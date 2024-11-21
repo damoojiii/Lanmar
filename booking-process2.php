@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lanmar Resort</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    <?php include "sidebar-design.php"; ?>
+    <style>
+        .progress-container {
+            width: 100%;
+            margin: 5px 0;
+            height: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background:lightgray;
+        }
+
+        .progress-bar {
+            width: 100%;
+            margin-left: 300px;
+            display: flex;
+            flex-direction: row;
+            gap: 3.5rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 28%;
+            width: 45%;
+            height: 5px;
+            background-color: white;
+            z-index: -1;
+            transform: translateY(-50%);
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step .circle {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .step.completed .circle {
+            background-color: #00214b; /* Blue background for completed steps */
+            border-color: #00214b; /* Blue border */
+            color: white; 
+        }
+
+        .step.completed ~ .step .circle {
+            background-color: lightgrey;
+            border-color: white; 
+            color: white; 
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 5px;
+            background-color: #00214b; /* Blue color for progress line */
+            transform: translateY(-50%);
+            z-index: -1;
+        }
+
+        .step:last-child::after {
+            content: none;
+        }
+
+        .step:not(.completed)::after {
+            background-color: white;
+        }
+    </style>
+    <style>
+        .summary {
+            background-color: #00214b;
+            color: #fff;
+            width: 25%;
+            height: 100%;
+        }
+
+        .summary .section-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .summary .bg-light {
+            background-color: #d1d5db; /* light gray for contrast */
+            color: #212529; /* dark text for readability */
+        }
+
+        .summary #booked-rooms .btn-link {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .summary table {
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+
+        .summary table td {
+            border: none;
+            padding: 5px 0;
+        }
+
+        .summary .btn-primary {
+            background-color: #003366;
+            border: none;
+            font-size: 1.2rem;
+        }
+        .section-header {
+            padding: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .container{
+            max-width: 75%;
+        }
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            appearance: none;
+            border-radius: 0.25rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+        .btn-primary {
+            color: #fff;
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-secondary {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .suminputs input{
+
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
+    <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <span class="fs-4">Lanmar Resort</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="index1.php" class="nav-link text-white active">Book Here</a>
+        </li>
+        <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
+        <li><a href="#" class="nav-link text-white">Notification</a></li>
+        <li><a href="#" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="#" class="nav-link text-white">Feedback</a></li>
+        <li><a href="#" class="nav-link text-white">Settings</a></li>
+    </ul>
+    <hr>
+    <a href="#" class="nav-link text-white">Log out</a>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container-fluid">
+        <button id="hamburger" class="navbar-toggler" type="button"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Progress bar -->
+<div class="progress-container">
+    <div class="progress-bar">
+        <div class="step completed">
+            <div class="circle">1</div>
+            <span>Check in & Check out</span>
+        </div>
+        <div class="step completed">
+            <div class="circle">2</div>
+            <span>Rooms & Rates</span>
+        </div>
+        <div class="step completed">
+            <div class="circle">3</div>
+            <span>Guest Information</span>
+        </div>
+        <div class="step">
+            <div class="circle">4</div>
+            <span>Payment & Receipt</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<div id="main-content" class="container mt-4 pt-3">
+    <div class="container1">
+        <div class="row" style="justify-content:space-between;">
+        <div class="col-md-6" style="width: 75%;">
+                <div class="section-header">Number of Guest (Pax)</div>
+                <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label for="firstname" class="form-label">First Name</label>
+                            <input type="text" id="firstname" name="firstname" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="lastname" class="form-label">Last Name</label>
+                            <input type="text" id="lastname" name="lastname" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="phonenum" class="form-label">Contact No.</label>
+                            <input type="number" id="phonenum" name="phonenum" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select id="gender" name="gender" class="form-control">
+                                <option selected hidden>Choose...</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                                <option value="O">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-6 p-3 summary">
+                <div class="section-header">Booking Summary</div>
+
+                <div class="bg-light p-2 rounded mb-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p>Date: <span id="date-input">mm-dd-yyyy</span></p>
+                            <p>Time: <span id="time-input">hh:mm - hh:mm</span></p>
+                            <p>Total No. of Pax: <span id="total-pax">0</span></p>
+                            <p>Reservation Type: <span id="reservation-type">Regular</span></p>
+                        </div>
+    
+                        <div class="dropdown">
+                            <button class="btn btn-link p-0" type="button" id="editDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Edit
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="editDropdown">
+                                <li><a class="dropdown-item" href="#">Edit Date</a></li>
+                                <li><a class="dropdown-item" href="#">Edit Time</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booked Rooms Section -->
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">Charges</h5>
+                    </div>
+                </div>
+
+                <!-- Total Calculation Section -->
+                <table class="w-100 text-light">
+                    <tr>
+                        <td>Original Price:</td>
+                        <td class="text-end">PHP 8,000</td>
+                    </tr>
+                    <tr>
+                        <td>Room:</td>
+                        <td class="text-end">PHP 4,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total:</strong></td>
+                        <td class="text-end"><strong>PHP 12,000</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Downpayment:</strong></td>
+                        <td class="text-end"><strong>PHP 5,000</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Payment Method:</td>
+                        <td class="text-end">GCASH</td>
+                    </tr>
+                </table>
+
+                <button type="button" class="btn btn-primary w-100 mt-3">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.getElementById('hamburger').addEventListener('click', function() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('show');
+    
+    const navbar = document.querySelector('.navbar');
+    navbar.classList.toggle('shifted');
+    
+    const mainContent = document.getElementById('main-content');
+    mainContent.classList.toggle('shifted');
+});
+</script>
+</body>
+</html>
