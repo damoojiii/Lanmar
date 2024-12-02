@@ -221,7 +221,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="nav-link text-white">
+            <a href="chats.php" class="nav-link text-white">
                 Chat with Lanmar
             </a>
         </li>

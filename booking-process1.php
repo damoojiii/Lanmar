@@ -216,7 +216,7 @@
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
         <li><a href="#" class="nav-link text-white">Notification</a></li>
-        <li><a href="#" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
         <li><a href="#" class="nav-link text-white">Feedback</a></li>
         <li><a href="#" class="nav-link text-white">Settings</a></li>
     </ul>
