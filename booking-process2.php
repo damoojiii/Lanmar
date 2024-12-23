@@ -1,3 +1,14 @@
+<?php
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }
+
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +21,7 @@
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    <?php include "connection.php"; ?>
     <?php include "sidebar-design.php"; ?>
     <style>
         .progress-container {
@@ -68,10 +80,10 @@
             color: white; 
         }
 
-        .step.completed ~ .step .circle {
+        .step.completed, .step .circle {
             background-color: lightgrey;
             border-color: white; 
-            color: white; 
+            color: black; 
         }
 
         .step::after {
@@ -168,9 +180,17 @@
             background-color: #6c757d;
             border-color: #6c757d;
         }
-        .suminputs input{
 
+        .message-box {
+            width: 100%; /* Full width of the parent container */
+            max-width: 600px; /* Maximum width */
+            height: 50px; /* Height of the input box */
+            font-size: 16px; /* Font size for better readability */
+            border: 1px solid #ccc; /* Border style */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for aesthetics */
         }
+
     </style>
 </head>
 <body>
@@ -226,39 +246,79 @@
         </div>
     </div>
 </div>
+<!-- phpsyntax for temp storage to process 3-->
+<?php
+    if (isset($_GET['continue'])) {
+        $_SESSION['origPrice'] = $_GET['origPrice'] ?? '';
+    }
+    if (isset($_GET['grandTotal'])&& isset($_GET['roomTotal'])) {
+        $_SESSION['grandTotal'] = (int)$_GET['grandTotal'];
+        $_SESSION['roomTotal'] = (int)$_GET['roomTotal'];
+    }
+
+    $dateIn = $_SESSION['dateIn'] ?? '';
+    $dateOut = $_SESSION['dateOut'] ?? '';
+    $checkin = $_SESSION['checkin'] ?? '';
+    $checkout = $_SESSION['checkout'] ?? '';
+    $numhours = $_SESSION['numhours'] ?? '';
+    $adult = $_SESSION['adult'] ?? '';
+    $adult = $_SESSION['child'] ?? '';
+    $pwd = $_SESSION['pwd'] ?? '';
+    $totalPax = $_SESSION['totalpax'] ?? '';
+    $origPrice = $_SESSION['origPrice'] ?? '';
+    $grandTotal = $_SESSION['grandTotal']  ?? '';
+    $roomTotal = $_SESSION['roomTotal'];
+
+    $sql = "SELECT * FROM users where user_id = 13";
+    $result = $conn->query($sql);
+    $user = $result->fetch_assoc();
+?>
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
     <div class="container1">
         <div class="row" style="justify-content:space-between;">
         <div class="col-md-6" style="width: 75%;">
-                <div class="section-header">Number of Guest (Pax)</div>
+                <div class="section-header">Personal Information</div>
                 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                     <div class="row mb-2">
                         <div class="col-md-3">
                             <label for="firstname" class="form-label">First Name</label>
-                            <input type="text" id="firstname" name="firstname" class="form-control">
+                            <input type="text" id="firstname" name="firstname" class="form-control" value="<?php echo $user["firstname"];?>" readonly>
                         </div>
                         <div class="col-md-3">
                             <label for="lastname" class="form-label">Last Name</label>
-                            <input type="text" id="lastname" name="lastname" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="phonenum" class="form-label">Contact No.</label>
-                            <input type="number" id="phonenum" name="phonenum" class="form-control">
+                            <input type="text" id="lastname" name="lastname" class="form-control" value="<?php echo $user["lastname"];?>" readonly>
                         </div>
                         <div class="col-md-3">
                             <label for="gender" class="form-label">Gender</label>
-                            <select id="gender" name="gender" class="form-control">
+                            <select id="gender" name="gender" class="form-control" require>
                                 <option selected hidden>Choose...</option>
                                 <option value="M">Male</option>
                                 <option value="F">Female</option>
                                 <option value="O">Other</option>
                             </select>
                         </div>
+                        <div class="col-md-3">
+                            <label for="phonenum" class="form-label">Contact No.</label>
+                            <input type="number" id="phonenum" name="phonenum" class="form-control" value="<?php echo $user["contact_number"];?>" readonly>
+                        </div>
                     </div>
                 </form>
-            </div>
+                <div class="section-header">Additionals</div>
+                <form action="">
+                    <label for="" class="form-label">is there any special request?</label>
+                    <input type="text" class="message-box" name="" placeholder="Type your message here...">
+                </form>
+                <div class="section-header">Payment Method</div>
+                <form action="" id="radioForm">
+                    <input type="radio" name="choice" value="Gcash" class="form-label">
+                    <label for="payment" class="form-label" >GCash</label>
+                    <input type="radio" name="choice" value="PayMaya" class="form-label">
+                    <label for="payment" class="form-label">Pay Maya</label>
+                </form>
+
+                </div>
 
             <div class="col-md-6 p-3 summary">
                 <div class="section-header">Booking Summary</div>
@@ -266,10 +326,22 @@
                 <div class="bg-light p-2 rounded mb-3">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <p>Date: <span id="date-input">mm-dd-yyyy</span></p>
-                            <p>Time: <span id="time-input">hh:mm - hh:mm</span></p>
-                            <p>Total No. of Pax: <span id="total-pax">0</span></p>
-                            <p>Reservation Type: <span id="reservation-type">Regular</span></p>
+                            <p>Date: <span id="date-input"><?php echo "$dateIn to $dateOut";?></span></p>
+                            <p>Time: <span id="time-input"><?php echo "$checkin to $checkout";?></span></p>
+                            <p>Total No. of Pax: <span id="total-pax"><?php echo "$totalPax";?></span></p>
+                            <p>Reservation Type: <span id="reservation-type"><?php 
+                                        $reservationTypeId = $_SESSION['reservationType'] ?? null;
+                                        $reservationType = ""; 
+
+                                        if ($reservationTypeId) {
+                                            $stmt = $pdo->prepare("SELECT reservation_type FROM reservationtype_tbl WHERE id = :id");
+                                            $stmt->bindValue(':id', $reservationTypeId, PDO::PARAM_INT);
+                                            $stmt->execute();
+                                            $reservationType = $stmt->fetchColumn() ?? $reservationType;
+                                        }
+
+                                        echo htmlspecialchars($reservationType);
+                                    ?></span></p>
                         </div>
     
                         <div class="dropdown">
@@ -281,6 +353,8 @@
                                 <li><a class="dropdown-item" href="#">Edit Time</a></li>
                             </ul>
                         </div>
+
+
                     </div>
                 </div>
 
@@ -295,23 +369,42 @@
                 <table class="w-100 text-light">
                     <tr>
                         <td>Original Price:</td>
-                        <td class="text-end">PHP 8,000</td>
+                        <td class="text-end"><?php echo "$origPrice";?></td>
                     </tr>
                     <tr>
                         <td>Room:</td>
-                        <td class="text-end">PHP 4,000</td>
+                        <td class="text-end"><?php
+                        if ($grandTotal > $origPrice){
+                            echo $roomTotal;
+                        }else{
+                            echo "2000";
+                        }
+?></td>
                     </tr>
                     <tr>
                         <td><strong>Total:</strong></td>
-                        <td class="text-end"><strong>PHP 12,000</strong></td>
+                        <td class="text-end"><strong><?php
+                        if ($grandTotal > $origPrice){
+                            echo $grandTotal;
+                        }else{
+                            echo $origPrice;
+                        }
+?></strong></td>
                     </tr>
                     <tr>
                         <td><strong>Downpayment:</strong></td>
-                        <td class="text-end"><strong>PHP 5,000</strong></td>
+                        <td class="text-end"><strong>
+                            <?php
+                                $sql = "SELECT * FROM prices_tbl where payment_name = 'downpayment'";
+                                $result = $conn->query($sql);
+                                $price = $result->fetch_assoc();
+                                echo $price["price"];
+                            ?>
+                        </strong></td>
                     </tr>
                     <tr>
                         <td>Payment Method:</td>
-                        <td class="text-end">GCASH</td>
+                        <td class="text-end"><p id="PaymentChoice">none</p></td>
                     </tr>
                 </table>
 
@@ -339,6 +432,17 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+
+// Function to update the choice value
+function Choice() {
+            const selectedOption = document.querySelector('input[name="choice"]:checked');
+            const output = document.getElementById('PaymentChoice');
+            output.textContent = selectedOption ? selectedOption.value : "None";
+        }
+
+        // Attach event listener to the form for automatic updates
+        const form = document.getElementById('radioForm');
+        form.addEventListener('input', Choice);
 </script>
 </body>
 </html>
