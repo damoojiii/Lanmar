@@ -62,8 +62,8 @@ if (isset($_POST["register"])) {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'enriquezadrianjensen@gmail.com';
-        $mail->Password = 'hmic oqcf wpxk dntb';
+                $mail->Username = 'lanmarresort@gmail.com';
+        $mail->Password = 'epuf eolg cjda efgc';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;
                 $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
