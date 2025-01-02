@@ -202,6 +202,8 @@
         }
     </style>
 </head>
+
+
 <body>
 
 <!-- Sidebar -->
@@ -411,78 +413,84 @@ if (isset($_GET['check'])) {
                 <?php endif; ?>
         
             </div>
-
+                    
             <div class="col-md-6 p-3 summary">
-                <div class="section-header">Booking Summary</div>
+                <form action="booking-process2.php" method="$_GET">
+                    <div class="section-header">Booking Summary</div>
 
-                <div class="bg-light p-3 rounded mb-3">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p><strong>Date:</strong> <span id="date-input"><?php echo "$dateIn to $dateOut";?></span></p>
-                            <p><strong>Time:</strong> <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
-                            <p><strong>Total of Hours:</strong> <span id="hour-input"><?php echo "$numhours";?></span></p>
-                            <p><strong>No. of Pax:</strong> <span id="total-pax">
-                            <?php echo $totalpax; ?></span></p>
-                            <p><strong>Reservation Type:</strong> <span id="reservation-type">
-                                <?php 
-                                    $reservationTypeId = $_SESSION['reservationType'] ?? null;
-                                    $reservationType = ""; 
+                    <div class="bg-light p-3 rounded mb-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p><strong>Date:</strong> <span id="date-input"><?php echo "$dateIn to $dateOut";?></span></p>
+                                <p><strong>Time:</strong> <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
+                                <p><strong>Total of Hours:</strong> <span id="hour-input"><?php echo $numhours;?></span></p>
+                                <p><strong>No. of Pax:</strong> <span id="total-pax"><?php echo $totalpax; ?></span></p>
+                                <p><strong>Reservation Type:</strong> <span id="reservation-type">
+                                    <?php 
+                                        $reservationTypeId = $_SESSION['reservationType'] ?? null;
+                                        $reservationType = ""; 
 
-                                    if ($reservationTypeId) {
-                                        $stmt = $pdo->prepare("SELECT reservation_type FROM reservationtype_tbl WHERE id = :id");
-                                        $stmt->bindValue(':id', $reservationTypeId, PDO::PARAM_INT);
-                                        $stmt->execute();
-                                        $reservationType = $stmt->fetchColumn() ?? $reservationType;
-                                    }
+                                        if ($reservationTypeId) {
+                                            $stmt = $pdo->prepare("SELECT reservation_type FROM reservationtype_tbl WHERE id = :id");
+                                            $stmt->bindValue(':id', $reservationTypeId, PDO::PARAM_INT);
+                                            $stmt->execute();
+                                            $reservationType = $stmt->fetchColumn() ?? $reservationType;
+                                        }
 
-                                    echo htmlspecialchars($reservationType);
-                                ?>
-                            </span></p>
+                                        echo htmlspecialchars($reservationType);
+                                    ?>
+                                </span></p>
+                            </div>
+        
+                            <div class="dropdown">
+                                <button class="btn btn-link p-0" type="button" id="editDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Edit
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="editDropdown">
+                                    <li><a class="dropdown-item" href="#">Edit Date</a></li>
+                                    <li><a class="dropdown-item" href="#">Edit Time</a></li>
+                                </ul>
+                            </div>
                         </div>
-    
-                        <div class="dropdown">
-                            <button class="btn btn-link p-0" type="button" id="editDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                Edit
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="editDropdown">
-                                <li><a class="dropdown-item" href="#">Edit Date</a></li>
-                                <li><a class="dropdown-item" href="#">Edit Time</a></li>
-                            </ul>
+                    </div>
+
+                    <!-- Booked Rooms Section -->
+                    <div class="row align-items-center mb-2">
+                        <div class="col">
+                            <h6 class="mb-0">Booked Rooms</h6>
+                        </div>
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-secondary btn-sm">Reset</button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Booked Rooms Section -->
-                <div class="row align-items-center mb-2">
-                    <div class="col">
-                        <h6 class="mb-0">Booked Rooms</h6>
-                    </div>
-                    <div class="col-auto">
-                        <button type="button" class="btn btn-secondary btn-sm">Reset</button>
-                    </div>
-                </div>
                 
-                <div id="booked-rooms" class="mb-3">
-                    <div id="no-rooms-message" class="text-light text-center py-2">No Room(s) Selected</div>
-                </div>
+                    <div id="booked-rooms" class="mb-3">
+                        <div id="no-rooms-message" class="text-light text-center py-2">No Room(s) Selected</div>
+                    </div>
 
-                <!-- Total Calculation Section -->
-                <table class="w-100 text-light table-summary">
-                    <tr>
-                        <td>Rate:</td>
-                        <td class="text-end" id="rate">PHP <?php echo number_format($_SESSION['rate'] ?? 0); ?></td>
-                    </tr>
-                    <tr>
-                        <td>Room:</td>
-                        <td class="text-end" id="room-total">PHP 0</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Total:</strong></td>
-                        <td class="text-end"><strong id="grand-total">PHP <?php echo number_format($_SESSION['rate'] ?? 0);?>   </strong></td>
-                    </tr>
-                </table>
+                    <!-- Total Calculation Section -->
+                    <table class="w-100 text-light table-summary">
+                        <tr>
+                            <td>Rate:</td>
+                            <td class="text-end" id="rate">PHP <?php echo number_format($_SESSION['rate'] ?? 0); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Room:</td>
+                            <td class="text-end" id="room-total">PHP 0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total:</strong></td>
+                            <td class="text-end"><strong id="grand-total">PHP <?php echo number_format($_SESSION['rate'] ?? 0);?></strong></td>
+                        </tr>
+                    </table>
 
-                <button type="button" class="btn btn-primary w-100 mt-3">Continue</button>
+                    <input type="hidden" name="reservationType" value="<?php echo htmlspecialchars($reservationType); ?>">
+                    <input type="hidden" name="origPrice" value="<?php echo number_format($_SESSION['rate'] ?? 0); ?>">
+                    <input type="hidden" name="grandTotal" id="grandTotal">
+                    <input type="hidden" name="roomTotal" id="roomTotal">
+
+                    <button id="Continue" name="continue" type="submit" class="btn btn-primary w-100 mt-3" >Continue</button>
+                </form>
             </div>
         </div>
     </div>
@@ -709,6 +717,9 @@ function updateTotal(priceChange) {
     // Calculate total
     const newGrandTotal = rate + newRoomTotal;
     grandTotalElement.textContent = `PHP ${newGrandTotal.toLocaleString()}`;
+
+    document.getElementById("grandTotal").value = newGrandTotal;
+    document.getElementById("roomTotal").value = newRoomTotal;
 }
 
 </script>
