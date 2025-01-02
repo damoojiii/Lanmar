@@ -12,6 +12,9 @@
     p{
         margin: 0;
     }
+    body{
+        font-family: Arial, sans-serif;
+    }
     #sidebar span{
         font-family: 'nautigal';
         font-size: 50px !important;

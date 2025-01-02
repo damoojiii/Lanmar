@@ -62,7 +62,7 @@ if (isset($_POST["register"])) {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'bonkristian.devera@cvsu.edu.ph';
+                $mail->Username = 'enriquezadrianjensen@gmail.com';
         $mail->Password = 'hmic oqcf wpxk dntb';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;

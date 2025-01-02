@@ -45,33 +45,37 @@ if (isset($_POST["verify_email"])) {
         body {
             background: linear-gradient(to bottom right, #006994, #00FFFF);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        .login-container {
-            background-color: white;
-            padding: 2rem;
+        .modal-content {
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2 class="text-center mb-4">Email Verification</h2>
-        <form method="POST" action="">
-            <div class="mb-3">
-                <input type="hidden" class="form-control" name="email" value="<?php echo $_GET['email']; ?>" required>
+    <div class="modal fade show" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" data-bs-backdrop="static" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="">
+                        <div class="mb-3">
+                            <input type="hidden" class="form-control" name="email" value="<?php echo $_GET['email']; ?>" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="verification_code" class="form-label">Verification Code</label>
+                            <input type="text" class="form-control" id="verification_code" name="verification_code" placeholder="Enter verification code" required />
+                        </div>
+                        <input type="submit" class="btn btn-primary w-100" name="verify_email" value="Verify Email">
+                    </form>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Verification Code</label>
-                <input type="text" class="form-control" name="verification_code" placeholder="Enter verification code" required />
-            </div>
-            <input type="submit" class="btn btn-primary w-100" name="verify_email" value="Verify Email">
-        </form>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 

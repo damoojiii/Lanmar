@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Sidebar</title>
+    <title>Lanmar Resort</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
@@ -89,6 +88,11 @@
             color: #fff !important;
         }
 
+        .dropdown-item:hover{
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
         @media (max-width: 768px) {
             #sidebar {
                 position: fixed;
@@ -128,14 +132,23 @@
             <li class="nav-item">
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
-            <li>
-                <a href="reservations.php" class="nav-link text-white">Reservations</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Manage Reservations
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="dropdown-item" href="approved_reservation.php">Approved Reservations</a></li>
+                </ul>
             </li>
             <li>
                 <a href="notifications.php" class="nav-link text-white">Notifications</a>
             </li>
             <li>
-                <a href="chats.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+            </li>
+            <li>
+                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
             </li>
             <li>
                 <a href="feedback.php" class="nav-link text-white">Feedback</a>
@@ -162,7 +175,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleSidebar() {

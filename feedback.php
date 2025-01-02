@@ -4,70 +4,37 @@ session_start();
 
 include("connection.php");
 
-$success_message = "";
-$error_message = "";
-$gallery_success_message = "";
-$gallery_error_message = "";
 
-// Define the target directory for uploads
-$targetDir = "uploads/"; 
-
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Handle background image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) {
-    $image = $_FILES['background_image'];
-    $imageName = basename($image['name']);
-    $targetFilePath = $targetDir . $imageName;
-    $imageType = $image['type'];
-
-    if (!is_dir($targetDir)) {
-        mkdir($targetDir, 0755, true);
-    }
-
-    // Clear existing settings
-    $conn->query("DELETE FROM settings_admin");
-
-    if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
-        $stmt = $conn->prepare("INSERT INTO settings_admin (image, image_type) VALUES (?, ?)");
-        $stmt->bind_param("ss", $targetFilePath, $imageType); 
-
-        if ($stmt->execute()) {
-            $success_message = "Background image updated successfully.";
-        } else {
-            $error_message = "Error updating background image in the database: " . $stmt->error;
-        }
-
-        $stmt->close();
+if (isset($_GET['delid'])) {
+    $rid = intval($_GET['delid']);
+    $sql = "UPDATE users SET status='0' WHERE user_id=?";
+    $query = $conn->prepare($sql);
+    $query->bind_param("i", $rid); // Use "i" for integer type
+    $query->execute();
+    
+    if ($query->affected_rows > 0) {
+        echo "<script>alert('Blocked successfully');</script>";
     } else {
-        $error_message = "Error uploading the file.";
+        echo "<script>alert('No user found or already blocked.');</script>";
     }
+    
+    echo "<script>window.location.href = 'account_lists.php';</script>";
 }
 
-// Handle gallery image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
-    $galleryImage = $_FILES['gallery_image'];
-    $galleryImageName = basename($galleryImage['name']);
-    $galleryTargetFilePath = $targetDir . $galleryImageName; // Use the same $targetDir
-    $galleryImageType = $galleryImage['type'];
-    $galleryCaption = $_POST['gallery_caption']; // Get the caption from the form
-
-    if (move_uploaded_file($galleryImage['tmp_name'], $galleryTargetFilePath)) {
-        $galleryStmt = $conn->prepare("INSERT INTO gallery (image, image_type, caption) VALUES (?, ?, ?)");
-        $galleryStmt->bind_param("sss", $galleryTargetFilePath, $galleryImageType, $galleryCaption); 
-
-        if ($galleryStmt->execute()) {
-            $gallery_success_message = "Gallery image uploaded successfully.";
-        } else {
-            $gallery_error_message = "Error uploading gallery image in the database: " . $galleryStmt->error;
-        }
-
-        $galleryStmt->close();
+if (isset($_GET['unblockid'])) {
+    $rid = intval($_GET['unblockid']);
+    $sql = "UPDATE users SET status='1' WHERE user_id=?";
+    $query = $conn->prepare($sql);
+    $query->bind_param("i", $rid); // Use "i" for integer type
+    $query->execute();
+    
+    if ($query->affected_rows > 0) {
+        echo "<script>alert('Unblocked successfully');</script>";
     } else {
-        $gallery_error_message = "Error uploading the gallery file.";
+        echo "<script>alert('No user found or already unblocked.');</script>";
     }
+    
+    echo "<script>window.location.href = 'account_lists.php';</script>";
 }
 ?>
 
@@ -76,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>homepage settings</title>
-
+    <title>Lanmar Resort</title>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -129,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
         #main-content {
             transition: margin-left 0.3s ease;
             margin-left: 250px; 
-            margin-top: 25px; /* Add top margin for header */
+            margin-top: 40px; /* Add top margin for header */
             padding: 20px; /* Padding for content */
         }
 
@@ -183,7 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 display: block; /* Show hamburger button on smaller screens */
             }
         }
-
 
         .flex-container {
             display: flex;
@@ -342,13 +307,76 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 
     .settings-form button, 
         .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
+            border-radius: 10px !important;  
             padding: 13px 30px;
             background-color: #03045e;
             border: none;
             cursor: pointer;
             color: white;
         }
+        .feedback-page {
+        padding: 20px;
+    }
+
+    .feedback-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: start;
+    }
+
+    .feedback-card {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        width: calc(33.333% - 20px); /* 3 cards per row */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .feedback-card h4 {
+        margin: 0 0 10px;
+        font-size: 18px;
+    }
+
+    .rating {
+        color: #ffc107;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .feedback-card .feedback-text {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: auto; /* Push the button to the bottom */
+    }
+
+    .feedback-card button {
+        margin: 0;
+    }
+
+    .feedback-line {
+        margin: 40px 0;
+    }
+
+    /* Responsiveness for mobile devices */
+    @media (max-width: 768px) {
+        .feedback-card {
+            width: calc(50% - 20px); /* 2 cards per row on tablets */
+        }
+    }
+
+    @media (max-width: 576px) {
+        .feedback-card {
+            width: 100%; /* Full width for smaller screens */
+        }
+    }
     </style>
 </head>
 <body>
@@ -357,7 +385,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3">Lanmar</span>
     </header>
 
     <!-- Sidebar -->
@@ -376,7 +404,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 </a>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="pending_reservation.php">Pending Reservations</a></li>
-                    <li><a class="dropdown-item" href=".php">Approved Reservations</a></li>
+                    <li><a class="dropdown-item" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -386,7 +414,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
             </li>
             <li>
-                <a href="feedback.php" class="nav-link text-white">Feedback</a>
+                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
+            </li>
+            <li>
+                <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
                 <a href="reports.php" class="nav-link text-white">Reports</a>
@@ -395,7 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Settings
                 </a>
                 <ul class="dropdown-menu">
@@ -410,65 +441,98 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
     </div>
 
     <div id="main-content" class="p-3">
-        <div class="flex-container">
-            <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
-                <div class="row"> <!-- Add this row container -->
-                    <div class="col-md-6"> <!-- First column -->
-                        <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Change Background Image</h2>
-                            <?php if ($success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="background_image" class="mb-2">Upload New Background Image:</label>
-                                    <input type="file" name="background_image" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Update Background">Update Background</button>
-                                </div>
-                            </form>
-                        </div>
+        <div class="feedback-page">
+            <h2>Selected Feedbacks</h2>
+            <div class="feedback-container">
+                <!-- Feedback Card -->
+                <div class="feedback-card selected">
+                    <h4>Juan Dela Cruz</h4>
+                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
+                    <p><strong>Amazing</strong></p>
+                    <p class="feedback-text">
+                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
+                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
+                        consectetur ducimus at provident totam aut sunt maxime.
+                    </p>
+                    <div class="button-container">
+                        <button class="btn btn-secondary btn-sm">Remove</button>
                     </div>
-                    <div class="col-md-6"> <!-- Second column -->
-                        <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Upload Gallery Image</h2>
-                            <?php if ($gallery_success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $gallery_success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($gallery_error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $gallery_error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group text-center">
-                                    <label for="gallery_image" class="mb-2">Upload New Gallery Image:</label>
-                                    <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Gallery Image">
-                                </div>
-                                <div class="form-group text-center">
-                                    <label for="gallery_caption" class="mb-2">Caption:</label>
-                                    <input type="text" name="gallery_caption" id="gallery_caption" class="form-control" placeholder="Enter caption for gallery image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
-                                </div>
-                            </form>
-                        </div>
+                </div>
+                <!-- Add more cards as needed -->
+                <div class="feedback-card selected">
+                    <h4>Juan Dela Cruz</h4>
+                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
+                    <p><strong>Amazing</strong></p>
+                    <p class="feedback-text">
+                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
+                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
+                        consectetur ducimus at provident totam aut sunt maxime.
+                    </p>
+                    <div class="button-container">
+                        <button class="btn btn-secondary btn-sm">Remove</button>
+                    </div>
+                </div>
+                <div class="feedback-card selected">
+                    <h4>Juan Dela Cruz</h4>
+                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
+                    <p><strong>Amazing</strong></p>
+                    <p class="feedback-text">
+                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
+                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
+                        consectetur ducimus at provident totam aut sunt maxime.
+                    </p>
+                    <div class="button-container">
+                        <button class="btn btn-secondary btn-sm">Remove</button>
                     </div>
                 </div>
             </div>
+
+            <hr class="feedback-line"/>
+
+            <h2>Feedbacks</h2>
+            <div class="feedback-container">
+                <!-- Feedback Card -->
+                <div class="feedback-card">
+                    <h4>Juan Dela Cruz</h4>
+                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
+                    <p><strong>Amazing</strong></p>
+                    <p class="feedback-text">
+                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
+                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
+                        consectetur ducimus at provident totam aut sunt maxime.
+                    </p>
+                    <div class="button-container">
+                        <button class="btn btn-primary btn-sm">Add</button>
+                    </div>
+                    
+                </div>
+                <!-- Add more cards as needed -->
+            </div>
         </div>
     </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const header = document.getElementById('header');
+
+        sidebar.classList.toggle('show');
+
+        if (sidebar.classList.contains('show')) {
+            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
+            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
+        } else {
+            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
+            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
+        }
+    }
+</script>
 </body>
 </html>

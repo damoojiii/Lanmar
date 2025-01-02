@@ -1,74 +1,5 @@
 <?php
-// Start the session at the very beginning of the file
-session_start();
 
-include("connection.php");
-
-$success_message = "";
-$error_message = "";
-$gallery_success_message = "";
-$gallery_error_message = "";
-
-// Define the target directory for uploads
-$targetDir = "uploads/"; 
-
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Handle background image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) {
-    $image = $_FILES['background_image'];
-    $imageName = basename($image['name']);
-    $targetFilePath = $targetDir . $imageName;
-    $imageType = $image['type'];
-
-    if (!is_dir($targetDir)) {
-        mkdir($targetDir, 0755, true);
-    }
-
-    // Clear existing settings
-    $conn->query("DELETE FROM settings_admin");
-
-    if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
-        $stmt = $conn->prepare("INSERT INTO settings_admin (image, image_type) VALUES (?, ?)");
-        $stmt->bind_param("ss", $targetFilePath, $imageType); 
-
-        if ($stmt->execute()) {
-            $success_message = "Background image updated successfully.";
-        } else {
-            $error_message = "Error updating background image in the database: " . $stmt->error;
-        }
-
-        $stmt->close();
-    } else {
-        $error_message = "Error uploading the file.";
-    }
-}
-
-// Handle gallery image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
-    $galleryImage = $_FILES['gallery_image'];
-    $galleryImageName = basename($galleryImage['name']);
-    $galleryTargetFilePath = $targetDir . $galleryImageName; // Use the same $targetDir
-    $galleryImageType = $galleryImage['type'];
-    $galleryCaption = $_POST['gallery_caption']; // Get the caption from the form
-
-    if (move_uploaded_file($galleryImage['tmp_name'], $galleryTargetFilePath)) {
-        $galleryStmt = $conn->prepare("INSERT INTO gallery (image, image_type, caption) VALUES (?, ?, ?)");
-        $galleryStmt->bind_param("sss", $galleryTargetFilePath, $galleryImageType, $galleryCaption); 
-
-        if ($galleryStmt->execute()) {
-            $gallery_success_message = "Gallery image uploaded successfully.";
-        } else {
-            $gallery_error_message = "Error uploading gallery image in the database: " . $galleryStmt->error;
-        }
-
-        $galleryStmt->close();
-    } else {
-        $gallery_error_message = "Error uploading the gallery file.";
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -76,12 +7,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>homepage settings</title>
-
+    <title>Lanmar Resort</title>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
-    
+
     <style>
         @font-face {
             font-family: 'nautigal';
@@ -183,7 +113,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 display: block; /* Show hamburger button on smaller screens */
             }
         }
-
 
         .flex-container {
             display: flex;
@@ -342,13 +271,62 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 
     .settings-form button, 
         .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
+            border-radius: 10px !important;  
             padding: 13px 30px;
             background-color: #03045e;
             border: none;
             cursor: pointer;
             color: white;
         }
+
+        thead.custom-header, thead.custom-header th {
+            background-color: #19315D !important;
+            color: white !important;
+        }
+        .table-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+        }
+
+        .table-row:hover {
+        background-color: #f1f1f1;
+        }
+
+        .status-badge {
+        padding: 0.4em 0.8em;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        background-color: #fbe9a1;
+        color: #856404;
+        font-weight: bold;
+        }
+        .modal-body h6 {
+        color: #19315D;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        }
+
+        .modal-body p {
+        font-size: 14px; /* Slightly smaller text for mobile */
+        margin: 0;
+        }
+
+        @media (max-width: 576px) {
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
+
+
     </style>
 </head>
 <body>
@@ -376,7 +354,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 </a>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="pending_reservation.php">Pending Reservations</a></li>
-                    <li><a class="dropdown-item" href=".php">Approved Reservations</a></li>
+                    <li><a class="dropdown-item" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -384,6 +362,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             </li>
             <li>
                 <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+            </li>
+            <li>
+                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
             </li>
             <li>
                 <a href="feedback.php" class="nav-link text-white">Feedback</a>
@@ -395,7 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Settings
                 </a>
                 <ul class="dropdown-menu">
@@ -408,67 +389,194 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
         <hr>
         <a href="logout.php" class="nav-link text-white">Log out</a>
     </div>
-
-    <div id="main-content" class="p-3">
-        <div class="flex-container">
-            <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
-                <div class="row"> <!-- Add this row container -->
-                    <div class="col-md-6"> <!-- First column -->
-                        <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Change Background Image</h2>
-                            <?php if ($success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="background_image" class="mb-2">Upload New Background Image:</label>
-                                    <input type="file" name="background_image" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Update Background">Update Background</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-md-6"> <!-- Second column -->
-                        <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Upload Gallery Image</h2>
-                            <?php if ($gallery_success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $gallery_success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($gallery_error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $gallery_error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group text-center">
-                                    <label for="gallery_image" class="mb-2">Upload New Gallery Image:</label>
-                                    <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Gallery Image">
-                                </div>
-                                <div class="form-group text-center">
-                                    <label for="gallery_caption" class="mb-2">Caption:</label>
-                                    <input type="text" name="gallery_caption" id="gallery_caption" class="form-control" placeholder="Enter caption for gallery image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+    
+    <div id="main-content" class="">
+        <div class="">
+            <div class="main-container my-5">
+                <h2 class="mb-4">Pending Reservations</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="custom-header">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th class="d-none d-sm-table-cell">Contact No.</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th class="d-none d-md-table-cell">Total No. of Pax</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(1)">
+                                <td>1</td>
+                                <td>Jani Doer</td>
+                                <td class="d-none d-sm-table-cell">0912345678</td>
+                                <td>mm-dd-yyyy</td>
+                                <td>hh:mm - hh:mm</td>
+                                <td class="d-none d-md-table-cell">12</td>
+                                <td><span class="status-badge">Pending</span></td>
+                            </tr>
+                            <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(2)">
+                                <td>2</td>
+                                <td>Laufeyson</td>
+                                <td class="d-none d-sm-table-cell">0912345678</td>
+                                <td>mm-dd-yyyy</td>
+                                <td>hh:mm - hh:mm</td>
+                                <td class="d-none d-md-table-cell">20</td>
+                                <td><span class="status-badge">Pending</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+                <nav>
+                    <ul class="pagination justify-content-end">
+                        <li class="page-item disabled">
+                            <a class="page-link">Previous</a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link">Next</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
+  
+
+
+
+    
+
+<div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reservationModalLabel">Reservation Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Reservation ID -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Reservation ID:</h6>
+          <p id="reservation-id">#12345</p>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Personal Information</h6>
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <p><strong>Name:</strong> Jani Doer</p>
+            </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Contact No.:</strong> 0912345678</p>
+            </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Gender:</strong> Female</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Details Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Booking Details</h6>
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <p><strong>Date:</strong> mm-dd-yyyy</p>
+            </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Time:</strong> hh:mm - hh:mm</p>
+            </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Total Hours:</strong> 4</p>
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-4 col-md-2">
+              <p><strong>Adults:</strong> 2</p>
+            </div>
+            <div class="col-4 col-md-2">
+              <p><strong>Children:</strong> 1</p>
+            </div>
+            <div class="col-4 col-md-2">
+              <p><strong>PWD:</strong> 0</p>
+            </div>
+            <div class="col-12 col-md-6">
+              <p><strong>Total Pax:</strong> 3</p>
+            </div>
+          </div>
+          <p><strong>Reservation Type:</strong> Regular</p>
+        </div>
+
+        <!-- Payment Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Payment</h6>
+          <div class="row g-2">
+            <div class="col-12 col-md-6">
+              <p><strong>Payment Method:</strong> Credit Card</p>
+            </div>
+            <div class="col-6 col-md-3">
+              <p><strong>Total Price:</strong> ₱5000</p>
+            </div>
+            <div class="col-6 col-md-3">
+              <p><strong>Balance Remaining:</strong> ₱2000</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-end">
+        
+            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+                <i class="fa-solid fa-message" style="color: #ffffff;"></i>
+            </button>
+
+            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+                <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
+            </button>
+
+            <!-- Check Button -->
+            <button type="button" class="btn" style="width:50px; background-color: #1daa2d; border-color: #1daa2d;">
+                <i class="fa-solid fa-check" style="color: #ffffff;"></i>
+            </button>
+
+            <!-- Cancel Button -->
+            <button type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
+                <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
+            </button>
+        </div>
+
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const header = document.getElementById('header');
+
+        sidebar.classList.toggle('show');
+
+        if (sidebar.classList.contains('show')) {
+            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
+            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
+        } else {
+            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
+            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
+        }
+    }
+</script>
 </body>
 </html>

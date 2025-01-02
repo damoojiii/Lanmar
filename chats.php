@@ -1,3 +1,15 @@
+<?php 
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }   
+
+    $userId = 11; 
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,58 +25,154 @@
     <?php include "sidebar-design.php"; ?>
 </head>
 <style>
-    .container{
+    .container {
         max-width: 80%;
     }
-    .chat-area{
-        display: flex;
-        margin: 10px 15px;
-        align-items: flex-end;
-        height: 75vh;
+
+    body {
+        background-color: #f8f9fa;
     }
-    .sender-box{
-        display: flex;
-        justify-content: flex-end;
+
+    .chat-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 15px;
     }
-    .sender{
-        margin: 5px;
-        padding: 5px;
-        background: #001A3E;
-        border-radius: 10px;
-        height: auto;
+
+    .chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background-color: #001A3E;
         color: #fff;
-
+        border-radius: 8px;
     }
-    .sender-box .chat-details{
+
+    .chat-header h3 {
+        margin: 0;
+    }
+
+    .chat-area {
+        margin-top: 20px;
+        height: 65vh;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        overflow-y: auto;
+    }
+
+    .message {
         display: flex;
+        align-items: flex-end;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .message.sent {
         justify-content: flex-end;
-        margin-right: 5px;
     }
-    .msg-text{
-        margin: 3px;
-        padding: 5px;
-        text-align: justify;
-    }
-    .receiver-box{
-        display: flex;
-        justify-content: flex-start;
-    }
-    .receiver-box .chat-details{
-        margin-left: 5px;
-    }
-    .receiver{
-        margin: 5px;
-        padding: 5px;
-        background: lightgrey;
-        border-radius: 10px;
-        height: auto;
-        color: #222;
 
+    .message img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 10px;
     }
-    .chat{
-        border: #222 solid 2px;
+
+    .message-content {
+        max-width: 70%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        word-wrap: break-word;
+        position: relative;
+    }
+
+    .message.sent .message-content {
+        background-color: #001A3E;
+        color: #fff;
+    }
+    .message.received .message-content {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+    .message-timestamp {
+        font-size: 0.8rem;
+        color: #6c757d;
+        position: absolute;
+        bottom: -18px;
+        right: 10px;
+    }
+
+    .date-stamp {
+        text-align: center;
+        margin: 15px 0;
+        font-size: 0.9rem;
+        color: #6c757d;
+        font-weight: bold;
+        position: relative;
+    }
+
+    .date-stamp span {
+        background: #f8f9fa;
+        padding: 5px 10px;
+        border-radius: 15px;
+        display: inline-block;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .chat-footer {
+        display: flex;
+        align-items: center;
+        margin-top: 15px;
+        gap: 10px;
+    }
+
+    .chat-footer textarea {
+        resize: none;
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        min-height: 40px;
+        max-height: 120px;
+    }
+
+    .chat-footer button {
+        background-color: #001A3E;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+    }
+
+    @media (max-width: 768px) {
+        #main-content{
+            padding: 0;
+        }
+        .container {
+            max-width: 100%;
+        }
+        .message.sent {
+            justify-content: flex-end;
+        }
+        .chat-header h3 {
+            font-size: 18px;
+        }
+
+        .message-content {
+            max-width: 85%;
+        }
+
+        .chat-footer textarea {
+            font-size: 14px;
+        }
     }
 </style>
+
+
 <body>
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
@@ -96,51 +204,25 @@
     </div>
 </nav>
 
-<div id="main-content" class="container mt-4 pt-3">
-    <div class="">
-        <div class="d-flex" style="gap: 0.5rem; align-items: center;">
+<div id="main-content" class="container mt-2">
+    <div class="chat-container">
+        <!-- Chat Header -->
+        <div class="chat-header">
             <h3>Lanmar Resort</h3>
-            <span>Active ## ago</span>
+            <span>Active now</span>
         </div>
-        <hr class="style">
-        <div class="chat-area">
-            <div class="" style="width: 100%;">
-                <div class="sender-box mb-1">
-                    <div class="sender">
-                        <div class="msg-text">ASDASHDHASDHSAHD</div>
-                    </div>
-                </div>
-                <div class="receiver-box mb-1">
-                    <div class="">
-                        <div class="receiver">
-                            <div class="msg-text">ASDASHDHASDHSAHD</div>
-                        </div>
-                        <span class="chat-details">Received at 09-09-2000 3:00 PM</span>
-                    </div>
-                </div>
-                <div class="sender-box mb-1">
-                    <div class="">
-                        <div class="sender">
-                            <div class="msg-text">SDHASHDSHADHSADHSAHDSHADHSADHSIAHDSAHDHSADHSAHDASHDSAHDSAHDASHDSHADHSADHASDHASDHASH</div>
-                        </div>
-                        <div class="chat-details">
-                            <span class="">Received at 09-09-2000 3:00 PM</span>
-                        </div>
-                    </div>
-                    
-                    
-                </div>
-                <div class="col-md-6 mt-4 pt-2" style="width: 100%;">
-                    <form action="" class="d-flex justify-content-between">
-                        <div class="" style="width: 90%;">
-                            <input type="text" class="form-control chat">
-                        </div>
-                        <div class="" style="">
-                            <button type="submit" name="send" class="btn send">Send</button>
-                        </div>
-                    </form>
-                </div>
-            </div>        
+
+        <!-- Chat Messages -->
+        <div class="chat-area" id="chat-area">
+            <div class="date-stamp">
+                <span>Today</span>
+            </div>
+        </div>
+
+        <!-- Chat Footer -->
+        <div class="chat-footer">
+            <textarea id="message-input" placeholder="Type a message..."></textarea>
+            <button id="send-message">Send</button>
         </div>
     </div>
 </div>
@@ -164,7 +246,119 @@
     
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
+    });
+
+    $(document).ready(function () {
+    const userId = '<?php echo $userId; ?>';
+    let isAutoScrollEnabled = true; // Flag to control auto-scroll
+
+    function fetchMessages() {
+        $.ajax({
+            url: 'fetch_messages.php',
+            method: 'GET',
+            data: { user_id: userId },
+            success: function (response) {
+                const messages = JSON.parse(response);
+                let chatHTML = '';
+                let lastDate = null;
+                const today = new Date().toISOString().split('T')[0]; 
+
+                messages.forEach((msg, index) => {
+                    const [messageDate, messageTime] = msg.timestamp.split(' '); 
+                
+                    // Convert time to 12-hour format
+                    const timeParts = messageTime.split(':');
+                    let hours = parseInt(timeParts[0]);
+                    const minutes = timeParts[1];
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12 || 12; 
+                    const formattedTime = `${hours}:${minutes} ${ampm}`; 
+                    
+                    // Check if the message date is different from the last processed date
+                    if (messageDate !== lastDate) {
+                        lastDate = messageDate;
+
+                        // Display "Today" for today's messages, otherwise show the date
+                        const dateLabel = messageDate === today ? 'Today' : lastDate;
+                        chatHTML += `
+                            <div class="date-stamp">
+                                <span>${dateLabel}</span>
+                            </div>`;
+                    }
+
+                    // Add message content
+                    if (msg.role === 'admin') {
+                        chatHTML += `
+                            <div class="message received">
+                                <img src="https://via.placeholder.com/40" alt="Profile Picture">
+                                <div class="message-content">
+                                    ${msg.msg}
+                                    <span class="message-timestamp">${formattedTime}</span>
+                                </div>
+                            </div>`;
+                    } else {
+                        chatHTML += `
+                            <div class="message sent">
+                                <div class="message-content">
+                                    ${msg.msg}
+                                    <span class="message-timestamp">${formattedTime}</span>
+                                </div>
+                            </div>`;
+                    }
+                });
+
+                const chatArea = $('#chat-area');
+                const wasAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
+
+                chatArea.html(chatHTML);
+
+                if (isAutoScrollEnabled || wasAtBottom) {
+                    chatArea.scrollTop(chatArea[0].scrollHeight); // Scroll to bottom
+                }
+            }
+        });
+    }
+
+
+    setInterval(fetchMessages, 2000);
+
+    $('#send-message').click(function () {
+        const message = $('#message-input').val().trim();
+
+        if (message.length > 0) {
+            $.ajax({
+                url: 'send_message1.php',
+                method: 'POST',
+                data: { user_id: userId, message: message },
+                success: function (response) {
+                    const result = JSON.parse(response);
+                    if (result.success) {
+                        $('#message-input').val(''); // Clear input
+                        fetchMessages(); // Refresh chat
+                    } else {
+                        alert('Error sending message.');
+                    }
+                }
+            });
+        }
+    });
+
+    // Monitor scroll position to detect manual backreading
+    $('#chat-area').on('scroll', function () {
+        const chatArea = $(this);
+        const isAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
+
+        if (isAtBottom) {
+            isAutoScrollEnabled = true; 
+        } else {
+            isAutoScrollEnabled = false; 
+        }
+    });
+
+    fetchMessages();
 });
+
+
 </script>
 </body>
 </html>
