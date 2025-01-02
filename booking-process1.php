@@ -31,6 +31,7 @@
             justify-content: space-between;
             align-items: center;
             background:lightgray;
+            transition: margin-left 0.3s ease;
         }
 
         .progress-bar {
@@ -52,6 +53,9 @@
             background-color: white;
             z-index: -1;
             transform: translateY(-50%);
+        }
+        .progress-bar span {
+        font-size: 16px; /* Default font size for larger screens */
         }
 
         .step {
@@ -201,6 +205,96 @@
             border-top: 1px solid #ccc;
         }
     </style>
+    <style>
+        /* responsive */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 20px 50px;
+                height: 70px;
+            }
+
+            nav a span {
+                font-size: 100px;
+            }
+            
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+            }
+            .progress-bar span {
+                font-size: 14px; /* Reduce font size slightly for tablets */
+            }
+        }
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 30px;
+                height: 60px;
+            }
+
+            nav a span {
+                font-size: 80px;
+            }
+            .progress-container.shifted{
+                margin-left: 250px;
+                transition: margin-left 0.3s ease;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 0.8rem;
+                margin-left: 0px;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .progress-bar span {
+                font-size: 12px; /* Further reduce the font size for mobile */
+            }
+        }
+        @media (max-width: 430px) {
+            nav {
+                padding: 10px 20px;
+                height: 50px;
+            }
+
+            nav a span {
+                font-size: 60px;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .progress-bar span {
+                font-size: 10px; /* Set a smaller font size for very small screens */
+            }
+            .container{
+                max-width: 100%;
+                padding: 10%;
+            }
+            .guest {
+                width: 100% !important; /* Override inline styles */
+            }
+            .summary{
+                width: 100% !important;
+            }
+        }
+    </style>
 </head>
 
 
@@ -259,92 +353,91 @@
 </div>
 
 <?php 
-$rooms = [];
-$totalpax = 0;
+    $rooms = [];
+    $totalpax = 0;
 
-if (isset($_GET['continue'])) {
-    $_SESSION['dateIn'] = $_GET['dateIn'];
-    $_SESSION['dateOut'] = $_GET['dateOut'];
-    $_SESSION['checkin'] = $_GET['checkin'];
-    $_SESSION['checkout'] = $_GET['checkout'];
-    $_SESSION['numhours'] = $_GET['numhours'];
-}
-
-// Load from session if available
-$dateIn = $_SESSION['dateIn'] ?? '';
-$dateOut = $_SESSION['dateOut'] ?? '';
-$checkin = $_SESSION['checkin'] ?? '';
-$checkout = $_SESSION['checkout'] ?? '';
-$numhours = $_SESSION['numhours'] ?? '';
-
-// Check if booking is for a single day or overnight
-$rateType = ($dateIn === $dateOut) ? '1' : '2';
-
-$rateQuery = $pdo->prepare("SELECT price FROM prices_tbl WHERE id = :rateType");
-$rateQuery->bindValue(':rateType', $rateType, PDO::PARAM_STR);
-$rateQuery->execute();
-$rate = $rateQuery->fetchColumn();
-
-$_SESSION['rate'] = $rate;
-
-$checkinDisplay = (new DateTime($checkin))->format('g:i A');
-$checkoutDisplay = (new DateTime($checkout))->format('g:i A');
-
-// Calculate total pax and get room info if check is set
-if (isset($_GET['check'])) {
-    $_SESSION['adult'] = filter_input(INPUT_GET, 'adults', FILTER_SANITIZE_NUMBER_INT);
-    $_SESSION['child'] = filter_input(INPUT_GET, 'children', FILTER_SANITIZE_NUMBER_INT);
-    $_SESSION['pwd'] = filter_input(INPUT_GET, 'pwd', FILTER_SANITIZE_NUMBER_INT);
-    $_SESSION['reservationType'] = $_GET['reservationType'];
-
-    $totalpax = (int)$_SESSION['adult'] + (int)$_SESSION['child'] + (int)$_SESSION['pwd'];
-    $_SESSION['totalpax'] = $totalpax;
-
-    $adult = $_SESSION['adult'] ?? 0;
-    $child = $_SESSION['child'] ?? 0;
-    $pwd = $_SESSION['pwd'] ?? 0;
-    
-    $additionalCharge = 0;
-    if ($adult > 10) {
-        $extraAdultCount = $adult - 10;
-        $extraRateQuery = $pdo->prepare("SELECT price FROM prices_tbl WHERE id = :id");
-        $extraRateQuery->bindValue(':id', 3 , PDO::PARAM_INT);
-        $extraRateQuery->execute();
-        $additionalCharge = $extraRateQuery->fetchColumn() * $extraAdultCount;
+    if (isset($_GET['continue'])) {
+        $_SESSION['dateIn'] = $_GET['dateIn'];
+        $_SESSION['dateOut'] = $_GET['dateOut'];
+        $_SESSION['checkin'] = $_GET['checkin'];
+        $_SESSION['checkout'] = $_GET['checkout'];
+        $_SESSION['numhours'] = $_GET['numhours'];
     }
 
-    $_SESSION['rate'] = $rate + $additionalCharge;
+    // Load from session if available
+    $dateIn = $_SESSION['dateIn'] ?? '';
+    $dateOut = $_SESSION['dateOut'] ?? '';
+    $checkin = $_SESSION['checkin'] ?? '';
+    $checkout = $_SESSION['checkout'] ?? '';
+    $numhours = $_SESSION['numhours'] ?? '';
 
-    // Load rooms based on pax capacity
-    if ($totalpax > 0) {
-        $sql = "
-            SELECT room_id, room_name, image_path, description, minpax, maxpax, price, is_offered 
-            FROM rooms
-            " . 
-            ($rateType == '1' ? "ORDER BY (minpax <= :totalpax AND maxpax >= :totalpax) DESC, minpax ASC" : "") . "
-        ";
+    // Check if booking is for a single day or overnight
+    $rateType = ($dateIn === $dateOut) ? '1' : '2';
 
-        $stmt = $pdo->prepare($sql);
+    $rateQuery = $pdo->prepare("SELECT price FROM prices_tbl WHERE id = :rateType");
+    $rateQuery->bindValue(':rateType', $rateType, PDO::PARAM_STR);
+    $rateQuery->execute();
+    $rate = $rateQuery->fetchColumn();
 
-        if ($rateType == '1') {
-            $stmt->bindValue(':totalpax', $totalpax, PDO::PARAM_INT);
+    $_SESSION['rate'] = $rate;
+
+    $checkinDisplay = (new DateTime($checkin))->format('g:i A');
+    $checkoutDisplay = (new DateTime($checkout))->format('g:i A');
+
+    // Calculate total pax and get room info if check is set
+    if (isset($_GET['check'])) {
+        $_SESSION['adult'] = filter_input(INPUT_GET, 'adults', FILTER_SANITIZE_NUMBER_INT);
+        $_SESSION['child'] = filter_input(INPUT_GET, 'children', FILTER_SANITIZE_NUMBER_INT);
+        $_SESSION['pwd'] = filter_input(INPUT_GET, 'pwd', FILTER_SANITIZE_NUMBER_INT);
+        $_SESSION['reservationType'] = $_GET['reservationType'];
+
+        $totalpax = (int)$_SESSION['adult'] + (int)$_SESSION['child'] + (int)$_SESSION['pwd'];
+        $_SESSION['totalpax'] = $totalpax;
+
+        $adult = $_SESSION['adult'] ?? 0;
+        $child = $_SESSION['child'] ?? 0;
+        $pwd = $_SESSION['pwd'] ?? 0;
+        
+        $additionalCharge = 0;
+        if ($adult > 10) {
+            $extraAdultCount = $adult - 10;
+            $extraRateQuery = $pdo->prepare("SELECT price FROM prices_tbl WHERE id = :id");
+            $extraRateQuery->bindValue(':id', 3 , PDO::PARAM_INT);
+            $extraRateQuery->execute();
+            $additionalCharge = $extraRateQuery->fetchColumn() * $extraAdultCount;
         }
 
-        $stmt->execute();
-        $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $_SESSION['rate'] = $rate + $additionalCharge;
 
+        // Load rooms based on pax capacity
+        if ($totalpax > 0) {
+            $sql = "
+                SELECT room_id, room_name, image_path, description, minpax, maxpax, price, is_offered 
+                FROM rooms
+                " . 
+                ($rateType == '1' ? "ORDER BY (minpax <= :totalpax AND maxpax >= :totalpax) DESC, minpax ASC" : "") . "
+            ";
+
+            $stmt = $pdo->prepare($sql);
+
+            if ($rateType == '1') {
+                $stmt->bindValue(':totalpax', $totalpax, PDO::PARAM_INT);
+            }
+
+            $stmt->execute();
+            $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        }
+    } else {
+        $totalpax = $_SESSION['totalpax'] ?? 0;
     }
-} else {
-    $totalpax = $_SESSION['totalpax'] ?? 0;
-}
 ?>
-
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
     <div class="container1">
         <div class="row" style="justify-content:space-between;">
-            <div class="col-md-6" style="width: 75%;">
+            <div class="guest col-md-6" style="width: 75%;">
                 <div class="section-header">Number of Guest (Pax)</div>
                 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                     <div class="row mb-2">
@@ -382,7 +475,7 @@ if (isset($_GET['check'])) {
                             </select>
 
                         </div>
-                        <div class="col-md-2" style="align-content: flex-end;">
+                        <div class="btn col-md-2" style="align-content: flex-end;">
                             <button type="submit" name="check" class="btn check">Check Rooms</button>
                         </div>
                     </div>
@@ -415,7 +508,7 @@ if (isset($_GET['check'])) {
             </div>
                     
             <div class="col-md-6 p-3 summary">
-                <form action="booking-process2.php" method="$_GET">
+                <form action="booking-process2.php" method="$_GET" id="secondForm">
                     <div class="section-header">Booking Summary</div>
 
                     <div class="bg-light p-3 rounded mb-3">
@@ -485,7 +578,6 @@ if (isset($_GET['check'])) {
                     </table>
 
                     <input type="hidden" name="reservationType" value="<?php echo htmlspecialchars($reservationType); ?>">
-                    <input type="hidden" name="origPrice" value="<?php echo number_format($_SESSION['rate'] ?? 0); ?>">
                     <input type="hidden" name="grandTotal" id="grandTotal">
                     <input type="hidden" name="roomTotal" id="roomTotal">
 
@@ -511,11 +603,14 @@ document.getElementById('hamburger').addEventListener('click', function() {
     
     const navbar = document.querySelector('.navbar');
     navbar.classList.toggle('shifted');
+
+    const progbar = document.querySelector('.progress-container');
+    progbar.classList.toggle('shifted');
     
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
-
+var rooms = [];
 const rateType = '<?php echo $rateType; ?>';
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -529,6 +624,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('.room-btn').forEach(button => {
         button.addEventListener('click', function() {
+            
             const roomId = this.dataset.id;
             
             // Highlight the selected room
@@ -593,6 +689,7 @@ function showOfferedRoomsOnly() {
 
 // Function to add selected room to the Booked Rooms summary
 function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
+    rooms.push(roomId);
     const bookedRoomsContainer = document.getElementById('booked-rooms');
     const noRoomsMessage = document.getElementById('no-rooms-message');
 
@@ -633,6 +730,7 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
     bookedRoomsContainer.appendChild(roomSummary);
 
     updateRemoveButtons();
+    addRoomIdToForm(roomId);
 
     if (rateType === '2') {
         if (offeredRoomAdded) {
@@ -646,6 +744,31 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
 
     showAllRooms(); 
 }
+
+function addRoomIdToForm(roomId) {
+    const form = document.getElementById('secondForm');  // Get the form element by ID
+
+    // Create a hidden input element for the roomId
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'roomIds[]';  // Use an array notation for multiple room IDs
+    input.value = roomId;
+
+    // Append the input field to the form
+    form.appendChild(input);
+}
+function removeRoomIdFromForm(roomId) {
+    const form = document.getElementById('secondForm');  // Get the form element by ID
+    const inputs = form.querySelectorAll('input[name="roomIds[]"]');  // Get all hidden inputs with name 'roomIds[]'
+
+    inputs.forEach(input => {
+        if (input.value === roomId) {
+            form.removeChild(input);  // Remove the matching input from the form
+        }
+    });
+}
+
+
 
 function updateRemoveButtons() {
     const bookedRoomsContainer = document.getElementById('booked-rooms');
@@ -685,6 +808,7 @@ function removeRoom(roomId, price) {
     if (roomElement) {
         roomElement.remove();    
         updateTotal(-price);
+        removeRoomIdFromForm(roomId);
     }
 
     if (bookedRoomsContainer.childElementCount === 1) {
@@ -721,6 +845,17 @@ function updateTotal(priceChange) {
     document.getElementById("grandTotal").value = newGrandTotal;
     document.getElementById("roomTotal").value = newRoomTotal;
 }
+
+document.getElementById("secondForm").addEventListener("submit", function(event) {
+        const bookedRooms = document.getElementById("booked-rooms");
+        const noRoomsMessage = document.getElementById("no-rooms-message");
+        
+        // Check if any room is selected
+        if (rateType === '2' && bookedRooms.children.length === 1 && noRoomsMessage.style.display !== "none") {
+            alert("Please select at least one room before continuing.");
+            event.preventDefault(); // Prevent form submission
+        }
+    });
 
 </script>
 </body>

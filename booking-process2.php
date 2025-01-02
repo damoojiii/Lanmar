@@ -248,7 +248,12 @@
 </div>
 <!-- phpsyntax for temp storage to process 3-->
 <?php
-    if (isset($_GET['continue'])) {
+    if (isset($_GET['roomIds']) && !empty($_GET['roomIds'])) {
+        $roomIds = $_GET['roomIds'];  // Get the array of room IDs
+        $_SESSION['roomIds'] = $roomIds;
+    }
+
+    if (isset($_GET['Continue'])) {
         $_SESSION['origPrice'] = $_GET['origPrice'] ?? '';
     }
     if (isset($_GET['grandTotal'])&& isset($_GET['roomTotal'])) {
@@ -261,12 +266,16 @@
     $checkin = $_SESSION['checkin'] ?? '';
     $checkout = $_SESSION['checkout'] ?? '';
     $numhours = $_SESSION['numhours'] ?? '';
-    $adult = $_SESSION['adult'] ?? '';
-    $adult = $_SESSION['child'] ?? '';
-    $pwd = $_SESSION['pwd'] ?? '';
+    $adults = $_SESSION['adult'];
+    $childs = $_SESSION['child'];
+    $pwd = $_SESSION['pwd'];
     $totalPax = $_SESSION['totalpax'] ?? '';
-    $origPrice = $_SESSION['origPrice'] ?? '';
+    $origPrice = $_SESSION['rate'] ?? '';
     $grandTotal = $_SESSION['grandTotal']  ?? '';
+    if($grandTotal == 0){
+        $grandTotal = $origPrice;
+        $_SESSION['grandTotal'] = $origPrice;
+    }
     $roomTotal = $_SESSION['roomTotal'];
 
     $sql = "SELECT * FROM users where user_id = 13";
@@ -311,13 +320,13 @@
                     <input type="text" class="message-box" name="" placeholder="Type your message here...">
                 </form>
                 <div class="section-header">Payment Method</div>
-                <form action="" id="radioForm">
-                    <input type="radio" name="choice" value="Gcash" class="form-label">
-                    <label for="payment" class="form-label" >GCash</label>
-                    <input type="radio" name="choice" value="PayMaya" class="form-label">
-                    <label for="payment" class="form-label">Pay Maya</label>
+                <form action="booking-process2.1.php" method="get" id="paymentForm">
+                    <input type="radio" name="choice" value="Gcash" id="gcash" class="form-label" required>
+                    <label for="gcash" class="form-label">GCash</label>
+        
+                    <input type="radio" name="choice" value="PayMaya" id="paymaya" class="form-label" required>
+                    <label for="paymaya" class="form-label">Pay Maya</label>
                 </form>
-
                 </div>
 
             <div class="col-md-6 p-3 summary">
@@ -325,7 +334,7 @@
 
                 <div class="bg-light p-2 rounded mb-3">
                     <div class="d-flex justify-content-between">
-                        <div>
+                        <div>                        
                             <p>Date: <span id="date-input"><?php echo "$dateIn to $dateOut";?></span></p>
                             <p>Time: <span id="time-input"><?php echo "$checkin to $checkout";?></span></p>
                             <p>Total No. of Pax: <span id="total-pax"><?php echo "$totalPax";?></span></p>
@@ -369,26 +378,16 @@
                 <table class="w-100 text-light">
                     <tr>
                         <td>Original Price:</td>
-                        <td class="text-end"><?php echo "$origPrice";?></td>
+                        <td class="text-end"><?php echo number_format($origPrice ?? 0); ?></td>
                     </tr>
                     <tr>
                         <td>Room:</td>
-                        <td class="text-end"><?php
-                        if ($grandTotal > $origPrice){
-                            echo $roomTotal;
-                        }else{
-                            echo "2000";
-                        }
-?></td>
+                        <td class="text-end"><?php echo number_format($roomTotal ?? 0); ?></td>
                     </tr>
                     <tr>
                         <td><strong>Total:</strong></td>
                         <td class="text-end"><strong><?php
-                        if ($grandTotal > $origPrice){
-                            echo $grandTotal;
-                        }else{
-                            echo $origPrice;
-                        }
+                        echo number_format($grandTotal ?? 0);
 ?></strong></td>
                     </tr>
                     <tr>
@@ -398,7 +397,7 @@
                                 $sql = "SELECT * FROM prices_tbl where payment_name = 'downpayment'";
                                 $result = $conn->query($sql);
                                 $price = $result->fetch_assoc();
-                                echo $price["price"];
+                                echo number_format($price["price"]);
                             ?>
                         </strong></td>
                     </tr>
@@ -408,7 +407,7 @@
                     </tr>
                 </table>
 
-                <button type="button" class="btn btn-primary w-100 mt-3">Continue</button>
+                <button type="submit" class="btn btn-primary w-100 mt-3" onclick="submitFormAndRedirect()" >Continue</button>
             </div>
         </div>
     </div>
@@ -441,8 +440,21 @@ function Choice() {
         }
 
         // Attach event listener to the form for automatic updates
-        const form = document.getElementById('radioForm');
+        const form = document.getElementById('paymentForm');
         form.addEventListener('input', Choice);
+function submitFormAndRedirect() {
+            var form = document.getElementById('paymentForm');
+            // Ensure that a choice is selected before submitting
+            if (form.choice.value === "") {
+                alert("Please select a payment method.");
+                return;
+            } else{
+                form.choice.value;
+            }
+            // Submit the form
+            form.submit();
+            //window.location.href = 'booking-process2.1.php';
+        }
 </script>
 </body>
 </html>
