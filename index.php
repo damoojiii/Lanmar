@@ -361,7 +361,11 @@ if ($resultGallery->num_rows > 0) {
                 echo '<h3>' . htmlspecialchars($row['room_name']) . '</h3>';
                 echo '<p>' . htmlspecialchars($row['description']) . '</p>';
                 echo '<ul class="room-features list-unstyled">';
+<<<<<<< HEAD
                 echo '<li><i class="bi bi-check-circle"></i> Capacity: ' . htmlspecialchars($row['minpax']) . '-'. htmlspecialchars($row['maxpax']).' persons</li>';
+=======
+                echo '<li><i class="bi bi-check-circle"></i> Capacity: ' . htmlspecialchars($row['capacity']) . ' persons</li>';
+>>>>>>> 1c551381ce41ccde0d9103a26e4879c5d91f3245
                 echo '</ul>';
               } else {
                 echo '<p>No featured room available at the moment.</p>';

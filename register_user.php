@@ -43,8 +43,13 @@ if (isset($_POST["register"])) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
+<<<<<<< HEAD
         $mail->Username = 'fridaythe012@gmail.com';
         $mail->Password = 'zaye hbft pwdh bqwo';
+=======
+        $mail->Username = 'nhatalie.paras@cvsu.edu.ph';
+        $mail->Password = 'qgro coop shdx rldc';
+>>>>>>> 1c551381ce41ccde0d9103a26e4879c5d91f3245
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->setFrom('your_email@gmail.com', 'Lanmar_Resort');

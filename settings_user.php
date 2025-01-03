@@ -70,6 +70,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <?php include "sidebar-design.php"; ?>
 
     <style>
+<<<<<<< HEAD
+=======
+        @font-face {
+            font-family: 'nautigal';
+            src: url(font/TheNautigal-Regular.ttf);
+        }
+
+        #sidebar span {
+            font-family: 'nautigal';
+            font-size: 50px !important;
+        }
+
+        #sidebar {
+            width: 250px;
+            position: fixed;
+            top: 0; 
+            height: 100vh;
+            overflow-y: auto; 
+            background: #001A3E;
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar.collapsed {
+            transform: translateX(-100%); /* Hide sidebar */
+        }
+
+        .navbar {
+            margin-left: 250px; 
+            z-index: 1; 
+            width: calc(100% - 250px);
+            height: 50px;
+            transition: margin-left 0.3s ease; 
+        }
+
+        #main-content {
+            transition: margin-left 0.3s ease;
+            margin-left: 250px; /* Ensures content starts after sidebar */
+            padding: 20px; /* Add some padding */
+        }
+
+        #hamburger {
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        hr {
+            background-color: #ffff;
+            height: 1.5px;
+        }
+
+        #sidebar .nav-link {
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+            margin-bottom: 2px;
+        }
+
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+>>>>>>> 1c551381ce41ccde0d9103a26e4879c5d91f3245
 
         .dropdown-menu {
             width: 100%;

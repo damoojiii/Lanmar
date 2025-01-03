@@ -112,7 +112,7 @@
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        
     </header>
 
     <!-- Sidebar -->
