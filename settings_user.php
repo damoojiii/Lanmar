@@ -102,7 +102,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         #main-content {
             transition: margin-left 0.3s ease;
-            margin-left: 250px; 
+            margin-left: 250px; /* Ensures content starts after sidebar */
+            padding: 20px; /* Add some padding */
         }
 
         #hamburger {
@@ -140,19 +141,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         @media (max-width: 768px) {
             #sidebar {
                 position: absolute;
-                transform: translateX(-100%); /* Hide sidebar off-screen */
+                transform: translateX(-100%);
             }
+            
             #sidebar.show {
-                transform: translateX(0); /* Show sidebar */
+                transform: translateX(0);
             }
 
-            .navbar {
-                margin-left: 0;
-                width: 100%; 
-            }
-
-            #main-content {
-                margin-left: 0;
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
             }
         }
 
@@ -241,6 +238,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-color: #ffff;
 
         }
+
+        .main-section {
+            margin-left: 250px; /* Add margin to align with sidebar */
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
@@ -277,6 +279,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <label for="contact_number" class="form-label">Contact Number</label>
                                     <input type="tel" class="form-control" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($user['contact_number']); ?>" required>
                                 </div>
+                            </form>
+                            <form action="update_profile.php" method="POST" enctype="multipart/form-data">
+                                <?php
+                                    $user_id = $_SESSION['user_id']; 
+                                    $query = "SELECT profile FROM users WHERE user_id = ?";
+                                    $stmt = $conn->prepare($query);
+                                    $stmt->bind_param("i", $user_id);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $user = $result->fetch_assoc();
+
+                                    if ($user) {
+                                        $photoPath = $user['profile']; // Get the profile photo path from the database
+                                    } else {
+                                        $photoPath = 'profile/default_photo.jpg'; // Fallback to default photo if user not found
+                                    }
+                                ?>
+                                <label for="profile_picture">Profile Picture:</label>
+                                <img src="<?php echo htmlspecialchars($photoPath); ?>" alt="Profile Picture" style="width: 100px; height: 100px;" />
+                                <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+                                <input type="submit" value="Update Profile">
                             </form>
                         </div>
                     </div>

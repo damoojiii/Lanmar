@@ -324,6 +324,15 @@ if ($resultGallery->num_rows > 0) {
           <div class="col-lg-6">
             <div class="room-image">
               <?php
+                // Add error reporting for debugging
+                error_reporting(E_ALL);
+                ini_set('display_errors', 1);
+
+                // Verify connection
+                if (!$conn) {
+                    die("Connection failed: " . mysqli_connect_error());
+                }
+
                 $query = "SELECT * FROM rooms WHERE is_featured = 1 LIMIT 1";
                 $result = mysqli_query($conn, $query);
 
@@ -332,26 +341,27 @@ if ($resultGallery->num_rows > 0) {
                 }
 
                 $row = mysqli_fetch_assoc($result);
-                $room_name = isset($row['room_name']) ? $row['room_name'] : 'Unavailable';
-
+                
                 if ($row) {
-                  $image_path = $row['image_path'];
+                  $room_name = htmlspecialchars($row['room_name']);
+                  $image_path = htmlspecialchars($row['image_path']);
                   echo '<img src="' . $image_path . '" class="img-fluid" alt="' . $room_name . '">';
                 } else {
                   echo '<p>No featured room available at the moment.</p>';
+                  // Debug output
+                  echo '<p>Debug: No rows returned from query</p>';
                 }
               ?>
-
             </div>
           </div>
           <div class="col-lg-6">
             <div class="room-description">
               <?php
-              if (isset($row)) {
-                echo '<h3>' . $room_name . '</h3>';
-                echo '<p>' . $row['description'] . '</p>';
+              if (isset($row) && $row) {
+                echo '<h3>' . htmlspecialchars($row['room_name']) . '</h3>';
+                echo '<p>' . htmlspecialchars($row['description']) . '</p>';
                 echo '<ul class="room-features list-unstyled">';
-                echo '<li><i class="bi bi-check-circle"></i> Capacity: ' . $row['capacity'] . ' persons</li>';
+                echo '<li><i class="bi bi-check-circle"></i> Capacity: ' . htmlspecialchars($row['capacity']) . ' persons</li>';
                 echo '</ul>';
               } else {
                 echo '<p>No featured room available at the moment.</p>';
@@ -371,11 +381,8 @@ if ($resultGallery->num_rows > 0) {
       <h3 class="sitename">Lanmar Resort</h3>
       <p>A Premuim Private Resort</p>
       <div class="social-links d-flex justify-content-center">
-        <a href=""><i class="bi bi-twitter-x"></i></a>
         <a href="https://www.facebook.com/lanmarresort"><i class="bi bi-facebook"></i></a>
-        <a href=""><i class="bi bi-instagram"></i></a>
-        <a href=""><i class="bi bi-skype"></i></a>
-        <a href=""><i class="bi bi-linkedin"></i></a>
+        
       </div>
       <div class="container">
         <div class="copyright">
