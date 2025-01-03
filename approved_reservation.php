@@ -1,5 +1,14 @@
 <?php
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }
 
+    session_start();
+    include "role_access.php";
+    checkAccess('admin');
 ?>
 
 <!DOCTYPE html>
@@ -382,6 +391,7 @@
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
+                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>

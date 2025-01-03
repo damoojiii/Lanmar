@@ -1,9 +1,9 @@
 <?php
-// Start the session at the very beginning of the file
-session_start();
 
 include("connection.php");
-
+session_start();
+include "role_access.php";
+checkAccess('admin');
 
 if (isset($_GET['delid'])) {
     $rid = intval($_GET['delid']);
@@ -381,6 +381,7 @@ if (isset($_GET['unblockid'])) {
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
+                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>

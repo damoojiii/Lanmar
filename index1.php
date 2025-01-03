@@ -1,12 +1,24 @@
+<?php 
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }   
+    session_start();
+    include "role_access.php";
+    checkAccess('user');
+    $userId = $_SESSION['user_id']; 
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -206,55 +218,28 @@
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
-            <a href="index1.php" class="nav-link text-white active">
-                Book Here
-            </a>
+            <a href="index1.php" class="nav-link text-white active">Book Here</a>
         </li>
-        <li>
-            <a href="my-reservation.php" class="nav-link text-white">
-                My Reservations
-            </a>
-        </li>
-        <li>
-            <a href="#" class="nav-link text-white">
-                Notification
-            </a>
-        </li>
-        <li>
-            <a href="chats.php" class="nav-link text-white">
-                Chat with Lanmar
-            </a>
-        </li>
-        <li>
-            <a href="#" class="nav-link text-white">
-                Feedback
-            </a>
-        </li>
-        <li>
-            <a href="#" class="nav-link text-white">
-                Settings
-            </a>
-        </li>
+        <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
+        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
+        <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="#" class="nav-link text-white">
-        Log out
-    </a>
+    <a href="logout.php" class="nav-link text-white">Log out</a>
 </div>
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container-fluid">
-        <button id="hamburger" class="navbar-toggler" type="button">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <button id="hamburger" class="navbar-toggler" type="button"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                
-            </ul>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
         </div>
     </div>
 </nav>
+
 <div class="progress-container">
     <div class="progress-bar">
         <div class="step completed">
@@ -352,11 +337,11 @@
     </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/bootstrap/js/all.min.js"></script>
+<script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="script.js"></script>

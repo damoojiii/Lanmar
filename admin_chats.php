@@ -5,7 +5,9 @@
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
     }   
-
+    session_start();
+    include "role_access.php";
+    checkAccess('admin');
     $userId = $_GET['user_id']; 
 
     $stmt = $pdo->prepare("SELECT firstname, lastname, status FROM users WHERE user_id = :userId");
@@ -409,6 +411,7 @@
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
+                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>

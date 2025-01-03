@@ -27,11 +27,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'bonkristian.devera@cvsu.edu.ph';
-                $mail->Password = 'gyfq ddvh zzxf zljj';
+                $mail->Username = 'fridaythe012@gmail.com';
+                $mail->Password = 'zaye hbft pwdh bqwo';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;
-                $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
+                $mail->setFrom('your_email@gmail.com', 'Lanmar_Resort');
                 $mail->addAddress($email, $fullname);
 
                 $mail->isHTML(true);

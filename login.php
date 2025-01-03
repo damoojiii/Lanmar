@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         if ($user['email_verify'] === NULL) {
                             $error = "Please verify your email before logging in.";
                         } else {
-                            header("Location: sidebar_user.php");
+                            header("Location: index1.php");
                             exit();
                         }
                     } else {

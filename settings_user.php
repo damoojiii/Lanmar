@@ -1,17 +1,14 @@
 <?php
 // Start the session
 session_start();
+include "role_access.php";
+checkAccess('user'); 
 
 include("connection.php");
 
 $success_message = "";
 $error_message = "";
 
-// Check if the user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo "<script>alert(' Engggggg'); window.location.href='login.php';</script>";
-    exit();
-}
 
 // Fetch current user information
 $user_id = $_SESSION['user_id']; // Make sure user_id is set
@@ -65,69 +62,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>User Settings</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    <?php include "sidebar-design.php"; ?>
 
     <style>
-        @font-face {
-            font-family: 'nautigal';
-            src: url(font/TheNautigal-Regular.ttf);
-        }
-
-        #sidebar span {
-            font-family: 'nautigal';
-            font-size: 50px !important;
-        }
-
-        #sidebar {
-            width: 250px;
-            position: fixed;
-            top: 0; 
-            height: 100vh;
-            overflow-y: auto; 
-            background: #001A3E;
-            transition: transform 0.3s ease;
-        }
-
-        #sidebar.collapsed {
-            transform: translateX(-100%); /* Hide sidebar */
-        }
-
-        .navbar {
-            margin-left: 250px; 
-            z-index: 1; 
-            width: calc(100% - 250px);
-            height: 50px;
-            transition: margin-left 0.3s ease; 
-        }
-
-        #main-content {
-            transition: margin-left 0.3s ease;
-            margin-left: 250px; 
-        }
-
-        #hamburger {
-            border: none;
-            background: none;
-            cursor: pointer;
-        }
-
-        hr {
-            background-color: #ffff;
-            height: 1.5px;
-        }
-
-        #sidebar .nav-link {
-            color: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            transition: background-color 0.3s, color 0.3s;
-            margin-bottom: 2px;
-        }
-
-        #sidebar .nav-link:hover, #sidebar .nav-link.active {
-            background-color: #fff !important;
-            color: #000 !important;
-        }
 
         .dropdown-menu {
             width: 100%;
@@ -140,19 +82,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         @media (max-width: 768px) {
             #sidebar {
                 position: absolute;
-                transform: translateX(-100%); /* Hide sidebar off-screen */
+                transform: translateX(-100%);
             }
+            
             #sidebar.show {
-                transform: translateX(0); /* Show sidebar */
+                transform: translateX(0);
             }
 
-            .navbar {
-                margin-left: 0;
-                width: 100%; 
-            }
-
-            #main-content {
-                margin-left: 0;
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
             }
         }
 
@@ -241,10 +179,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background-color: #ffff;
 
         }
+
+        .main-section {
+            margin-left: 250px; /* Add margin to align with sidebar */
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
-    <?php include 'sidebar_user.php'; ?>
+    <!-- Sidebar -->
+<div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
+    <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <span class="fs-4">Lanmar Resort</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="index1.php" class="nav-link text-white">Book Here</a>
+        </li>
+        <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
+        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
+        <li><a href="settings_user.php" class="nav-link text-white active">Settings</a></li>
+    </ul>
+    <hr>
+    <a href="logout.php" class="nav-link text-white">Log out</a>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container-fluid">
+        <button id="hamburger" class="navbar-toggler" type="button"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        </div>
+    </div>
+</nav>
     
     <div class="main-section" class="p-3">
         <div class="flex-container">
@@ -278,6 +249,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <input type="tel" class="form-control" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($user['contact_number']); ?>" required>
                                 </div>
                             </form>
+                            <form action="update_profile.php" method="POST" enctype="multipart/form-data">
+                                <?php
+                                    $user_id = $_SESSION['user_id']; 
+                                    $query = "SELECT profile FROM users WHERE user_id = ?";
+                                    $stmt = $conn->prepare($query);
+                                    $stmt->bind_param("i", $user_id);
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+                                    $user = $result->fetch_assoc();
+
+                                    if ($user) {
+                                        $photoPath = $user['profile']; // Get the profile photo path from the database
+                                    } else {
+                                        $photoPath = 'profile/default_photo.jpg'; // Fallback to default photo if user not found
+                                    }
+                                ?>
+                                <label for="profile_picture">Profile Picture:</label>
+                                <img src="<?php echo htmlspecialchars($photoPath); ?>" alt="Profile Picture" style="width: 100px; height: 100px;" />
+                                <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
+                                <input type="submit" value="Update Profile">
+                            </form>
                         </div>
                     </div>
                     <div class="col-md-6"><!-- Second column -->
@@ -285,11 +277,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <h2 class="mb-4">Change Password</h2>
                             <form class="settings-form" action="" method="POST">
                                 <div>
-                                    <label for="current_password" class="form-label">Current Password (required to make changes)</label>
+                                    <label for="current_password" class="form-label">Current Password</label>
                                     <input type="password" class="form-control" id="current_password" name="current_password" required>
                                 </div>
                                 <div>
-                                    <label for="new_password" class="form-label">New Password (leave blank to keep current password)</label>
+                                    <label for="new_password" class="form-label">New Password </label>
                                     <input type="password" class="form-control" id="new_password" name="new_password">
                                     <p id="message" style="display: none;"><span id="strength"></span></p>
                                 </div>
@@ -301,6 +293,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </div>
+
+    <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/all.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {

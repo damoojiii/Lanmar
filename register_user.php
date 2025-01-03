@@ -1,6 +1,4 @@
 <?php
-session_start(); // Start the session
-
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -21,83 +19,99 @@ if (isset($_POST["register"])) {
     $confirm_password = $_POST['confirm_password'];
     $role = $_POST['role'];
     $status = 1;
+
+    
+
     $mail = new PHPMailer(true);
 
-    // Database connection
-    $conn = mysqli_connect("localhost", "root", "", "lanmartest");
-    if (!$conn) {
-        die("Connection failed: " . mysqli_connect_error());
+    // Validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo '<script>alert("Invalid email address.");</script>';
+        echo '<script>window.location.href = "register_user.php";</script>';
+        exit; // Stop further execution
     }
 
-    if ($password !== $confirm_password) {
-        $error = "Passwords do not match";
-    } else {
-        $check_query = "SELECT * FROM users WHERE email = ?";
-        $check_stmt = $conn->prepare($check_query);
-        if (!$check_stmt) {
-            die("Prepare failed: " . $conn->error);
-        }
-        
-        $check_stmt->bind_param("s", $email);
-        $check_stmt->execute();
-        $check_result = $check_stmt->get_result();
+    // Ensure email is not empty before sending
+    if (empty($email)) {
+        echo '<script>alert("Email cannot be empty.");</script>';
+        echo '<script>window.location.href = "register_user.php";</script>';
+        exit; // Stop further execution
+    }
 
-        if ($check_result->num_rows > 0) {
+    try {
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'fridaythe012@gmail.com';
+        $mail->Password = 'zaye hbft pwdh bqwo';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        $mail->setFrom('your_email@gmail.com', 'Lanmar_Resort');
+        $mail->addAddress($email, $firstname);
+
+        $mail->isHTML(true);
+        $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+        $mail->Subject = 'Email verification';
+        $mail->Body = '<p>Your verification code is: <b style="font-size:30px;">' . $verification_code . '</b></p>';
+
+        // Send the email
+        $mail->send();
+
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Database connection
+        $conn = mysqli_connect("localhost", "root", "", "lanmartest");
+        if (!$conn) {
+            die("Connection failed: " . mysqli_connect_error());
+        }
+
+        // Check if email already exists
+        $email_exist = "SELECT * FROM users WHERE email ='$email'";
+        $email_result = $conn->query($email_exist);
+        if ($email_result->num_rows > 0) {
             $error = "Email already exists";
         } else {
-            $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
-            $encrypted_password = password_hash($password, PASSWORD_DEFAULT);
-
-            $insert_query = "INSERT INTO users (firstname, lastname, contact_number, email, password, role, verification_code, email_verify, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            $insert_stmt = $conn->prepare($insert_query);
-            if (!$insert_stmt) {
-                die("Prepare failed: " . $conn->error);
+            if ($_FILES['photo']['name']) {
+                $photo = $_FILES['photo']['name'];
+                $photoPath = 'profile/' . basename($photo);
+                move_uploaded_file($_FILES['photo']['tmp_name'], $photoPath);
+            } else {
+                // Default photo
+                $photoPath = 'profile/default_photo.jpg';
             }
-            
-            $email_verify = NULL;
-            $insert_stmt->bind_param("ssssssisi", $firstname, $lastname, $contact_number, $email, $encrypted_password, $role, $verification_code, $email_verify, $status);
 
-            try {
-                $mail->SMTPDebug = 2; // Set to 2 for detailed debug output
-                $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com';
-                $mail->SMTPAuth = true;
-                $mail->Username = 'lanmarresort@gmail.com';
-        $mail->Password = 'epuf eolg cjda efgc';
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587;
-                $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
-                $mail->addAddress($email, $firstname);
-                $mail->isHTML(true);
+            $insert_query = "INSERT INTO users (firstname, lastname, contact_number, email, password, role, verification_code, email_verify, status, profile) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-                $mail->Subject = 'Email verification';
-                $mail->Body = '<p>Your verification code is: <b style="font-size:30px;">'.$verification_code.'</b></p>';
+            $insert_stmt = $conn->prepare($insert_query);
+            $email_verify = NULL; // Assuming email is not verified initially
 
-                if (!$mail->send()) {
-                    echo "Mailer Error: " . $mail->ErrorInfo; 
-                } else {
-                    // Now insert into the database
-                    if ($insert_stmt->execute()) {
-                        header("Location: email_verification.php?email=" . urlencode($email));
-                        exit();
-                    } else {
-                        echo "Error inserting data: " . $insert_stmt->error; // Output error if insert fails
-                    }
-                }
-            } catch (Exception $e) {
-                // Handle exceptions
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            $insert_stmt->bind_param("ssissssiis", $firstname, $lastname, $contact_number, $email, $hashed_password, $role, $verification_code, $email_verify, $status, $photoPath);
+
+            // Execute the insert statement
+            if ($insert_stmt->execute()) {
+                header("Location: email_verification.php?email=" . urlencode($email));
+                exit();
+            } else {
+                echo "Error inserting data: " . $insert_stmt->error; // Output error if insert fails
             }
         }
+    } catch (Exception $e) {
+        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
+
+
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             background: linear-gradient(to bottom right, #006994, #00FFFF);
@@ -184,6 +198,7 @@ if (isset($_POST["register"])) {
             <input type="password" name="confirm_password" placeholder="Confirm Password" required>
             <p id="message" style="display: none;"><span id="strength"></span></p>
             <input type="hidden" name="role" value="user" required>
+            <input type="hidden" name="photo" required>
             <button type="submit" name="register" id="submitButton">Register</button>
             <p>Already have an account? <a href="login.php">Login here</a></p>
         </form>
@@ -191,45 +206,77 @@ if (isset($_POST["register"])) {
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var pass = document.getElementById("password"); // Corrected ID
+        var pass = document.getElementById("password");
+        var confirmPass = document.querySelector('input[name="confirm_password"]');
         var msg = document.getElementById("message");
         var strength = document.getElementById("strength");
-        var submitButton = document.querySelector('button[type="submit"]'); // Reference to the submit button
+        var submitButton = document.querySelector('button[type="submit"]');
 
-        // Initially disable the submit button
-        submitButton.disabled = true;
+        // Add new element for confirm password message
+        var confirmMsg = document.createElement("p");
+        confirmMsg.id = "confirmMessage";
+        confirmMsg.style.display = "none";
+        confirmPass.parentNode.insertBefore(confirmMsg, confirmPass.nextSibling);
 
-        pass.addEventListener("input", () => {
-            if (pass.value.length > 0) {
-                msg.style.display = "block"; // Show the message
+        // Add event listener for confirm password
+        confirmPass.addEventListener("input", () => {
+            confirmMsg.style.display = "block";
+            if (pass.value !== confirmPass.value) {
+                confirmPass.style.borderColor = "#ff5925";
+                confirmMsg.innerHTML = "Passwords do not match!";
+                confirmMsg.style.color = "#ff5925";
+                submitButton.disabled = true;
             } else {
-                msg.style.display = "none"; // Hide the message
-                submitButton.disabled = true; // Disable button if password is empty
-                return; // Exit the function
-            }
-
-            if (pass.value.length < 5) {
-                strength.innerHTML = "Password is Weak";
-                pass.style.borderColor = "#ff5925"; 
-                msg.style.color = "#ff5925"; 
-                strength.style.color = "#ff5925";
-                submitButton.disabled = true; // Disable button for weak password
-            } else if (pass.value.length >= 5 && pass.value.length < 8) {
-                strength.innerHTML = "Password is Medium";
-                pass.style.borderColor = "#FFA500"; 
-                msg.style.color = "#FFA500";
-                strength.style.color = "#FFA500"; 
-                submitButton.disabled = true; // Disable button for medium password
-            } else if (pass.value.length >= 8) {
-                strength.innerHTML = "Password is Strong";
-                pass.style.borderColor = "#26d730"; 
-                msg.style.color = "#26d730"; 
-                strength.style.color = "#26d730"; 
-                submitButton.disabled = false; // Enable button for strong password
+                confirmPass.style.borderColor = "#26d730";
+                confirmMsg.innerHTML = "Passwords match!";
+                confirmMsg.style.color = "#26d730";
+                // Check if password is also strong enough
+                checkPasswordStrength();
             }
         });
+
+        // Password strength checker
+        function checkPasswordStrength() {
+            const hasUpperCase = /[A-Z]/.test(pass.value);
+            const hasLowerCase = /[a-z]/.test(pass.value);
+            const hasNumbers = /\d/.test(pass.value);
+            const hasSymbols = /[!@#$%^&*(),.?":{}|<>]/.test(pass.value);
+            
+            if (pass.value.length > 0) {
+                msg.style.display = "block";
+            } else {
+                msg.style.display = "none";
+                submitButton.disabled = true;
+                return;
+            }
+
+            if (pass.value.length < 5 || !hasUpperCase || !hasLowerCase || !hasNumbers || !hasSymbols) {
+                strength.innerHTML = "Password is Weak (Requires uppercase, lowercase, number, and symbol)";
+                pass.style.borderColor = "#ff5925";
+                msg.style.color = "#ff5925";
+                strength.style.color = "#ff5925";
+                submitButton.disabled = true;
+            } else if (pass.value.length >= 5 && pass.value.length < 8) {
+                strength.innerHTML = "Password is Medium (Consider using a longer password)";
+                pass.style.borderColor = "#FFA500";
+                msg.style.color = "#FFA500";
+                strength.style.color = "#FFA500";
+                submitButton.disabled = true;
+            } else if (pass.value.length >= 8 && hasUpperCase && hasLowerCase && hasNumbers && hasSymbols) {
+                strength.innerHTML = "Password is Strong";
+                pass.style.borderColor = "#26d730";
+                msg.style.color = "#26d730";
+                strength.style.color = "#26d730";
+                // Only enable submit if passwords also match
+                submitButton.disabled = !(pass.value === confirmPass.value);
+            }
+        }
+
+        // Add event listener for password
+        pass.addEventListener("input", checkPasswordStrength);
     });
 </script>
 
 </body>
+
 </html>

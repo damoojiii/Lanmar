@@ -1,6 +1,9 @@
 <?php
-// Start the session at the very beginning of the file
+
 session_start();
+include "role_access.php";
+checkAccess('admin');
+
 
 include("connection.php");
 
@@ -402,6 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
+                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>

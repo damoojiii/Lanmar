@@ -5,8 +5,10 @@
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
     }   
-
-    $userId = 11; 
+    session_start();
+    include "role_access.php";
+    checkAccess('user');
+    $userId = $_SESSION['user_id']; 
 
 ?>
 
@@ -185,13 +187,13 @@
             <a href="index1.php" class="nav-link text-white">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
-        <li><a href="#" class="nav-link text-white">Notification</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
         <li><a href="chats.php" class="nav-link text-white active">Chat with Lanmar</a></li>
-        <li><a href="#" class="nav-link text-white">Feedback</a></li>
-        <li><a href="#" class="nav-link text-white">Settings</a></li>
+        <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
+        <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="#" class="nav-link text-white">Log out</a>
+    <a href="logout.php" class="nav-link text-white">Log out</a>
 </div>
 
 <!-- Navbar -->

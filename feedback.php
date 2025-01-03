@@ -1,41 +1,15 @@
 <?php
-// Start the session at the very beginning of the file
-session_start();
-
-include("connection.php");
-
-
-if (isset($_GET['delid'])) {
-    $rid = intval($_GET['delid']);
-    $sql = "UPDATE users SET status='0' WHERE user_id=?";
-    $query = $conn->prepare($sql);
-    $query->bind_param("i", $rid); // Use "i" for integer type
-    $query->execute();
-    
-    if ($query->affected_rows > 0) {
-        echo "<script>alert('Blocked successfully');</script>";
-    } else {
-        echo "<script>alert('No user found or already blocked.');</script>";
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
     }
-    
-    echo "<script>window.location.href = 'account_lists.php';</script>";
-}
 
-if (isset($_GET['unblockid'])) {
-    $rid = intval($_GET['unblockid']);
-    $sql = "UPDATE users SET status='1' WHERE user_id=?";
-    $query = $conn->prepare($sql);
-    $query->bind_param("i", $rid); // Use "i" for integer type
-    $query->execute();
-    
-    if ($query->affected_rows > 0) {
-        echo "<script>alert('Unblocked successfully');</script>";
-    } else {
-        echo "<script>alert('No user found or already unblocked.');</script>";
-    }
-    
-    echo "<script>window.location.href = 'account_lists.php';</script>";
-}
+    session_start();
+    include "role_access.php";
+    checkAccess('admin');
+
 ?>
 
 <!DOCTYPE html>
@@ -433,6 +407,7 @@ if (isset($_GET['unblockid'])) {
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
+                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>

@@ -1,6 +1,8 @@
 <?php
 
 session_start();
+include "role_access.php";
+checkAccess('admin');
 
 // Get any messages from session
 $success_message = $_SESSION['success_message'] ?? "";
@@ -275,6 +277,7 @@ $stmt->close();
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
+                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>
