@@ -1,10 +1,10 @@
 <style>
-    .calendar {
-    width: 100%;
+.calendar {
+    flex: 1;
     max-width: 600px;
     padding: 30px 20px;
-    border-radius: 10px;
     background-color: #19315D;
+    border-radius: 10px;
 }
 
 .calendar .header {

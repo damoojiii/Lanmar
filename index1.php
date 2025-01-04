@@ -27,12 +27,6 @@
     include "calendar-design.php";
     ?>
     <style>
-        .container{
-            display: flex;
-            width: 100%;
-            padding: 0;
-            gap: 5rem;
-        }
         .inputs label {
             font-weight: bold; /* Emphasize labels */
             margin-bottom: 0.5rem; /* Add space below labels */
@@ -43,21 +37,21 @@
             width: 100%; /* Make inputs take full width */
             flex-grow: unset; /* Remove auto-grow */
         }
-
-        /* .inputs .mb-3 {
-            margin-bottom: 10px;
+        .container {
+            display: flex;
+            flex-wrap: wrap; /* Allows items to wrap */
+            gap: 5rem;
+            width: 100%;
+            padding: 0;
         }
 
-        .form-label.me-3 {
-            margin-bottom: 0;
-        } */
-
-        .legend{
+        .legend {
+            padding-left: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 20px;
         }
+
         .legend h4 {
             margin-bottom: 10px;
         }
@@ -65,19 +59,21 @@
         .legend ul {
             list-style: none;
             padding: 0;
+            display: flex; /* Arrange items in a row */
+            flex-direction: column;
+            flex-wrap: wrap; /* Ensure items wrap on small screens */
+            gap: 1rem; /* Spacing between items */
         }
 
         .legend li {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            gap: 0.5rem;
         }
 
         .legend .box {
-            display: inline-block;
             width: 20px;
             height: 20px;
-            margin-right: 10px;
         }
 
         .box.available {
@@ -157,7 +153,6 @@
 
         .step {
             text-align: center;
-            position: relative;
         }
 
         .step .circle {
@@ -204,6 +199,38 @@
 
         .step:not(.completed)::after {
             background-color: white;
+        }
+        @media (max-width: 768px) {
+            .progress-bar {
+                margin-left: 0px;
+                gap: 0;
+                justify-content: space-evenly;
+            }
+            .progress-container {
+                height: 70px;
+            }
+            .step span{
+                display: none;
+            }
+            .container {
+                flex-direction: column-reverse; /* Switch the order on mobile */
+                gap: 2rem;
+            }
+
+            .legend ul {
+                flex-direction: row; /* Stack legend items on mobile */
+            }
+
+            .legend li {
+                gap: 0.8rem;
+            }
+            .continue-btn-container{
+                width: 100%;
+            }
+            .calendar{
+                margin-inline: 5px;
+            }
+
         }
     </style>
     

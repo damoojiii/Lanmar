@@ -62,12 +62,11 @@
             transform: translateY(-50%);
         }
         .progress-bar span {
-        font-size: 16px; /* Default font size for larger screens */
+            font-size: 16px; /* Default font size for larger screens */
         }
 
         .step {
             text-align: center;
-            position: relative;
         }
 
         .step .circle {
@@ -117,11 +116,28 @@
         }
     </style>
     <style>
+        .mobile-room{
+            width: 80%;
+        }
         .summary {
             background-color: #00214b;
             color: #fff;
             width: 25%;
             height: 100%;
+        }
+        .collapse:not(.show){
+            display: block;
+        }
+        .expand-summary {
+            width: 100%;
+            background-color: #00214b;
+            text-align: center;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            cursor: pointer;
+            display: none;
         }
 
         .summary .section-header {
@@ -256,6 +272,11 @@
                 flex-direction: row;
                 gap: 0.8rem;
                 margin-left: 0px;
+                justify-content: space-evenly;
+            }
+
+            .progress-container {
+                height: 70px;
             }
 
             .step .circle {
@@ -265,6 +286,41 @@
             }
             .progress-bar span {
                 font-size: 12px; /* Further reduce the font size for mobile */
+            }
+            #room-selection {
+                display: none !important;
+            }
+            
+            #room-selection-dropdown {
+                display: block;
+            }
+            .mobile-room{
+                width: 100%;
+            }
+            .add-room{
+                font-size: 14px;
+            }
+            .summary {
+                width: 100%;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                z-index: 1000;
+                transition: height 0.3s ease-in-out;
+                overflow: hidden;
+            }
+            .expand-summary{
+                display: block;
+                background-color: transparent;
+            }
+            .summary.collapse {
+                height: 60px; /* Initial height for collapsed state */
+                border-radius: 15px;
+            }
+        }
+        @media (min-width: 768px) {
+            #room-selection-dropdown {
+                display: none !important;
             }
         }
         @media (max-width: 430px) {
@@ -292,7 +348,7 @@
             }
             .container{
                 max-width: 100%;
-                padding: 10%;
+                padding: 20px;
             }
             .guest {
                 width: 100% !important; /* Override inline styles */
@@ -489,20 +545,35 @@
                 </form>
 
                 <div class="section-header">Select Room(s)</div>
-                
+
                 <?php if ($totalpax > 0 && !empty($rooms)): ?>
                     <div class="row px-2">
-                        <div class="list-group" id="room-selection" style="width: 20%;">
-                        <?php foreach ($rooms as $room): ?>
-                            <button type="button" class="list-group-item list-group-item-action room-btn" 
-                                    data-id="<?php echo $room['room_id']; ?>" 
-                                    data-offered="<?php echo $room['is_offered']; ?>">
-                                <?php echo htmlspecialchars($room['room_name']); ?>
-                            </button>
-                        <?php endforeach; ?>
+                        <!-- Room Selection for Desktop -->
+                        <div class="list-group d-none d-md-block" id="room-selection" style="width: 20%;">
+                            <?php foreach ($rooms as $room): ?>
+                                <button type="button" class="list-group-item list-group-item-action room-btn" 
+                                        data-id="<?php echo $room['room_id']; ?>" 
+                                        data-offered="<?php echo $room['is_offered']; ?>">
+                                    <?php echo htmlspecialchars($room['room_name']); ?>
+                                </button>
+                            <?php endforeach; ?>
                         </div>
+
+                        <!-- Room Selection for Mobile -->
+                        <div class="d-md-none mb-3">
+                            <select id="room-selection-dropdown" class="form-select">
+                                <option selected hidden disabled>Select a room</option>
+                                <?php foreach ($rooms as $room): ?>
+                                    <option value="<?php echo $room['room_id']; ?>" 
+                                            data-offered="<?php echo $room['is_offered']; ?>">
+                                        <?php echo htmlspecialchars($room['room_name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                         <!-- Room Details Section -->
-                        <div class="col-md-6 py-3" style="width: 80%;">
+                        <div class="mobile-room col-md-6 py-3">
                             <div id="room-details">
                                 <div class="placeholder-text">Select a room to view details.</div>
                             </div>
@@ -514,7 +585,8 @@
         
             </div>
                     
-            <div class="col-md-6 p-3 summary">
+            <div class="col-md-6 p-3 summary collapse" id="bookingSummary">
+                <button class="btn btn-link expand-summary" onclick="toggleSummary()">Expand</button>
                 <form action="booking-process2.php" method="$_GET" id="secondForm">
                     <div class="section-header">Booking Summary</div>
 
@@ -620,6 +692,22 @@ document.getElementById('hamburger').addEventListener('click', function() {
 var rooms = [];
 const rateType = '<?php echo $rateType; ?>';
 
+function toggleSummary() {
+    const summarySection = document.getElementById('bookingSummary');
+    const expandButton = document.querySelector('.expand-summary');
+
+    if (summarySection.classList.contains('collapse')) {
+        summarySection.classList.remove('collapse');
+        summarySection.style.height = '100vh'; // Full screen height
+        expandButton.textContent = 'Collapse';
+    } else {
+        summarySection.classList.add('collapse');
+        summarySection.style.height = '60px'; // Reset to initial height
+        expandButton.textContent = 'Expand';
+    }
+}
+
+
 document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelectorAll('.room-btn').forEach(button => {
@@ -673,6 +761,59 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const roomDropdown = document.getElementById('room-selection-dropdown');
+
+    // Filter out non-offered rooms based on rateType
+    for (let i = 0; i < roomDropdown.options.length; i++) {
+        const option = roomDropdown.options[i];
+        const isOffered = option.getAttribute('data-offered') === "1";
+        if (rateType === '2' && !isOffered) {
+            option.style.display = 'none';
+        }
+    }
+
+    // Event listener for room selection from dropdown
+    roomDropdown.addEventListener('change', function () {
+        const selectedRoomId = this.value;
+
+        // Fetch and display room details based on selected room ID
+        fetch(`getRoomDetails.php?room_id=${selectedRoomId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('room-details').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="${data.image_path}" class="placeholder-img" style="width: 100%; height: 200px;">
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <h5>${data.room_name}</h5>
+                            <p>${data.description}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h6>Rate & Details</h6>
+                        <div class="d-flex gap-2">
+                            <div class="p-3 bg-light" style="flex: 1;">
+                                <p><strong>PHP ${data.price}</strong></p>
+                                <p>Good for: ${data.minpax}-${data.maxpax} pax</p>
+                                <a href="#" class="text-decoration-underline">Conditions</a>
+                            </div>
+                            <div class="p-3 bg-secondary text-white" style="flex: 1;">
+                                <h6>Includes:</h6>
+                                <ul class="list">
+                                    ${data.inclusions.map(inclusion => `<li>${inclusion}</li>`).join('')}
+                                </ul>
+                                <button class="btn mt-2 add-room" onclick="addToSummary(${selectedRoomId}, '${data.room_name}', ${data.price}, ${data.minpax}, ${data.maxpax}, ${data.is_offered})">+ Book this room</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+    });
+});
+
 
 let offeredRoomAdded = false;
 
