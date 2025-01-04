@@ -149,6 +149,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             margin-bottom: 2px;
         }
 
+        #sidebar .collapse {
+            transition: height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        #sidebar .collapse.show {
+            height: auto !important;
+            opacity: 1;
+        }
+        #sidebar .collapse:not(.show) {
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .caret-icon .fa-caret-down {
+            display: inline-block;
+            font-size: 20px;
+        }
+        .navcircle{
+            font-size: 7px;
+            text-align: justify;
+        }
+
         #sidebar .nav-link:hover, #sidebar .nav-link.active {
             background-color: #fff !important;
             color: #000 !important;
@@ -161,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 
         .dropdown-item {
             color: #fff !important;
+            margin-bottom: 10px;
         }
 
         .dropdown-item:hover{
@@ -373,13 +395,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             <li class="nav-item">
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <li class="nav-item">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
                     Manage Reservations
+                    <span class="caret-icon">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </span>
                 </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="pending_reservation.php">Pending Reservations</a></li>
-                    <li><a class="dropdown-item" href=".php">Approved Reservations</a></li>
+                <ul class="collapse list-unstyled ms-3" id="manageReservations">
+                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -389,7 +414,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
             </li>
             <li>
-                <a href="feedback.php" class="nav-link text-white">Feedback</a>
+                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
+            </li>
+            <li>
+                <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
                 <a href="reports.php" class="nav-link text-white">Reports</a>
@@ -397,11 +425,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <li class="nav-item">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
                     Settings
+                    <span class="caret-icon">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </span>
                 </a>
-                <ul class="dropdown-menu">
+                <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
@@ -475,4 +506,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 </body>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const header = document.getElementById('header');
+
+        sidebar.classList.toggle('show');
+
+        if (sidebar.classList.contains('show')) {
+            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
+            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
+        } else {
+            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
+            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
+        }
+    }
+    
+    document.querySelectorAll('.collapse').forEach(collapse => {
+        collapse.addEventListener('show.bs.collapse', () => {
+            collapse.style.height = collapse.scrollHeight + 'px';
+        });
+        collapse.addEventListener('hidden.bs.collapse', () => {
+            collapse.style.height = '0px';
+        });
+    });
+</script>
 </html>

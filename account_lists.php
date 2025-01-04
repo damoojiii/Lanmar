@@ -54,6 +54,11 @@ if (isset($_GET['unblockid'])) {
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -144,6 +149,7 @@ if (isset($_GET['unblockid'])) {
 
         .dropdown-item {
             color: #fff !important;
+            margin-bottom: 10px;
         }
 
         .dropdown-item:hover{
@@ -367,7 +373,7 @@ if (isset($_GET['unblockid'])) {
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
                     Manage Reservations
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>
@@ -396,11 +402,14 @@ if (isset($_GET['unblockid'])) {
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <li class="nav-item">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
                     Settings
+                    <span class="caret-icon">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </span>
                 </a>
-                <ul class="dropdown-menu">
+                <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
