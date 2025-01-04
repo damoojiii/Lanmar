@@ -8,8 +8,12 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
-    $userId = $_SESSION['user_id']; 
-
+    $userId = $_SESSION['user_id'];
+    if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
+        echo '<script>
+                    window.location="/lanmar/index1.php"; 
+         </script>';
+    }
 ?>
 
 <!DOCTYPE html>
@@ -446,7 +450,7 @@
                     <div class="row mb-2">
                         <div class="col-md-2">
                             <label for="adults" class="form-label">Adult(s)</label>
-                            <input type="number" min="0" id="adults" name="adults" class="form-control" value="<?php echo $adult; ?>">
+                            <input type="number" min="0" id="adults" name="adults" class="form-control" value="<?php echo $adult; ?>" required>
                         </div>
                         <div class="col-md-2">
                             <label for="children" class="form-label">Child(ren)</label>
@@ -478,7 +482,7 @@
                             </select>
 
                         </div>
-                        <div class="btn col-md-2" style="align-content: flex-end;">
+                        <div class=" col-md-2" style="align-content: flex-end;">
                             <button type="submit" name="check" class="btn check">Check Rooms</button>
                         </div>
                     </div>
@@ -850,11 +854,16 @@ function updateTotal(priceChange) {
 }
 
 document.getElementById("secondForm").addEventListener("submit", function(event) {
+        var totalpax = document.getElementById("adults").value;
         const bookedRooms = document.getElementById("booked-rooms");
         const noRoomsMessage = document.getElementById("no-rooms-message");
-        
         // Check if any room is selected
-        if (rateType === '2' && bookedRooms.children.length === 1 && noRoomsMessage.style.display !== "none") {
+        if (totalpax == '' || totalpax == 0) {
+            if(rateType === '2' || rateType === '1'){
+            alert("Enter number of guest.");
+            event.preventDefault();
+            }
+        } else if (rateType === '2' && bookedRooms.children.length === 1 && noRoomsMessage.style.display !== "none") {
             alert("Please select at least one room before continuing.");
             event.preventDefault(); // Prevent form submission
         }

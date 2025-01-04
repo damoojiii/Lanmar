@@ -33,6 +33,7 @@
             justify-content: space-between;
             align-items: center;
             background:lightgray;
+            transition: margin-left 0.3s ease;
         }
 
         .progress-bar {
@@ -128,7 +129,119 @@
         .summary p{
             text-align: justify;
         }
+        .room-list{
+            margin-left: 50px;
+        }
 
+    </style>
+    <style>
+        /* responsive */
+        @media (max-width: 1024px) {
+            nav {
+                padding: 20px 50px;
+                height: 70px;
+            }
+
+            nav a span {
+                font-size: 100px;
+            }
+            
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+            }
+            .progress-bar span {
+                font-size: 14px; /* Reduce font size slightly for tablets */
+            }
+            .container{
+                max-width: fit-content;
+            }
+        }
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 30px;
+                height: 60px;
+            }
+
+            nav a span {
+                font-size: 80px;
+            }
+            .progress-container.shifted{
+                margin-left: 250px;
+                transition: margin-left 0.3s ease;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 0.8rem;
+                margin-left: 0px;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .progress-bar span {
+                font-size: 12px; /* Further reduce the font size for mobile */
+            }
+            .bill-message {
+                width: 100% !important; /* Override inline styles */
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .room-list{
+            margin-left: 35px;
+        }
+        }
+        @media (max-width: 430px) {
+            nav {
+                padding: 10px 20px;
+                height: 50px;
+            }
+
+            nav a span {
+                font-size: 60px;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .progress-bar span {
+                font-size: 10px; /* Set a smaller font size for very small screens */
+            }
+            .container{
+                max-width: 100%;
+                padding: 10%;
+            }
+            .bill-message {
+                width: 100% !important; /* Override inline styles */
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            .receipt-section{
+                width: 100% !important;
+            }
+            .summary{
+                width: 100% !important;
+            }
+            .room-list{
+            margin-left: 32px;
+        }
+        }
     </style>
 </head>
 <body>
@@ -187,7 +300,17 @@
 
 <!-- called passing information -->
 <?php
-    $id = 38;
+    $stmt = $pdo->prepare("SELECT * FROM booking_tbl ORDER BY booking_id DESC LIMIT 1");
+    $stmt->execute();
+    $latestRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($latestRow['user_id'] == $userId){
+        $id = $latestRow['booking_id'];
+    }
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = $userId");
+    $stmt->execute();
+    $name = $stmt->fetch(PDO::FETCH_ASSOC);
+    $fullname = $name['firstname'] . " " . $name['lastname'];
+    
     $sql = "
         SELECT 
             booking_tbl.booking_id,
@@ -220,7 +343,7 @@
         booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours,
         reservationType_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
-        bill_tbl.total_bill
+        bill_tbl.total_bill, bill_tbl.balance
     FROM booking_tbl
     LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
@@ -249,7 +372,8 @@
                     echo "No record found with user ID: $id.";
                     }
                 ?></span></p><br>
-                <p><strong>Name: </strong> <span id="name-input"></span></p>
+                <p><strong>Name: </strong> <span id="name-input"><?php echo $fullname?>
+                </span></p>
                 <p><strong>Date: </strong> <span id="date-input"><?php if ($row) {
                     echo $row["dateIn"] . " to " . $row["dateOut"];
                     } else {
@@ -277,10 +401,11 @@
                 ?></span></p>
                 <p><strong>Rooms: </strong> <span id="rooms"><?php
                     if (!empty($room_data)) {
-                    foreach ($room_data as $room) {
-                        echo "<br>";
-                        echo $room['room_name'] . "<br>";
-                    }
+                        echo '<div class="room-list">'; // Start the div container
+                        foreach ($room_data as $room) {
+                            echo '<div class="room-item">' . $room['room_name'] . '</div>'; // Room name inside a div
+                        }
+                        echo '</div>';
                     }
                 ?></span></p><br>
                 <p><Strong>Total Amount: </Strong><span><?php if ($row) {
@@ -289,7 +414,7 @@
                     echo "No record found with user ID: $id.";
                     }
                     ?></span></p>
-                <p><strong>Balance Remaining: </strong> <span></span></p>
+                <p><strong>Balance Remaining: </strong><?php echo number_format($row["balance"]) ?><span></span></p>
             </div>
             <div class="summary">
                 <h2>Thank You For Choosing <br> Lanmar Resort</h2>
@@ -314,6 +439,9 @@ document.getElementById('hamburger').addEventListener('click', function() {
     
     const navbar = document.querySelector('.navbar');
     navbar.classList.toggle('shifted');
+
+    const progbar = document.querySelector('.progress-container');
+    progbar.classList.toggle('shifted');
     
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');

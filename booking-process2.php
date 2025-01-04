@@ -8,6 +8,11 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
+    if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
+        echo '<script>
+                    window.location="/lanmar/index1.php"; 
+         </script>';
+    }
     $userId = $_SESSION['user_id']; 
 
 ?>
@@ -35,6 +40,7 @@
             justify-content: space-between;
             align-items: center;
             background:lightgray;
+            transition: margin-left 0.3s ease;
         }
 
         .progress-bar {
@@ -56,6 +62,9 @@
             background-color: white;
             z-index: -1;
             transform: translateY(-50%);
+        }
+        .progress-bar span {
+        font-size: 16px; /* Default font size for larger screens */
         }
 
         .step {
@@ -195,6 +204,99 @@
         }
 
     </style>
+    <style>
+        @media (max-width: 1024px) {
+            nav {
+                padding: 20px 50px;
+                height: 70px;
+            }
+
+            nav a span {
+                font-size: 100px;
+            }
+            
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+            }
+            .progress-bar span {
+                font-size: 14px; /* Reduce font size slightly for tablets */
+            }
+        }
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 30px;
+                height: 60px;
+            }
+
+            nav a span {
+                font-size: 80px;
+            }
+            .progress-container.shifted{
+                margin-left: 250px;
+                transition: margin-left 0.3s ease;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 0.8rem;
+                margin-left: 0px;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .progress-bar span {
+                font-size: 12px; /* Further reduce the font size for mobile */
+            }
+            .container{
+                max-width: 100% !important;
+            }
+            
+        }
+        @media (max-width: 430px) {
+            nav {
+                padding: 10px 20px;
+                height: 50px;
+            }
+
+            nav a span {
+                font-size: 60px;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            .progress-bar span {
+                font-size: 10px; /* Set a smaller font size for very small screens */
+            }
+            .container{
+                max-width: 100%;
+                padding: 10%;
+            }
+            .guest {
+                width: 100% !important; /* Override inline styles */
+            }
+            .summary{
+                width: 100% !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -279,7 +381,7 @@
         $grandTotal = $origPrice;
         $_SESSION['grandTotal'] = $origPrice;
     }
-    $roomTotal = $_SESSION['roomTotal'];
+    $roomTotal = $_SESSION['roomTotal'] ?? '';
 
     $sql = "SELECT * FROM users where user_id = '$userId'";
     $result = $conn->query($sql);
@@ -289,8 +391,8 @@
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
     <div class="container1">
-        <div class="row" style="justify-content:space-between;">
-        <div class="col-md-6" style="width: 75%;">
+        <div class="row " style="justify-content:space-between;">
+        <div class="guest col-md-6" style="width: 75%;">
                 <div class="section-header">Personal Information</div>
                 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                     <div class="row mb-2">
@@ -430,6 +532,9 @@ document.getElementById('hamburger').addEventListener('click', function() {
     
     const navbar = document.querySelector('.navbar');
     navbar.classList.toggle('shifted');
+    
+    const progbar = document.querySelector('.progress-container');
+    progbar.classList.toggle('shifted');
     
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');

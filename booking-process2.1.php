@@ -8,6 +8,16 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
+    //if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
+    //    echo '<script>
+    //               window.location="/lanmar/index1.php"; 
+    //    </script>';
+    //}
+    if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
+        echo '<script>
+                    window.location="/lanmar/index1.php"; 
+         </script>';
+    }
     $userId = $_SESSION['user_id']; 
 
 ?>
@@ -188,107 +198,107 @@
         width: 60%;
         margin-right: 5%;
     }
-}
-
-/* Mobile (Phone) - from 768px and below */
-@media (max-width: 768px) {
-    nav {
-        padding: 15px 30px;
-        height: 60px;
     }
 
-    nav a span {
-        font-size: 80px;
+    /* Mobile (Phone) - from 768px and below */
+    @media (max-width: 768px) {
+        nav {
+            padding: 15px 30px;
+            height: 60px;
+        }
+
+        nav a span {
+            font-size: 80px;
+        }
+
+        .progress-bar {
+            flex-direction: row;
+            gap: 0.8rem;
+        }
+
+        .step .circle {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+        }
+        .progress-bar span {
+            font-size: 12px; /* Further reduce the font size for mobile */
+        }
+
+        .bill-message {
+            flex-direction: column;
+            gap: 20px;
+            margin-left: 0;
+            align-items: center;
+        }
+
+        .qrcode {
+            width: 200px;
+            height: 200px;
+        }
+
+        .summary {
+            width: 90%;
+            margin-right: 0;
+        }
+
+        input[type="file"], input[type="text"], button {
+            width: 100%;
+            font-size: 14px;
+        }
     }
 
-    .progress-bar {
-        flex-direction: row;
-        gap: 0.8rem;
-    }
+    /* Phone (Small screen) - 430px and below */
+    @media (max-width: 430px) {
+        nav {
+            padding: 10px 20px;
+            height: 50px;
+        }
 
-    .step .circle {
-        width: 20px;
-        height: 20px;
-        font-size: 10px;
-    }
-    .progress-bar span {
-        font-size: 12px; /* Further reduce the font size for mobile */
-    }
+        nav a span {
+            font-size: 60px;
+        }
 
-    .bill-message {
-        flex-direction: column;
-        gap: 20px;
-        margin-left: 0;
-        align-items: center;
-    }
+        .progress-bar {
+            flex-direction: row;
+            gap: 1rem;
+        }
 
-    .qrcode {
-        width: 200px;
-        height: 200px;
-    }
+        .step .circle {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+        }
+        .progress-bar span {
+            font-size: 10px; /* Set a smaller font size for very small screens */
+        }
 
-    .summary {
-        width: 90%;
-        margin-right: 0;
-    }
+        .bill-message {
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 0;
+            align-items: center;
+        }
 
-    input[type="file"], input[type="text"], button {
-        width: 100%;
-        font-size: 14px;
-    }
-}
+        .qrcode {
+            width: 150px;
+            height: 150px;
+        }
 
-/* Phone (Small screen) - 430px and below */
-@media (max-width: 430px) {
-    nav {
-        padding: 10px 20px;
-        height: 50px;
-    }
+        .summary {
+            width: 100%;
+            margin-right: 0;
+        }
 
-    nav a span {
-        font-size: 60px;
-    }
+        input[type="file"], input[type="text"], button {
+            width: 100%;
+            font-size: 12px;
+        }
 
-    .progress-bar {
-        flex-direction: row;
-        gap: 1rem;
+        button {
+            margin-top: 10px;
+        }
     }
-
-    .step .circle {
-        width: 20px;
-        height: 20px;
-        font-size: 10px;
-    }
-    .progress-bar span {
-        font-size: 10px; /* Set a smaller font size for very small screens */
-    }
-
-    .bill-message {
-        flex-direction: column;
-        gap: 10px;
-        margin-left: 0;
-        align-items: center;
-    }
-
-    .qrcode {
-        width: 150px;
-        height: 150px;
-    }
-
-    .summary {
-        width: 100%;
-        margin-right: 0;
-    }
-
-    input[type="file"], input[type="text"], button {
-        width: 100%;
-        font-size: 12px;
-    }
-
-    button {
-        margin-top: 10px;
-    }
-}
     </style>
 </head>
 <body>
@@ -346,6 +356,13 @@
     $paymode = $_SESSION['payment_method'] ?? '';
     $status = 'Pending';
 
+    $sql = "SELECT * FROM prices_tbl where payment_name = 'downpayment'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $priceData = $stmt->fetch(PDO::FETCH_ASSOC);
+    $price = $priceData['price'];
+    $balance = $grandTotal - $price;
+
     // Check if the form is submitted
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && basename($_SERVER['PHP_SELF']) == 'booking-process2.1.php') {
     
@@ -356,7 +373,7 @@
     // Handle file upload
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         // Define the upload directory and file path
-        $uploadDir = 'uploads/';
+        $uploadDir = 'uploads/ref_proof/';
         $uploadFile = $uploadDir . basename($_FILES['image']['name']);
 
         // Move the uploaded file to the desired directory
@@ -375,11 +392,12 @@
     try {
         // Insert into bill_tbl first
         $bill_sql = "INSERT INTO bill_tbl (image, ref_num, balance, total_bill, pay_mode) 
-                    VALUES (:uploadFile, :ref_id, 0, :grandTotal, :paymode)";
+                    VALUES (:uploadFile, :ref_id, :balance, :grandTotal, :paymode)";
         $stmt = $pdo->prepare($bill_sql);
         $stmt->execute([
             ':uploadFile' => $uploadFile, 
-            ':ref_id' => $ref_id, 
+            ':ref_id' => $ref_id,
+            ':balance' => $balance,
             ':grandTotal' => $grandTotal,
             ':paymode' => $paymode
         ]);
@@ -414,13 +432,12 @@
         $room_name = $room['room_name']; // Extract the room name from the result
         
         // Insert the data into room_tbl with parameter binding
-        $room_sql = "INSERT INTO room_tbl (room_Id, room_name, user_id, bill_id) 
-                     VALUES (:roomId, :room_name,  :user_id , :billId)";
+        $room_sql = "INSERT INTO room_tbl (room_Id, room_name, bill_id) 
+                     VALUES (:roomId, :room_name, :billId)";
         $stmt = $pdo->prepare($room_sql);
         $stmt->execute([
             ':roomId' => $roomId,
             ':billId' => $bill_id,
-            ':user_id' => $userId,
             ':room_name' => $room_name
         ]);
         
@@ -435,10 +452,11 @@
 
     
         // Insert into booking_tbl last
-        $booking_sql = "INSERT INTO booking_tbl ( dateIn, dateOut, checkin, checkout, hours, reservation_id, pax_id, bill_id, additionals, status) 
-                        VALUES ( :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, 'None', :status)";
+        $booking_sql = "INSERT INTO booking_tbl (user_id, dateIn, dateOut, checkin, checkout, hours, reservation_id, pax_id, bill_id, additionals, status) 
+                        VALUES (:userId, :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, 'None', :status)";
         $stmt = $pdo->prepare($booking_sql);
         $stmt->execute([
+            'userId' => $userId,
             ':dateIn' => $dateIn, 
             ':dateOut' => $dateOut, 
             ':checkin' => $checkin, 
@@ -449,6 +467,25 @@
             ':bill_id' => $bill_id,
             ':status' => $status
         ]);
+
+        unset($_SESSION['dateIn']);
+        unset($_SESSION['dateOut']);
+        unset($_SESSION['checkin']);
+        unset($_SESSION['checkout']);
+        unset($_SESSION['numhours']);
+        unset($_SESSION['adult']);
+        unset($_SESSION['child']);
+        unset($_SESSION['pwd']);
+        unset($_SESSION['totalpax']);
+        unset($_SESSION['reservationType']);
+        unset($_SESSION['rate']);
+        unset($_SESSION['grandTotal']);
+        unset($_SESSION['roomTotal']);
+        unset($_SESSION['roomIds']);
+        unset($_SESSION['payment_method']);
+        $ref_id = '';
+        $balance = '';
+        
         //echo "New record created successfully in booking_tbl<br>";
         echo '<script type="text/javascript">';
         echo 'window.location.href = "booking-process3.php";';
