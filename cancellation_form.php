@@ -6,8 +6,6 @@
         echo "Connection failed: " . $e->getMessage();
     }   
     session_start();
-    include "role_access.php";
-    checkAccess('user');
     $userId = $_SESSION['user_id']; 
 
 ?>
@@ -18,7 +16,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -148,6 +148,20 @@
         padding: 8px 16px;
     }
 
+    .form-container {
+        background: #fff;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+    .form-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
     @media (max-width: 768px) {
         #main-content{
             padding: 0;
@@ -205,34 +219,36 @@
 </nav>
 
 <div id="main-content" class="container mt-2">
-    <div class="chat-container">
-        <!-- Chat Header -->
-        <div class="chat-header">
-            <h3>Lanmar Resort</h3>
-            <span><i class="fa-solid fa-circle" style="color: #1ab106;"></i> Active now</span>
-        </div>
-
-        <!-- Chat Messages -->
-        <div class="chat-area" id="chat-area">
-            <div class="date-stamp">
-                <span>Today</span>
+    <div class="form-container">
+        <div class="form-header text-center">Cancellation Form</div>
+        <form action="process_cancellation.php" method="POST">
+            <div class="mb-3">
+                <label for="reservationId" class="form-label">Reservation ID</label>
+                <input type="text" class="form-control" id="reservationId" name="reservation_id" placeholder="Enter your reservation ID" required>
             </div>
-        </div>
-
-        <!-- Chat Footer -->
-        <div class="chat-footer">
-            <textarea id="message-input" placeholder="Type a message..."></textarea>
-            <button id="send-message">Send</button>
-        </div>
+            <div class="mb-3">
+                <label for="cancellationDate" class="form-label">Date</label>
+                <input type="date" class="form-control" id="cancellationDate" name="cancellation_date" required>
+            </div>
+            <div class="mb-3">
+                <label for="cancellationTime" class="form-label">Time</label>
+                <input type="time" class="form-control" id="cancellationTime" name="cancellation_time" required>
+            </div>
+            <div class="mb-3">
+                <label for="cancellationReason" class="form-label">Reason for Cancellation</label>
+                <textarea class="form-control" id="cancellationReason" name="cancellation_reason" rows="4" placeholder="Please explain your reason..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger w-100">Submit Cancellation</button>
+        </form>
     </div>
 </div>
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/bootstrap/js/all.min.js"></script>
-<script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -247,117 +263,6 @@
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
     });
-
-    $(document).ready(function () {
-    const userId = '<?php echo $userId; ?>';
-    let isAutoScrollEnabled = true; // Flag to control auto-scroll
-
-    function fetchMessages() {
-        $.ajax({
-            url: 'fetch_messages.php',
-            method: 'GET',
-            data: { user_id: userId },
-            success: function (response) {
-                const messages = JSON.parse(response);
-                let chatHTML = '';
-                let lastDate = null;
-                const today = new Date().toISOString().split('T')[0]; 
-
-                messages.forEach((msg, index) => {
-                    const [messageDate, messageTime] = msg.timestamp.split(' '); 
-                
-                    // Convert time to 12-hour format
-                    const timeParts = messageTime.split(':');
-                    let hours = parseInt(timeParts[0]);
-                    const minutes = timeParts[1];
-                    const ampm = hours >= 12 ? 'PM' : 'AM';
-                    hours = hours % 12 || 12; 
-                    const formattedTime = `${hours}:${minutes} ${ampm}`; 
-                    
-                    // Check if the message date is different from the last processed date
-                    if (messageDate !== lastDate) {
-                        lastDate = messageDate;
-
-                        // Display "Today" for today's messages, otherwise show the date
-                        const dateLabel = messageDate === today ? 'Today' : lastDate;
-                        chatHTML += `
-                            <div class="date-stamp">
-                                <span>${dateLabel}</span>
-                            </div>`;
-                    }
-
-                    // Add message content
-                    if (msg.role === 'admin') {
-                        chatHTML += `
-                            <div class="message received">
-                                <img src="https://via.placeholder.com/40" alt="Profile Picture">
-                                <div class="message-content">
-                                    ${msg.msg}
-                                    <span class="message-timestamp">${formattedTime}</span>
-                                </div>
-                            </div>`;
-                    } else {
-                        chatHTML += `
-                            <div class="message sent">
-                                <div class="message-content">
-                                    ${msg.msg}
-                                    <span class="message-timestamp">${formattedTime}</span>
-                                </div>
-                            </div>`;
-                    }
-                });
-
-                const chatArea = $('#chat-area');
-                const wasAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
-
-                chatArea.html(chatHTML);
-
-                if (isAutoScrollEnabled || wasAtBottom) {
-                    chatArea.scrollTop(chatArea[0].scrollHeight); // Scroll to bottom
-                }
-            }
-        });
-    }
-
-
-    setInterval(fetchMessages, 2000);
-
-    $('#send-message').click(function () {
-        const message = $('#message-input').val().trim();
-
-        if (message.length > 0) {
-            $.ajax({
-                url: 'send_message1.php',
-                method: 'POST',
-                data: { user_id: userId, message: message },
-                success: function (response) {
-                    const result = JSON.parse(response);
-                    if (result.success) {
-                        $('#message-input').val(''); // Clear input
-                        fetchMessages(); // Refresh chat
-                    } else {
-                        alert('Error sending message.');
-                    }
-                }
-            });
-        }
-    });
-
-    // Monitor scroll position to detect manual backreading
-    $('#chat-area').on('scroll', function () {
-        const chatArea = $(this);
-        const isAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
-
-        if (isAtBottom) {
-            isAutoScrollEnabled = true; 
-        } else {
-            isAutoScrollEnabled = false; 
-        }
-    });
-
-    fetchMessages();
-});
-
 
 </script>
 </body>

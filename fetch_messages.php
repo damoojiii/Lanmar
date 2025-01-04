@@ -9,7 +9,7 @@ try {
         SELECT 
             m.msg, 
             m.timestamp, 
-            u.role 
+            u.role, u.profile 
         FROM message_tbl m
         JOIN users u ON m.sender_id = u.user_id
         WHERE ((u.role = 'admin' AND m.receiver_id = :userId) 

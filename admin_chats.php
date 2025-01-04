@@ -10,14 +10,19 @@
     checkAccess('admin');
     $userId = $_GET['user_id']; 
 
+    $updateQuery = "UPDATE message_tbl SET is_read = 1 WHERE sender_id = :sender_id";
+    $updateStmt = $pdo->prepare($updateQuery);
+    $updateStmt->execute([':sender_id' => $userId]);
+
+
     $stmt = $pdo->prepare("SELECT firstname, lastname, status FROM users WHERE user_id = :userId");
     $stmt->execute([':userId' => $userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user) {
-        $firstname = htmlspecialchars($user['firstname']);
-        $lastname = htmlspecialchars($user['lastname']);
-        $status = $user['status'] == 1 ? 'Active Now' : 'Offline';
+        $firstname = htmlspecialchars(ucwords($user['firstname']));
+        $lastname = htmlspecialchars(ucwords($user['lastname']));
+        $status = $user['status'] == 1 ? '<i class="fa-solid fa-circle" style="color: #1ab106;"></i> Active Now' : '<i class="fa-solid fa-circle" style="color: #aea7a7;"></i> Offline';
     } else {
         // Default values if user is not found
         $firstname = 'User';
@@ -166,6 +171,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-left: 250px;
         }
 
         .user {
@@ -375,6 +381,7 @@
 
         .user-list {
             justify-content: space-evenly;
+            margin-left: 0;
         }
 
         .user {
@@ -452,9 +459,27 @@
     </div>
 
     <div class="contact-container">
-        <div class="user-list">
+    <div class="user-list">
         <?php
-        $userlist = $pdo->query("SELECT * FROM users WHERE role = 'user'");
+        $userlist = $pdo->query("
+            SELECT 
+                u.user_id, 
+                u.firstname, 
+                u.lastname, 
+                u.role, 
+                u.profile, 
+                MAX(m.timestamp) AS max_timestamp, 
+                MAX(CASE WHEN m.sender_id = u.user_id THEN m.msg END) AS latest_msg, 
+                COUNT(CASE WHEN m.is_read = 0 AND m.sender_id = u.user_id THEN 1 END) AS unread_count
+            FROM users u
+            LEFT JOIN message_tbl m 
+                ON u.user_id = m.sender_id OR u.user_id = m.receiver_id
+            WHERE u.role = 'user'
+            GROUP BY u.user_id
+            ORDER BY max_timestamp DESC
+            LIMIT 10
+        ");
+
         $users = $userlist->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($users as $user) {
@@ -462,10 +487,12 @@
             <a href="admin_chats.php?user_id=<?php echo $user['user_id']; ?>" class="user-link">
                 <div class="user">
                     <div class="user-pic">
-                        <img src="https://via.placeholder.com/40" alt="<?php echo htmlspecialchars($user['firstname']); ?>">
-                        <span class="new-message"><i class="fas fa-circle fa-beat"></i></span>
+                        <img src="<?php echo $user['profile']; ?>" alt="<?php echo htmlspecialchars(ucwords($user['firstname'])); ?>">
+                        <?php if ($user['unread_count'] > 0) : ?>
+                            <span class="new-message"><i class="fas fa-circle fa-beat"></i></span>
+                        <?php endif; ?>
                     </div>
-                    <div class="user-name"><?php echo htmlspecialchars($user['firstname'] . " " . $user['lastname']); ?></div>
+                    <div class="user-name"><?php echo htmlspecialchars(ucwords($user['firstname'] . " " . $user['lastname'])); ?></div>
                 </div>
             </a>
             <?php
@@ -575,7 +602,7 @@
                             } else {
                                 chatHTML += `
                                     <div class="message received">
-                                        <img src="https://via.placeholder.com/40" alt="Profile Picture">
+                                        <img src="${msg.profile}" alt="Profile Picture">
                                         <div class="message-content">
                                             ${msg.msg}
                                             <span class="message-timestamp">${formattedTime}</span>

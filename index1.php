@@ -34,22 +34,23 @@
             gap: 5rem;
         }
         .inputs label {
-            min-width: 120px; /* Ensures consistent label width */
-            margin-bottom: 0; /* Removes bottom margin to align horizontally */
+            font-weight: bold; /* Emphasize labels */
+            margin-bottom: 0.5rem; /* Add space below labels */
+            display: block; /* Ensure labels are above inputs */
         }
 
         .inputs .form-control {
-            width: auto;
-            flex-grow: 1; /* Allows input to take remaining space */
+            width: 100%; /* Make inputs take full width */
+            flex-grow: unset; /* Remove auto-grow */
         }
 
-        .inputs .mb-3 {
-            margin-bottom: 10px; /* Adds space between rows */
+        /* .inputs .mb-3 {
+            margin-bottom: 10px;
         }
 
         .form-label.me-3 {
             margin-bottom: 0;
-        }
+        } */
 
         .legend{
             display: flex;
@@ -263,32 +264,38 @@
 <!-- Main content -->
 <div id="main-content" class="mt-4 pt-3">
     <form action="booking-process1.php" method="GET">
-        <div class="row inputs mb-4" style="max-width: 95%;">
-            <div class="col-md-6 mb-3 d-flex align-items-center" >
-                <label for="date-in" class="form-label me-3">Check-in Date:</label>
+        <div class="row inputs mb-3 mx-2" style="max-width: 95%;">
+            <!-- Check-in Date -->
+            <div class="col-md-2 mb-3">
+                <label for="date-in" class="form-label">Check-in Date:</label>
                 <input id="date-in" class="form-control" type="text" placeholder="Select a date" name="dateIn" readonly required>
             </div>
-            <div class="col-md-6 mb-3 d-flex align-items-center">
-                <label for="date-out" class="form-label me-3">Check-out Date:</label>
+            <!-- Check-out Date -->
+            <div class="col-md-2 mb-3">
+                <label for="date-out" class="form-label">Check-out Date:</label>
                 <input id="date-out" class="form-control" type="text" placeholder="Select check-out date" name="dateOut" readonly required>
             </div>
-            <div class="col-md-6 mb-3 d-flex align-items-center">
-                <label for="checkin-time" class="form-label me-3">Check-In Time:</label>
-                <select id="checkin-time" name="checkin" class="form-control" style="width: 100px;" required>
+            <!-- Check-In Time -->
+            <div class="col-md-2 mb-3">
+                <label for="checkin-time" class="form-label">Check-In Time:</label>
+                <select id="checkin-time" name="checkin" class="form-control" required>
                     <option value="" hidden selected>Select time</option>
                 </select>
             </div>
-            <div class="col-md-6 mb-3 d-flex align-items-center">
-                <label for="checkout-time" class="form-label me-3">Check-Out Time:</label>
-                <select id="checkout-time" name="checkout" class="form-control" style="width: 100px;" required>
+            <!-- Check-Out Time -->
+            <div class="col-md-2 mb-3">
+                <label for="checkout-time" class="form-label">Check-Out Time:</label>
+                <select id="checkout-time" name="checkout" class="form-control" required>
                     <option value="" hidden selected>Select check-in time first</option>
                 </select>
             </div>
-            <div class="col-md-6 mb-3 d-flex align-items-center">
-                <label class="form-label me-3">Total No. of Hours:</label>
-                <input type="text" name="numhours" class="form-control" readonly style="width: 10px;" required>
+            <!-- Total No. of Hours -->
+            <div class="col-md-2 mb-3">
+                <label class="form-label">Total No. of Hours:</label>
+                <input type="text" name="numhours" class="form-control" readonly required>
             </div>
         </div>
+
 
         <div class="container">
             <div class="calendar">

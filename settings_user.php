@@ -79,21 +79,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             color: #000 !important;
         }
 
-        @media (max-width: 768px) {
-            #sidebar {
-                position: absolute;
-                transform: translateX(-100%);
-            }
-            
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
-            .main-section {
-                margin-left: 0; /* Remove margin on mobile */
-            }
-        }
-
         .flex-container {
             display: flex;
             gap: 20px;
@@ -183,6 +168,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .main-section {
             margin-left: 250px; /* Add margin to align with sidebar */
             padding: 20px;
+        }
+        @media (max-width: 768px) {
+            #sidebar {
+                position: absolute;
+                transform: translateX(-100%);
+            }
+            
+            #sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
+            }
+        }
+        @media (max-width: 480px) {
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
+            }
         }
     </style>
 </head>
