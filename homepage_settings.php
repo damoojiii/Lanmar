@@ -1,9 +1,6 @@
 <?php
-
+// Start the session at the very beginning of the file
 session_start();
-include "role_access.php";
-checkAccess('admin');
-
 
 include("connection.php");
 
@@ -46,30 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
         $stmt->close();
     } else {
         $error_message = "Error uploading the file.";
-    }
-}
-
-// Handle gallery image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
-    $galleryImage = $_FILES['gallery_image'];
-    $galleryImageName = basename($galleryImage['name']);
-    $galleryTargetFilePath = $targetDir . $galleryImageName; // Use the same $targetDir
-    $galleryImageType = $galleryImage['type'];
-    $galleryCaption = $_POST['gallery_caption']; // Get the caption from the form
-
-    if (move_uploaded_file($galleryImage['tmp_name'], $galleryTargetFilePath)) {
-        $galleryStmt = $conn->prepare("INSERT INTO gallery (image, image_type, caption) VALUES (?, ?, ?)");
-        $galleryStmt->bind_param("sss", $galleryTargetFilePath, $galleryImageType, $galleryCaption); 
-
-        if ($galleryStmt->execute()) {
-            $gallery_success_message = "Gallery image uploaded successfully.";
-        } else {
-            $gallery_error_message = "Error uploading gallery image in the database: " . $galleryStmt->error;
-        }
-
-        $galleryStmt->close();
-    } else {
-        $gallery_error_message = "Error uploading the gallery file.";
     }
 }
 ?>
@@ -149,27 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             margin-bottom: 2px;
         }
 
-        #sidebar .collapse {
-            transition: height 0.3s ease-out, opacity 0.3s ease-out;
-        }
-        #sidebar .collapse.show {
-            height: auto !important;
-            opacity: 1;
-        }
-        #sidebar .collapse:not(.show) {
-            height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-        .caret-icon .fa-caret-down {
-            display: inline-block;
-            font-size: 20px;
-        }
-        .navcircle{
-            font-size: 7px;
-            text-align: justify;
-        }
-
         #sidebar .nav-link:hover, #sidebar .nav-link.active {
             background-color: #fff !important;
             color: #000 !important;
@@ -182,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 
         .dropdown-item {
             color: #fff !important;
-            margin-bottom: 10px;
         }
 
         .dropdown-item:hover{
@@ -395,16 +346,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             <li class="nav-item">
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Manage Reservations
-                    <span class="caret-icon">
-                        <i class="fa-solid fa-caret-down"></i>
-                    </span>
                 </a>
-                <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="dropdown-item" href=".php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -414,10 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                 <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
             </li>
             <li>
-                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
-            </li>
-            <li>
-                <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
+                <a href="feedback.php" class="nav-link text-white">Feedback</a>
             </li>
             <li>
                 <a href="reports.php" class="nav-link text-white">Reports</a>
@@ -425,18 +370,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Settings
-                    <span class="caret-icon">
-                        <i class="fa-solid fa-caret-down"></i>
-                    </span>
                 </a>
-                <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
+                <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
                     <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>
@@ -448,8 +389,102 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
         <div class="flex-container">
             <div class="main-content">
                 <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
-                <div class="row"> <!-- Add this row container -->
-                    <div class="col-md-6"> <!-- First column -->
+                
+                <div class="tab-container">
+                    <a href="homepage_settings.php">
+                        <div class="tab active" id="roomInfoTab">
+                            Section 1
+                        </div>
+                    </a>
+                    <a href="homepage_section3.php">
+                        <div class="tab " id="archiveInfoTab">
+                            Section 2
+                        </div>
+                    </a>
+                    <a href="homepage_section2.php">
+                        <div class="tab" id="facilityInfoTab">
+                            Section 3
+                        </div>
+                    </a>
+                    <a href="homepage_section4.php">
+                        <div class="tab" id="facilityInfoTab">
+                            Section 4
+                        </div>
+                    </a>
+                    <a href="section_5.php">
+                        <div class="tab" id="facilityInfoTab">
+                            Section 5
+                        </div>
+                    </a>
+                    <a href="section_6.php">
+                        <div class="tab" id="facilityInfoTab">
+                            Section 6
+                        </div>
+                    </a>
+                </div>
+                <style>
+                    .tab-container {
+                        display: flex;
+                        justify-content: center;
+                        gap: 10px;
+                        flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
+                    }
+
+                    .tab-container a {
+                        text-decoration: none;
+                        flex: 1 1 auto;
+                        min-width: 140px;
+                    }
+
+                    .tab-container .tab {
+                        padding: 8px 30px;
+                        text-align: center;
+                        cursor: pointer;
+                        border-radius: 5px;
+                        transition: 0.3s;
+                        font-size: 14px;
+                        background-color: #1c2531;
+                        color: white;
+                        width: 100%;
+                    }
+
+                    .tab-container .tab.active {
+                        background-color: #00968f;
+                    }
+
+                    .tab:hover {
+                        background-color: #0175FE;
+                    }
+
+                    /* Mobile-specific styles */
+                    @media (max-width: 768px) {
+                        .tab-container {
+                            gap: 8px;
+                            padding: 0 10px;
+                        }
+
+                        .tab-container a {
+                            min-width: 120px;
+                        }
+
+                        .tab-container .tab {
+                            padding: 8px 15px;
+                            font-size: 12px;
+                        }
+                    }
+
+                    @media (max-width: 480px) {
+                        .tab-container a {
+                            min-width: 100px;
+                            flex: 1 1 calc(50% - 8px);
+                        }
+                    }
+                </style>
+                <div class="flex-container">
+                    <!-- Sidebar -->
+                    <!-- Main Content -->
+                    <div class="main-content">
+                        <!-- Main content goes here -->
                         <div class="settings-form-container">
                             <h2 class="text-center mb-4">Change Background Image</h2>
                             <?php if ($success_message): ?>
@@ -470,32 +505,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                             </form>
                         </div>
                     </div>
-                    <div class="col-md-6"> <!-- Second column -->
-                        <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Upload Gallery Image</h2>
-                            <?php if ($gallery_success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $gallery_success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($gallery_error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $gallery_error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group text-center">
-                                    <label for="gallery_image" class="mb-2">Upload New Gallery Image:</label>
-                                    <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Gallery Image">
-                                </div>
-                                <div class="form-group text-center">
-                                    <label for="gallery_caption" class="mb-2">Caption:</label>
-                                    <input type="text" name="gallery_caption" id="gallery_caption" class="form-control" placeholder="Enter caption for gallery image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
                 </div>
+
+
+
             </div>
         </div>
     </div>
@@ -506,30 +519,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 </body>
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
-        sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
+<style>
+      .tab-container {
+        display: flex;
+        margin-top: 5px;
+        margin-bottom: 1px;
     }
-    
-    document.querySelectorAll('.collapse').forEach(collapse => {
-        collapse.addEventListener('show.bs.collapse', () => {
-            collapse.style.height = collapse.scrollHeight + 'px';
-        });
-        collapse.addEventListener('hidden.bs.collapse', () => {
-            collapse.style.height = '0px';
-        });
-    });
-</script>
+
+    .tab-container .tab.active {
+        background-color: #01968F;
+        color: white;
+    }
+
+    .tab-container .tab {
+        padding: 8px 29.8px;
+        text-align: center;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 10px 10px 0 0;
+        margin-right: 21px;
+        transition: 0.3s;
+        background-color: white;
+        font-size: 12px;
+        background-color: #1c2531;
+        color: white;
+        border-bottom: 1px solid white;
+        text-decoration: none;
+    }
+
+    .tab:hover {
+        background-color: #0175FE;
+        color: white;
+    }
+</style>
 </html>
