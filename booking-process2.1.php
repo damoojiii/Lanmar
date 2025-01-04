@@ -344,6 +344,7 @@
     $roomTotal = $_SESSION['roomTotal'];
     $roomIds = $_SESSION['roomIds'] ?? '';
     $paymode = $_SESSION['payment_method'] ?? '';
+    $status = 'Pending';
 
     // Check if the form is submitted
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && basename($_SERVER['PHP_SELF']) == 'booking-process2.1.php') {
@@ -434,8 +435,8 @@
 
     
         // Insert into booking_tbl last
-        $booking_sql = "INSERT INTO booking_tbl ( dateIn, dateOut, checkin, checkout, hours, reservation_id, pax_id, bill_id, additionals) 
-                        VALUES ( :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, 'None')";
+        $booking_sql = "INSERT INTO booking_tbl ( dateIn, dateOut, checkin, checkout, hours, reservation_id, pax_id, bill_id, additionals, status) 
+                        VALUES ( :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, 'None', :status)";
         $stmt = $pdo->prepare($booking_sql);
         $stmt->execute([
             ':dateIn' => $dateIn, 
@@ -446,6 +447,7 @@
             ':res_type' => $reservationType,
             ':pax_id' => $pax_id, 
             ':bill_id' => $bill_id,
+            ':status' => $status
         ]);
         //echo "New record created successfully in booking_tbl<br>";
         echo '<script type="text/javascript">';

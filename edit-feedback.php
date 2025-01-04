@@ -13,11 +13,22 @@ checkAccess('user');
 
 $userId = $_SESSION['user_id'];
 
-// Fetch user's feedback
-$query = "SELECT feedback_id, rating, comment, created_at, updated_at FROM feedback_tbl WHERE user_id = :user_id LIMIT 1";
+if (!isset($_GET['id'])) {
+    header("Location: my-feedback.php");
+    exit;
+}
+$feedbackId = $_GET['id'];
+
+// Fetch the existing feedback
+$query = "SELECT rating, comment FROM feedback_tbl WHERE feedback_id = :feedback_id AND user_id = :user_id LIMIT 1";
 $stmt = $pdo->prepare($query);
-$stmt->execute([':user_id' => $userId]);
+$stmt->execute([':feedback_id' => $feedbackId, ':user_id' => $userId]);
 $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$feedback) {
+    echo "Feedback not found.";
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -124,35 +135,6 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
         .feedback-content {
             flex: 1;
         }
-
-        .feedback-card p {
-            margin: 0 0 10px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .feedback-card button {
-            margin-left: 15px;
-        }
-
-        .rating-star {
-            width: 24px;
-            height: 24px;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-
-        /* No Feedback Message */
-        .no-feedback {
-            text-align: center;
-            font-size: 16px;
-            color: #555;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
         
 
         @media (max-width: 768px) {
@@ -204,44 +186,11 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
                 margin-bottom: 10px;
             }
 
-            .rating-star {
-                width: 20px;
-                height: 20px;
-            }
-
-            .feedback-card button {
-                align-self: stretch;
-                margin-top: 10px;
-                text-align: center;
-            }
-
-            .feedback-card p {
-                font-size: 14px;
-            }
-
-            .no-feedback {
-                font-size: 14px;
-                padding: 15px;
-            }
         }
         @media (max-width: 480px) {
             .rating-star {
                 width: 18px;
                 height: 18px;
-            }
-
-            .feedback-card p {
-                font-size: 12px;
-            }
-
-            .feedback-card button {
-                font-size: 14px;
-                padding: 8px;
-            }
-
-            .no-feedback {
-                font-size: 12px;
-                padding: 10px;
             }
         }
     </style>
@@ -287,64 +236,36 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
     <div class="feedback-page">
         <!-- Feedback Form -->
         <div class="feedback-form">
-            <h3>Give Us Your Feedback</h3>
-            <form id="feedbackForm">
+            <h3>Edit Your Feedback</h3>
+            <form id="feedbackForm" method="POST" action="update-feedback.php">
+                <!-- Pass the feedback ID -->
+                <input type="hidden" name="feedback_id" value="<?= htmlspecialchars($feedbackId); ?>">
+
                 <div class="rating-section">
                     <label>Rate Us:</label>
                     <div class="stars">
-                        <img src="font/star-regular.svg" data-value="1" alt="1 Star">
-                        <img src="font/star-regular.svg" data-value="2" alt="2 Stars">
-                        <img src="font/star-regular.svg" data-value="3" alt="3 Stars">
-                        <img src="font/star-regular.svg" data-value="4" alt="4 Stars">
-                        <img src="font/star-regular.svg" data-value="5" alt="5 Stars">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <img 
+                                src="font/<?= $i <= $feedback['rating'] ? 'star-solid.svg' : 'star-regular.svg'; ?>" 
+                                data-value="<?= $i; ?>" 
+                                alt="<?= $i; ?> Star" 
+                                class="rating-star">
+                        <?php endfor; ?>
                     </div>
-                    <p class="rating-meaning">Pick a star</p>
-                    <input type="hidden" id="ratingValue" name="rating" value="">
+                    <p class="rating-meaning">
+                        <?= ['Not Good', 'Bad', 'Okay', 'Very Good', 'Amazing'][$feedback['rating'] - 1]; ?>
+                    </p>
+                    <input type="hidden" id="ratingValue" name="rating" value="<?= htmlspecialchars($feedback['rating']); ?>">
                 </div>
-
 
                 <div class="comment-section">
                     <label for="feedbackComment">Your Comments:</label>
-                    <textarea id="feedbackComment" rows="4" placeholder="Write your feedback here..."></textarea>
+                    <textarea id="feedbackComment" name="comment" rows="4" placeholder="Write your feedback here..."><?= htmlspecialchars($feedback['comment']); ?></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                <button type="submit" class="btn btn-primary">Update Feedback</button>
+                <a href="my-feedback.php" class="btn btn-secondary">Cancel</a>
             </form>
-        </div>
-
-        <div class="feedback-section">
-            <h2 class="section-title">My Feedback</h2>
-
-            <?php if ($feedback): ?>
-                <div class="feedback-card">
-                    <div class="feedback-content">
-                        <p><strong>Your Rating:</strong> 
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <img 
-                                    src="<?= $i <= $feedback['rating'] ? 'font/star-solid.svg' : 'font/star-regular.svg'; ?>" 
-                                    alt="<?= $i <= $feedback['rating'] ? 'Filled Star' : 'Empty Star'; ?>" 
-                                    class="rating-star">
-                            <?php endfor; ?>
-                            (<?= htmlspecialchars(
-                                $feedback['rating'] == 5 ? 'Amazing' : 
-                                ($feedback['rating'] == 4 ? 'Very Good' : 
-                                ($feedback['rating'] == 3 ? 'Okay' : 
-                                ($feedback['rating'] == 2 ? 'Bad' : 'Not Good')))); ?>)
-                        </p>
-                        <p><strong>Your Comment:</strong> <?= htmlspecialchars($feedback['comment']); ?></p>
-                        <?php if ($feedback['updated_at']): ?>
-                            <p><strong>Updated At:</strong> <?= date("F j, Y, g:i A", strtotime($feedback['updated_at'])); ?></p>
-                        <?php else: ?>
-                            <p><strong>Created At:</strong> <?= date("F j, Y, g:i A", strtotime($feedback['created_at'])); ?></p>
-                        <?php endif; ?>
-                    </div>
-                    <a href="edit-feedback.php?id=<?= htmlspecialchars($feedback['feedback_id']); ?>" class="btn btn-secondary btn-sm">Edit</a>
-                </div>
-            <?php else: ?>
-                <div class="no-feedback">
-                    <p>You have not submitted any feedback yet. Please provide your feedback to help us improve!</p>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -379,46 +300,20 @@ const ratingInput = document.querySelector('#ratingValue');
 
 const meanings = ['Not Good', 'Bad', 'Okay', 'Very Good', 'Amazing'];
 
+// Add click listeners to stars
 stars.forEach((star) => {
     star.addEventListener('click', () => {
         const rating = star.getAttribute('data-value');
         ratingInput.value = rating;
 
-        // Update stars
+        // Update star visuals
         stars.forEach((s, index) => {
-            if (index < rating) {
-                s.src = 'font/star-solid.svg'; // Shaded star
-            } else {
-                s.src = 'font/star-regular.svg'; // Unshaded star
-            }
+            s.src = index < rating ? 'font/star-solid.svg' : 'font/star-regular.svg';
         });
 
-        // Update meaning
+        // Update rating meaning
         ratingMeaning.textContent = meanings[rating - 1];
     });
-});
-
-document.querySelector('#feedbackForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent default form submission
-
-    const formData = new FormData();
-    formData.append('rating', document.querySelector('#ratingValue').value);
-    formData.append('comment', document.querySelector('#feedbackComment').value);
-
-    fetch('submit_feedback.php', {
-        method: 'POST',
-        body: formData,
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                alert(data.message); // Display success message
-                location.reload();  // Reload the page to update feedback display
-            } else {
-                alert(data.message); // Display error message
-            }
-        })
-        .catch(error => console.error('Error:', error));
 });
 
 </script>

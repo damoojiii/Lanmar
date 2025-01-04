@@ -10,6 +10,25 @@
     include "role_access.php";
     checkAccess('admin');
 
+    // Query featured feedbacks
+    $featuredQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
+    u.firstname, u.lastname 
+    FROM feedback_tbl f
+    JOIN users u ON f.user_id = u.user_id
+    WHERE f.is_featured = 1
+    ORDER BY f.created_at DESC";
+    $featuredStmt = $pdo->query($featuredQuery);
+    $featuredFeedbacks = $featuredStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Query non-featured feedbacks
+    $nonFeaturedQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
+    u.firstname, u.lastname 
+    FROM feedback_tbl f
+    JOIN users u ON f.user_id = u.user_id
+    WHERE f.is_featured = 0
+    ORDER BY f.created_at DESC";
+    $nonFeaturedStmt = $pdo->query($nonFeaturedQuery);
+    $nonFeaturedFeedbacks = $nonFeaturedStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -417,74 +436,58 @@
 
     <div id="main-content" class="p-3">
         <div class="feedback-page">
-            <h2>Selected Feedbacks</h2>
+            <!-- Featured Feedbacks Section -->
+            <h2>Selected Featured Feedbacks</h2>
             <div class="feedback-container">
-                <!-- Feedback Card -->
-                <div class="feedback-card selected">
-                    <h4>Juan Dela Cruz</h4>
-                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
-                    <p><strong>Amazing</strong></p>
-                    <p class="feedback-text">
-                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
-                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
-                        consectetur ducimus at provident totam aut sunt maxime.
-                    </p>
-                    <div class="button-container">
-                        <button class="btn btn-secondary btn-sm">Remove</button>
-                    </div>
-                </div>
-                <!-- Add more cards as needed -->
-                <div class="feedback-card selected">
-                    <h4>Juan Dela Cruz</h4>
-                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
-                    <p><strong>Amazing</strong></p>
-                    <p class="feedback-text">
-                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
-                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
-                        consectetur ducimus at provident totam aut sunt maxime.
-                    </p>
-                    <div class="button-container">
-                        <button class="btn btn-secondary btn-sm">Remove</button>
-                    </div>
-                </div>
-                <div class="feedback-card selected">
-                    <h4>Juan Dela Cruz</h4>
-                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
-                    <p><strong>Amazing</strong></p>
-                    <p class="feedback-text">
-                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
-                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
-                        consectetur ducimus at provident totam aut sunt maxime.
-                    </p>
-                    <div class="button-container">
-                        <button class="btn btn-secondary btn-sm">Remove</button>
-                    </div>
-                </div>
+                <?php if (!empty($featuredFeedbacks)): ?>
+                    <?php foreach ($featuredFeedbacks as $feedback): ?>
+                        <div class="feedback-card selected">
+                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
+                            <div class="rating">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <p><strong><?= ['Not Good', 'Bad', 'Okay', 'Very Good', 'Amazing'][$feedback['rating'] - 1]; ?></strong></p>
+                            <p class="feedback-text"><?= htmlspecialchars($feedback['comment']); ?></p>
+                            <div class="button-container">
+                                <button class="btn btn-secondary btn-sm" onclick="updateFeature(<?= $feedback['feedback_id']; ?>, 0)">Remove</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No featured feedbacks added yet.</p>
+                <?php endif; ?>
             </div>
 
             <hr class="feedback-line"/>
 
+            <!-- Non-Featured Feedbacks Section -->
             <h2>Feedbacks</h2>
             <div class="feedback-container">
-                <!-- Feedback Card -->
-                <div class="feedback-card">
-                    <h4>Juan Dela Cruz</h4>
-                    <div class="rating"><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i><i class="fa-solid fa-star" style="color: #FFD43B;"></i></div>
-                    <p><strong>Amazing</strong></p>
-                    <p class="feedback-text">
-                        Lorem ipsum dolor sit amet. Vel minus iste eos ullam dolor aut provident illum! 
-                        Aut culpa officiis eos cupiditate omnis vel autem eligendi est omnis maiores et 
-                        consectetur ducimus at provident totam aut sunt maxime.
-                    </p>
-                    <div class="button-container">
-                        <button class="btn btn-primary btn-sm">Add</button>
-                    </div>
-                    
-                </div>
-                <!-- Add more cards as needed -->
+                <?php if (!empty($nonFeaturedFeedbacks)): ?>
+                    <?php foreach ($nonFeaturedFeedbacks as $feedback): ?>
+                        <div class="feedback-card">
+                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
+                            <div class="rating">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <p><strong><?= ['Not Good', 'Bad', 'Okay', 'Very Good', 'Amazing'][$feedback['rating'] - 1]; ?></strong></p>
+                            <p class="feedback-text"><?= htmlspecialchars($feedback['comment']); ?></p>
+                            <div class="button-container">
+                                <button class="btn btn-primary btn-sm" onclick="updateFeature(<?= $feedback['feedback_id']; ?>, 1)">Add</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No feedbacks found.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
@@ -507,6 +510,23 @@
             mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
             header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
         }
+    }
+    function updateFeature(feedbackId, isFeatured) {
+        fetch('update-feature.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ feedback_id: feedbackId, is_featured: isFeatured })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Feedback updated successfully!');
+                location.reload(); // Reload the page to reflect changes
+            } else {
+                alert('Failed to update feedback. Please try again.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
 </script>
 </body>

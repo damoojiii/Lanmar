@@ -4,7 +4,7 @@
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $dbname = "lanmar_db";
+    $dbname = "lanmartest";
 
     $con = new mysqli($servername, $username, $password, $dbname);
 
