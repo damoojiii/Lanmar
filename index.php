@@ -21,6 +21,19 @@ if ($resultGallery->num_rows > 0) {
         $galleryImages[] = $row['image'];
     }
 }
+  // Fetch descriptions from the database
+$sqlDescriptions = "SELECT description, description_2 FROM about LIMIT 1"; 
+$resultDescriptions = $conn->query($sqlDescriptions);
+$descriptions = [];
+
+  if ($resultDescriptions->num_rows > 0) {
+      $row = $resultDescriptions->fetch_assoc();
+      $descriptions['description'] = $row['description'];
+      $descriptions['description_2'] = $row['description_2'];
+  } else {
+      $descriptions['description'] = "Default description 1 if not found.";
+      $descriptions['description_2'] = "Default description 2 if not found.";
+  }
 
 ?>
 <!DOCTYPE html>
@@ -197,6 +210,93 @@ if ($resultGallery->num_rows > 0) {
       height: 70vh;
       object-fit: cover;
     }
+
+    .room-slideshow-container {
+        position: relative;
+        max-width: 1200px;
+        margin: auto;
+        background: white;
+        padding: 5px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .room-slide {
+        display: none;
+        padding: 5px;
+    }
+
+    .room-prev, .room-next {
+        cursor: pointer;
+        position: absolute;
+        top: 50%;
+        width: auto;
+        padding: 16px;
+        margin-top: -22px;
+        color: #333;
+        font-weight: bold;
+        font-size: 24px;
+        border-radius: 0 3px 3px 0;
+        user-select: none;
+        background-color: rgba(255,255,255,0.8);
+        transition: 0.3s ease;
+    }
+
+    .room-next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .room-prev:hover, .room-next:hover {
+        background-color: rgba(0,0,0,0.8);
+        color: white;
+    }
+
+    .room-dot {
+        cursor: pointer;
+        height: 12px;
+        width: 12px;
+        margin: 0 5px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+
+    .room-dot.active, .room-dot:hover {
+        background-color: #717171;
+    }
+
+    .fade {
+        animation-name: fade;
+        animation-duration: 4s;
+    }
+
+    @keyframes fade {
+        from {opacity: .1}
+        to {opacity: 1}
+    }
+
+    .room-description {
+        padding: 0 10px;
+    }
+
+    .room-description h3 {
+        margin: 0 0 5px 0;
+    }
+
+    .room-description p {
+        margin: 0 0 5px 0;
+    }
+
+    .room-features {
+        margin: 5px 0;
+        padding: 0;
+    }
+
+    .room-dots {
+        margin-top: 5px;
+    }
   </style>
 
   </style>
@@ -278,10 +378,10 @@ if ($resultGallery->num_rows > 0) {
             <div class="about-content">
               <h2 class="text-center mb-4">About Our Resort</h2>
               <p style="text-indent: 2em; text-align: justify;">
-                Welcome to our luxurious resort, where tranquility meets adventure. Nestled in a picturesque location, our resort offers a perfect blend of comfort, elegance, and natural beauty. Whether you're seeking a romantic getaway, a family vacation, or a solo retreat, we have something for everyone. Our carefully curated experiences cater to diverse tastes, ensuring that each guest finds their own slice of paradise within our grounds. From serene spa treatments to exhilarating outdoor activities, every moment at our resort is designed to create lasting memories and provide the ultimate escape from the everyday.
+                <?php echo htmlspecialchars($descriptions['description']); ?>
               </p>
               <p style="text-indent: 2em; text-align: justify;">
-                Indulge in our world-class amenities, savor exquisite cuisine, and immerse yourself in the stunning surroundings. Our dedicated staff is committed to ensuring your stay is nothing short of extraordinary. Come and experience the magic of our resort - your paradise awaits!
+                <?php echo htmlspecialchars($descriptions['description_2']); ?>
               </p>
             </div>
           </div>
@@ -314,64 +414,60 @@ if ($resultGallery->num_rows > 0) {
 
     <!-- Room Showcase Section -->
     <section id="room-showcase" class="room-showcase section">
-      <div class="container">
-        <div class="section-header text-center">  
-          <h2>Featured Room</h2>
-          <p>Experience luxury and comfort in our signature accommodation</p>
-        </div>
+        <div class="container">
+            <div class="section-header text-center">  
+                <h2>Featured Rooms</h2>
+                <p>Experience luxury and comfort in our signature accommodations</p>
+            </div>
             
-        <div class="row gy-4 justify-content-center">
-          <div class="col-lg-6">
-            <div class="room-image">
-              <?php
-                // Add error reporting for debugging
-                error_reporting(E_ALL);
-                ini_set('display_errors', 1);
-
-                // Verify connection
-                if (!$conn) {
-                    die("Connection failed: " . mysqli_connect_error());
-                }
-
-                $query = "SELECT * FROM rooms WHERE is_featured = 1 LIMIT 1";
+            <div class="room-slideshow-container">
+                <?php
+                // Fetch all rooms
+                $query = "SELECT * FROM rooms ORDER BY room_id ASC";
                 $result = mysqli_query($conn, $query);
 
                 if (!$result) {
                     die('Query Error: ' . mysqli_error($conn));
                 }
 
-                $row = mysqli_fetch_assoc($result);
+                while ($row = mysqli_fetch_assoc($result)) {
+                    ?>
+                    <div class="room-slide fade">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <img src="uploads/<?php echo htmlspecialchars($row['image_path']); ?>" 
+                                     class="img-fluid" 
+                                     alt="<?php echo htmlspecialchars($row['room_name']); ?>">
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="room-description">
+                                    <h3><?php echo htmlspecialchars($row['room_name']); ?></h3>
+                                    <p><?php echo htmlspecialchars($row['description']); ?></p>
+                                    <ul class="room-features list-unstyled">
+                                        <li><i class="bi bi-check-circle"></i> Minimum Capacity: <?php echo htmlspecialchars($row['minpax']); ?> persons</li>
+                                        <li><i class="bi bi-check-circle"></i> Maximum Capacity: <?php echo htmlspecialchars($row['maxpax']); ?> persons</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
                 
-                if ($row) {
-                  $room_name = htmlspecialchars($row['room_name']);
-                  $image_path = htmlspecialchars($row['image_path']);
-                  echo '<img src="' . $image_path . '" class="img-fluid" alt="' . $room_name . '">';
-                } else {
-                  echo '<p>No featured room available at the moment.</p>';
-                  // Debug output
-                  echo '<p>Debug: No rows returned from query</p>';
+            </div>
+
+            <!-- Dots indicator -->
+            <div class="room-dots text-center">
+                <?php
+                mysqli_data_seek($result, 0); // Reset result pointer
+                $index = 0;
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo '<span class="room-dot" onclick="currentRoomSlide(' . ($index + 1) . ')"></span>';
+                    $index++;
                 }
-              ?>
+                ?>
             </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="room-description">
-              <?php
-              if (isset($row) && $row) {
-                echo '<h3>' . htmlspecialchars($row['room_name']) . '</h3>';
-                echo '<p>' . htmlspecialchars($row['description']) . '</p>';
-                echo '<ul class="room-features list-unstyled">';
-                echo '<li><i class="bi bi-check-circle"></i> Capacity: ' . htmlspecialchars($row['minpax']) . '-'. htmlspecialchars($row['maxpax']).' persons</li>';
-                echo '</ul>';
-              } else {
-                echo '<p>No featured room available at the moment.</p>';
-              }
-              ?>
-            </div>
-          </div>
         </div>
-      </div>
-    </section><!-- End Room Showcase Section -->
+    </section>
 
     
   </main>
@@ -469,9 +565,54 @@ if ($resultGallery->num_rows > 0) {
   // Optional: Automatic slideshow
   setInterval(() => {
     moveSlide(1);
-  }, 5000); // Change image every 5 seconds
+  }, 4000); // Show each slide for 4 seconds total
   </script>
 
+  <script>
+  let roomSlideIndex = 1;
+  let roomSlideInterval;
+
+  document.addEventListener('DOMContentLoaded', function() {
+      showRoomSlides(roomSlideIndex);
+      startRoomAutoSlide();
+  });
+
+  function startRoomAutoSlide() {
+      roomSlideInterval = setInterval(() => {
+          moveRoomSlide(1);
+      }, 4000); // Show each slide for 4 seconds total
+  }
+
+  function moveRoomSlide(n) {
+      clearInterval(roomSlideInterval);
+      showRoomSlides(roomSlideIndex += n);
+      startRoomAutoSlide();
+  }
+
+  function currentRoomSlide(n) {
+      clearInterval(roomSlideInterval);
+      showRoomSlides(roomSlideIndex = n);
+      startRoomAutoSlide();
+  }
+
+  function showRoomSlides(n) {
+      let slides = document.getElementsByClassName("room-slide");
+      let dots = document.getElementsByClassName("room-dot");
+      
+      if (n > slides.length) {roomSlideIndex = 1}
+      if (n < 1) {roomSlideIndex = slides.length}
+      
+      for (let i = 0; i < slides.length; i++) {
+          slides[i].style.display = "none";
+      }
+      for (let i = 0; i < dots.length; i++) {
+          dots[i].className = dots[i].className.replace(" active", "");
+      }
+      
+      slides[roomSlideIndex-1].style.display = "block";
+      dots[roomSlideIndex-1].className += " active";
+  }
+  </script>
 
 </body>
 
