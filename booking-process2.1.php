@@ -108,7 +108,7 @@
         .step.completed, .step .circle {
             background-color: lightgrey;
             border-color: white; 
-            color: black; 
+            color: white; 
         }
 
         .step::after {
@@ -129,6 +129,9 @@
 
         .step:not(.completed)::after {
             background-color: white;
+        }
+        .label-mobile{
+            display: none;
         }
     </style>
     <style>
@@ -157,10 +160,26 @@
         .summary p{
             text-align: justify;
         }
+        .btn-primary {
+            background-color: #003366;
+            border: none;
+            font-size: 1rem;
+        }
+        #reference{
+            width: 100%;
+        }
+        .submit-btn{
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .sabmit{
+            width: 50%;
+        }
     </style>
-    <style>
+<style>
         /* responsive */
-        @media (max-width: 1024px) {
+@media (max-width: 1024px) {
     nav {
         padding: 20px 50px;
         height: 70px;
@@ -198,22 +217,37 @@
         width: 60%;
         margin-right: 5%;
     }
+    .sabmit{
+        width: 100%;
     }
+}
 
     /* Mobile (Phone) - from 768px and below */
     @media (max-width: 768px) {
         nav {
             padding: 15px 30px;
-            height: 60px;
+            height: 70px !important;
         }
 
         nav a span {
             font-size: 80px;
         }
 
+        .logo-font{
+            font-size: 2rem !important;
+        }
+
         .progress-bar {
             flex-direction: row;
-            gap: 0.8rem;
+            gap: 0;
+            margin-left: 0px;
+            justify-content: space-evenly;
+        }
+
+        .progress-container {
+            height: 80px;
+            flex-direction: column;
+            justify-content: space-evenly;
         }
 
         .step .circle {
@@ -221,30 +255,49 @@
             height: 20px;
             font-size: 10px;
         }
-        .progress-bar span {
-            font-size: 12px; /* Further reduce the font size for mobile */
+        .step span{
+            display: none;
         }
-
+        .label-mobile{
+            display: block;
+            font-size: 13px;
+        }
+        .section-header{
+            text-align: center;
+        }
         .bill-message {
             flex-direction: column;
             gap: 20px;
             margin-left: 0;
             align-items: center;
         }
+        .qr{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
 
         .qrcode {
-            width: 200px;
-            height: 200px;
+            width: 300px;
+            height: 300px;
         }
 
         .summary {
             width: 90%;
             margin-right: 0;
+            margin-top: 15px;
         }
 
         input[type="file"], input[type="text"], button {
             width: 100%;
             font-size: 14px;
+        }
+        .submit-btn{
+            justify-content: flex-start;
+            width: 100%;
         }
     }
 
@@ -252,7 +305,7 @@
     @media (max-width: 430px) {
         nav {
             padding: 10px 20px;
-            height: 50px;
+            height: 60px;
         }
 
         nav a span {
@@ -265,12 +318,9 @@
         }
 
         .step .circle {
-            width: 20px;
-            height: 20px;
-            font-size: 10px;
-        }
-        .progress-bar span {
-            font-size: 10px; /* Set a smaller font size for very small screens */
+            width: 30px;
+            height: 30px;
+            font-size: 15px;
         }
 
         .bill-message {
@@ -278,11 +328,6 @@
             gap: 10px;
             margin-left: 0;
             align-items: center;
-        }
-
-        .qrcode {
-            width: 150px;
-            height: 150px;
         }
 
         .summary {
@@ -304,7 +349,7 @@
 <body>
 <nav>
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+        <span class="fs-2 logo-font">Lanmar Resort</span>
     </a>
 </nav>
 
@@ -327,6 +372,9 @@
             <div class="circle">4</div>
             <span>Payment & Receipt</span>
         </div>
+    </div>
+    <div class="label-mobile">
+        <span>Payment & Receipt</span>
     </div>
 </div>
 <?php
@@ -511,7 +559,9 @@
                     <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
                     <input type="text" name="ref_id" id="reference">
-                    <button type="submit">Submit</button>
+                    <div class="submit-btn">
+                        <button type="submit" class="btn btn-primary mt-1 sabmit">Submit</button>
+                    </div>
                 </form>
             </div>
             <div class="summary">

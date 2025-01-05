@@ -435,7 +435,7 @@ $descriptions = [];
                     <div class="room-slide fade">
                         <div class="row">
                             <div class="col-lg-6">
-                                <img src="uploads/<?php echo htmlspecialchars($row['image_path']); ?>" 
+                                <img src="<?php echo htmlspecialchars($row['image_path']); ?>" 
                                      class="img-fluid" 
                                      alt="<?php echo htmlspecialchars($row['room_name']); ?>">
                             </div>

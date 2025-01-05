@@ -64,7 +64,7 @@
             transform: translateY(-50%);
         }
         .progress-bar span {
-        font-size: 16px; /* Default font size for larger screens */
+            font-size: 16px; /* Default font size for larger screens */
         }
 
         .step {
@@ -95,7 +95,7 @@
         .step.completed, .step .circle {
             background-color: lightgrey;
             border-color: white; 
-            color: black; 
+            color: white; 
         }
 
         .step::after {
@@ -117,6 +117,9 @@
         .step:not(.completed)::after {
             background-color: white;
         }
+        .label-mobile{
+            display: none;
+        }
     </style>
     <style>
         .summary {
@@ -124,6 +127,21 @@
             color: #fff;
             width: 25%;
             height: 100%;
+        }
+        .collapse:not(.show){
+            display: block;
+        }
+
+        .expand-summary {
+            width: 100%;
+            background-color: #00214b;
+            text-align: center;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            cursor: pointer;
+            display: none;
         }
 
         .summary .section-header {
@@ -245,8 +263,15 @@
 
             .progress-bar {
                 flex-direction: row;
-                gap: 0.8rem;
+                gap: 0;
                 margin-left: 0px;
+                justify-content: space-evenly;
+            }
+
+            .progress-container {
+                height: 80px;
+                flex-direction: column;
+                justify-content: space-evenly;
             }
 
             .step .circle {
@@ -254,11 +279,32 @@
                 height: 20px;
                 font-size: 10px;
             }
-            .progress-bar span {
-                font-size: 12px; /* Further reduce the font size for mobile */
+            .step span{
+                display: none;
+            }
+            .label-mobile{
+                display: block;
+                font-size: 13px;
             }
             .container{
                 max-width: 100% !important;
+            }
+            .summary {
+                width: 100%;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                z-index: 1000;
+                transition: height 0.3s ease-in-out;
+                overflow: hidden;
+            }
+            .expand-summary{
+                display: block;
+                background-color: transparent;
+            }
+            .summary.collapse {
+                height: 60px; /* Initial height for collapsed state */
+                border-radius: 15px;
             }
             
         }
@@ -278,12 +324,9 @@
             }
 
             .step .circle {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
-            }
-            .progress-bar span {
-                font-size: 10px; /* Set a smaller font size for very small screens */
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
             }
             .container{
                 max-width: 100%;
@@ -349,6 +392,9 @@
             <div class="circle">4</div>
             <span>Payment & Receipt</span>
         </div>
+    </div>
+    <div class="label-mobile">
+        <span>Guest Information</span>
     </div>
 </div>
 <!-- phpsyntax for temp storage to process 3-->
@@ -434,7 +480,8 @@
                 </form>
                 </div>
 
-            <div class="col-md-6 p-3 summary">
+            <div class="col-md-6 p-3 summary collapse" id="bookingSummary">
+                <button class="btn btn-link expand-summary" onclick="toggleSummary()">View Booking Summary</button>
                 <div class="section-header">Booking Summary</div>
 
                 <div class="bg-light p-2 rounded mb-3">
@@ -493,7 +540,7 @@
                         <td><strong>Total:</strong></td>
                         <td class="text-end"><strong><?php
                         echo number_format($grandTotal ?? 0);
-?></strong></td>
+                        ?></strong></td>
                     </tr>
                     <tr>
                         <td><strong>Downpayment:</strong></td>
@@ -539,6 +586,21 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+
+function toggleSummary() {
+    const summarySection = document.getElementById('bookingSummary');
+    const expandButton = document.querySelector('.expand-summary');
+
+    if (summarySection.classList.contains('collapse')) {
+        summarySection.classList.remove('collapse');
+        summarySection.style.height = '100vh'; // Full screen height
+        expandButton.textContent = 'Close';
+    } else {
+        summarySection.classList.add('collapse');
+        summarySection.style.height = '60px'; // Reset to initial height
+        expandButton.textContent = 'View Booking Summary';
+    }
+}
 
 // Function to update the choice value
 function Choice() {

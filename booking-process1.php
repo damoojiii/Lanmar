@@ -92,7 +92,7 @@
         .step.completed, .step .circle {
             background-color: lightgrey;
             border-color: white; 
-            color: black; 
+            color: white; 
         }
 
         .step::after {
@@ -113,6 +113,9 @@
 
         .step:not(.completed)::after {
             background-color: white;
+        }
+        .label-mobile{
+            display: none;
         }
     </style>
     <style>
@@ -270,13 +273,15 @@
 
             .progress-bar {
                 flex-direction: row;
-                gap: 0.8rem;
+                gap: 0;
                 margin-left: 0px;
                 justify-content: space-evenly;
             }
 
             .progress-container {
-                height: 70px;
+                height: 80px;
+                flex-direction: column;
+                justify-content: space-evenly;
             }
 
             .step .circle {
@@ -284,8 +289,12 @@
                 height: 20px;
                 font-size: 10px;
             }
-            .progress-bar span {
-                font-size: 12px; /* Further reduce the font size for mobile */
+            .step span{
+                display: none;
+            }
+            .label-mobile{
+                display: block;
+                font-size: 13px;
             }
             #room-selection {
                 display: none !important;
@@ -339,12 +348,9 @@
             }
 
             .step .circle {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
-            }
-            .progress-bar span {
-                font-size: 10px; /* Set a smaller font size for very small screens */
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
             }
             .container{
                 max-width: 100%;
@@ -412,6 +418,9 @@
             <div class="circle">4</div>
             <span>Payment & Receipt</span>
         </div>
+    </div>
+    <div class="label-mobile">
+        <span>Room & Rates</span>
     </div>
 </div>
 
@@ -586,7 +595,7 @@
             </div>
                     
             <div class="col-md-6 p-3 summary collapse" id="bookingSummary">
-                <button class="btn btn-link expand-summary" onclick="toggleSummary()">Expand</button>
+                <button class="btn btn-link expand-summary" onclick="toggleSummary()">View Booking Summary</button>
                 <form action="booking-process2.php" method="$_GET" id="secondForm">
                     <div class="section-header">Booking Summary</div>
 
@@ -699,11 +708,11 @@ function toggleSummary() {
     if (summarySection.classList.contains('collapse')) {
         summarySection.classList.remove('collapse');
         summarySection.style.height = '100vh'; // Full screen height
-        expandButton.textContent = 'Collapse';
+        expandButton.textContent = 'Close';
     } else {
         summarySection.classList.add('collapse');
         summarySection.style.height = '60px'; // Reset to initial height
-        expandButton.textContent = 'Expand';
+        expandButton.textContent = 'View Booking Summary';
     }
 }
 
@@ -822,6 +831,12 @@ function showAllRooms() {
     document.querySelectorAll('.room-btn').forEach(button => {
         button.style.display = 'block'; 
     });
+
+    const roomDropdown = document.getElementById('room-selection-dropdown');
+    for (let i = 0; i < roomDropdown.options.length; i++) {
+        const option = roomDropdown.options[i];
+        option.style.display = 'block';
+    }
 }
 
 // Function to show only is_offered rooms

@@ -200,17 +200,39 @@
         .step:not(.completed)::after {
             background-color: white;
         }
+        .label-mobile{
+            display: none;
+        }
         @media (max-width: 768px) {
+            .progress-container.shifted{
+                margin-left: 250px;
+                transition: margin-left 0.3s ease;
+            }
+
             .progress-bar {
-                margin-left: 0px;
+                flex-direction: row;
                 gap: 0;
+                margin-left: 0px;
                 justify-content: space-evenly;
             }
+
             .progress-container {
-                height: 70px;
+                height: 80px;
+                flex-direction: column;
+                justify-content: space-evenly;
+            }
+
+            .step .circle {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
             }
             .step span{
                 display: none;
+            }
+            .label-mobile{
+                display: block;
+                font-size: 13px;
             }
             .container {
                 flex-direction: column-reverse; /* Switch the order on mobile */
@@ -231,6 +253,27 @@
                 margin-inline: 5px;
             }
 
+        }
+        @media (max-width: 430px) {
+            nav {
+                padding: 10px 20px;
+                height: 50px;
+            }
+
+            nav a span {
+                font-size: 60px;
+            }
+
+            .progress-bar {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .step .circle {
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
+            }
         }
     </style>
     
@@ -274,7 +317,7 @@
             <div class="circle">1</div>
             <span>Check in & Check out</span>
         </div>
-        <div class="step">
+        <div class="step completed">
             <div class="circle">2</div>
             <span>Rooms & Rates</span>
         </div>
@@ -286,6 +329,9 @@
             <div class="circle">4</div>
             <span>Payment & Receipt</span>
         </div>
+    </div>
+    <div class="label-mobile">
+        <span>Check in & Checkout</span>
     </div>
 </div>
 <!-- Main content -->
@@ -384,12 +430,15 @@
 
 
 <script>
-    document.getElementById('hamburger').addEventListener('click', function () {
+    document.getElementById('hamburger').addEventListener('click', function() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('show');
     
     const navbar = document.querySelector('.navbar');
     navbar.classList.toggle('shifted');
+
+    const progbar = document.querySelector('.progress-container');
+    progbar.classList.toggle('shifted');
     
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
