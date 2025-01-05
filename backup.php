@@ -21,13 +21,6 @@ if ($resultGallery->num_rows > 0) {
         $galleryImages[] = $row['image'];
     }
 }
-try {
-  $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
-}
-
   // Fetch descriptions from the database
 $sqlDescriptions = "SELECT description, description_2 FROM about LIMIT 1"; 
 $resultDescriptions = $conn->query($sqlDescriptions);
@@ -42,25 +35,6 @@ $descriptions = [];
       $descriptions['description_2'] = "Default description 2 if not found.";
   }
 
-  // Query featured feedbacks
-  $featuredQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
-  u.firstname, u.lastname 
-  FROM feedback_tbl f
-  JOIN users u ON f.user_id = u.user_id
-  WHERE f.is_featured = 1 
-  ORDER BY f.created_at DESC";
-  $featuredStmt = $pdo->query($featuredQuery);
-  $featuredFeedbacks = $featuredStmt->fetchAll(PDO::FETCH_ASSOC);
-
-  // Query non-featured feedbacks
-  $nonFeaturedQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
-  u.firstname, u.lastname 
-  FROM feedback_tbl f
-  JOIN users u ON f.user_id = u.user_id
-  WHERE f.is_featured = 0 
-  ORDER BY f.created_at DESC";
-  $nonFeaturedStmt = $pdo->query($nonFeaturedQuery);
-  $nonFeaturedFeedbacks = $nonFeaturedStmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -324,67 +298,6 @@ $descriptions = [];
     .room-dots {
         margin-top: 5px;
     }
-    .feedback-page {
-        padding: 20px;
-    }
-
-    .feedback-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: start;
-    }
-
-    .feedback-card {
-        background-color: #f8f9fa;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 15px;
-        width: calc(33.333% - 20px); 
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .feedback-card h4 {
-        margin: 0 0 10px;
-        font-size: 18px;
-    }
-
-    .rating {
-        color: #ffc107;
-        margin-bottom: 10px;
-        font-size: 16px;
-    }
-
-    .feedback-card .feedback-text {
-        font-size: 14px;
-        color: #555;
-        margin-bottom: 15px;
-    }
-
-    .button-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: auto; 
-    }
-
-    .feedback-card button {
-        margin: 0;
-    }
-
-    .feedback-line {
-        margin: 40px 0;
-    }
-    @media (max-width: 768px) {
-        .feedback-card {
-            width: calc(50% - 20px); 
-        }
-    }
-
-    @media (max-width: 576px) {
-        .feedback-card {
-            width: 100%; 
-        }
-    }
   </style>
 
   </style>
@@ -558,34 +471,7 @@ $descriptions = [];
         </div>
     </section>
 
-    <section id="feedback" class="feedback">
-      <div class="container">
-            <div class="section-header text-center">
-            <h2>Guest Feedbacks</h2>
-            <p>What Our Guests Say</p>
-            </div>
-
-            <div class="feedback-container">
-                <?php if (!empty($featuredFeedbacks)): ?>
-                    <?php foreach ($featuredFeedbacks as $feedback): ?>
-                        <div class="feedback-card selected">
-                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
-                            <div class="rating">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>
-                                <?php endfor; ?>
-                            </div>
-                            <p><strong><?= ['Not Good', 'Bad', 'Okay', 'Very Good', 'Amazing'][$feedback['rating'] - 1]; ?></strong></p>
-                            <p class="feedback-text"><?= htmlspecialchars($feedback['comment']); ?></p>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No featured feedbacks added yet.</p>
-                <?php endif; ?>
-            </div>
-      </div>
-    </section>
-
+    
   </main>
 
   <footer id="footer" class="footer dark-background">
@@ -627,9 +513,6 @@ $descriptions = [];
   <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
   <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/all.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
