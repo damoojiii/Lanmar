@@ -157,6 +157,34 @@
         </div>
     </div>
 </nav>
+
+<!-- data fetch-->
+<?php
+    $id = $userId;
+    // Assuming you have already executed the SQL query as shown in your code:
+    $sql_solo = "
+        SELECT 
+            booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.status,
+            reservationType_tbl.reservation_type,
+            pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
+            bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode
+        FROM booking_tbl
+        LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+        LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
+        LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
+        WHERE booking_tbl.user_id = :id ORDER BY booking_id DESC
+    ";
+    $stmt_solo = $pdo->prepare($sql_solo);
+    $stmt_solo->bindParam(":id", $id, PDO::PARAM_INT);
+    $stmt_solo->execute();
+    $results = $stmt_solo->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = $userId");
+    $stmt->execute();
+    $name = $stmt->fetch(PDO::FETCH_ASSOC);
+    $fullname = $name['firstname'] . " " . $name['lastname'];
+ ?> 
+
 <!-- Main content -->
 <div id="main-content" class="mt-4 pt-3">
     <h2 class="mb-4">My Reservations</h2>
@@ -174,42 +202,85 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(1)">
-                        <td>1</td>
-                        <td>mm-dd-yyyy</td>
-                        <td>hh:mm - hh:mm</td>
-                        <td class="d-none d-md-table-cell">12</td>
-                        <td class="">PHP 5000</td>
-                        <td class="">PHP 2000</td>
-                        <td><span class="status-badge approved">Approved</span></td>
+                <?php if(!empty($results)): ?>
+                <?php foreach ($results as $row): ?>
+                    <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" 
+                    onclick="showDetails(this)"
+                      data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>"
+                      data-date-range="<?php echo ($row["dateIn"] != $row["dateOut"]) 
+                          ? date("F j, Y", strtotime($row["dateIn"])) . ' to ' . date("F j, Y", strtotime($row["dateOut"])) 
+                          : date("F j, Y", strtotime($row["dateIn"])); ?>"
+                      data-time-range="<?php echo date("g:i A", strtotime($row["checkin"])) . ' to ' . date("g:i A", strtotime($row["checkout"])); ?>"
+                      data-adult = "<?php echo htmlspecialchars($row['adult']); ?>"
+                      data-child = "<?php echo htmlspecialchars($row['child']); ?>"
+                      data-pwd = "<?php echo htmlspecialchars($row['pwd']); ?>"
+                      data-total-pax="<?php echo htmlspecialchars($row['adult'] + $row['child'] + $row['pwd']); ?>"
+                      data-roomtype = "<?php echo htmlspecialchars($row['reservation_type']); ?>"
+                      data-paymode="<?php echo htmlspecialchars(htmlspecialchars($row['pay_mode'])); ?>"
+                      data-total-bill="<?php echo htmlspecialchars(number_format($row['total_bill'])); ?>"
+                      data-balance="<?php echo htmlspecialchars(number_format($row['balance'])); ?>"
+                      data-status="<?php echo htmlspecialchars($row['status']); ?>">
+
+                        <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
+                        
+                        <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
+                          echo date("F j, Y" , strtotime($row["dateIn"])) . " to " . date("F j, Y" , strtotime($row["dateOut"]));
+                          } else {
+                            echo date("F j, Y" , strtotime($row["dateIn"]));
+                          } ?></td>
+                        <td><?php 
+                          echo date("g:i A" , strtotime($row["checkin"])) . " to " . date("g:i A" , strtotime($row["checkout"]));
+                          ?></td>
+                        <td class="d-none d-md-table-cell"><?php $totalPax = $row['adult'] + $row['child'] + $row['pwd'];
+                        echo htmlspecialchars($totalPax); ?></td>
+                        <td class="">PHP <?php echo number_format($row['total_bill']); ?></td>
+                        <td class="">PHP <?php echo number_format($row['balance']); ?></td>
+                        <?php 
+                        switch ($row['status']) {
+                          case "Approved":
+                              $class = "approved";
+                              break;
+                          case "Pending":
+                              $class = "pending";
+                              break;
+                          case "Cancel":
+                              $class = "cancel";
+                              break;
+                          case "Completed":
+                              $class = "completed";
+                              break;
+                        }
+                        ?>
+                        <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
+                        <td><span>
+                          <?php 
+                          $sql = "
+                          SELECT 
+                              booking_tbl.booking_id,
+                              room_tbl.bill_id, room_tbl.room_name
+                          FROM booking_tbl
+                          LEFT JOIN room_tbl ON booking_tbl.bill_id = room_tbl.bill_id
+                          WHERE booking_tbl.booking_id = :id
+                            ";
+                          $stmt = $pdo->prepare($sql);
+                          $stmt->bindParam(":id", $row['booking_id'], PDO::PARAM_INT);
+                          $stmt->execute();
+                          $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                          $room_data = [];
+                          if (!empty($rows)) {
+                              foreach ($rows as $row) {
+                                  $room_data[] = [
+                                      'room_name'=>$row['room_name'] ?? null,
+                                  ];
+                              }
+                          }
+                          ?>
+                        </span></td>
+                  <?php endforeach; ?>
+                  <?php elseif(empty($results)):?>
+                    <td colspan="7" style="text-align: center;">No reservations</td>
                     </tr>
-                    <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(2)">
-                        <td>2</td>
-                        <td>mm-dd-yyyy</td>
-                        <td>hh:mm - hh:mm</td>
-                        <td class="d-none d-md-table-cell">20</td>
-                        <td class="">PHP 10000</td>
-                        <td class="">PHP 5000</td>
-                        <td><span class="status-badge cancel">Cancelled</span></td>
-                    </tr>
-                    <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(2)">
-                        <td>3</td>
-                        <td>mm-dd-yyyy</td>
-                        <td>hh:mm - hh:mm</td>
-                        <td class="d-none d-md-table-cell">20</td>
-                        <td class="">PHP 10000</td>
-                        <td class="">PHP 5000</td>
-                        <td><span class="status-badge pending">Pending</span></td>
-                    </tr>
-                    <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(2)">
-                        <td>4</td>
-                        <td>mm-dd-yyyy</td>
-                        <td>hh:mm - hh:mm</td>
-                        <td class="d-none d-md-table-cell">20</td>
-                        <td class="">PHP 10000</td>
-                        <td class="">PHP 5000</td>
-                        <td><span class="status-badge completed">Completed</span></td>
-                    </tr>
+                  <?php endif ?>
                 </tbody>
             </table>
         </div>
@@ -242,21 +313,21 @@
         <!-- Reservation ID -->
         <div class="mb-4">
           <h6 class="fw-bold">Reservation ID:</h6>
-          <p id="reservation-id">#12345</p>
+          <p id="reservation-id"><span id="modalBookingId"></p>
         </div>
 
         <!-- Personal Information Section -->
-        <div class="mb-4">
+        <div class="mb-4 ">
           <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2">
+          <div class="row g-2" >
             <div class="col-12 col-md-4">
-              <p><strong>Name:</strong> Jani Doer</p>
+              <p><strong>Name:</strong> <?php echo $fullname ?></p>
             </div>
             <div class="col-12 col-md-4">
-              <p><strong>Contact No.:</strong> 0912345678</p>
+              <p><strong>Contact No.:</strong> <?php echo $name['contact_number'] ?></p>
             </div>
             <div class="col-12 col-md-4">
-              <p><strong>Gender:</strong> Female</p>
+              <p><strong>Gender:</strong> WRONG-TURN</p>
             </div>
           </div>
         </div>
@@ -265,45 +336,60 @@
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
           <div class="row g-2">
-            <div class="col-12 col-md-4">
-              <p><strong>Date:</strong> mm-dd-yyyy</p>
+            <div class="col-12 col-md-5">
+              <p><strong>Date:</strong> <span id="modalDateRange"></p>
             </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Time:</strong> hh:mm - hh:mm</p>
+            <div class="col-12 col-md-3">
+              <p><strong>Time:</strong> <span id="modalTimeRange"></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
               <p><strong>Total Hours:</strong> 4</p>
             </div>
           </div>
           <div class="row g-2">
             <div class="col-4 col-md-2">
-              <p><strong>Adults:</strong> 2</p>
+              <p><strong>Adults:</strong> <span id="modalAdults"></p>
             </div>
             <div class="col-4 col-md-2">
-              <p><strong>Children:</strong> 1</p>
+              <p><strong>Children:</strong> <span id="modalChild"></p>
             </div>
             <div class="col-4 col-md-2">
-              <p><strong>PWD:</strong> 0</p>
+              <p><strong>PWD:</strong> <span id="modalPwd"></p>
             </div>
             <div class="col-12 col-md-6">
-              <p><strong>Total Pax:</strong> 3</p>
+              <p><strong>Total Pax:</strong> <span id="modalTotalPax"></p>
             </div>
           </div>
-          <p><strong>Reservation Type:</strong> Regular</p>
+          <div class="row g-2">
+            <div><p><strong>Reservation Type:</strong> <span id="modalroomtype"></p></div>
+          </div>
+          <div class="row g-2">
+            <div><p><strong>Rooms:</strong> <span id="modalrooms"></p></div>
+          </div>
+        </div>
+
+        <!-- Booking Details Section -->
+        <div class="mb-4">
+          <h6 class="fw-bold">Booking Details</h6>
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <p><strong>Additionals:</strong> <span id=""></p>
+            </div>
+          </div>
         </div>
 
         <!-- Payment Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
-            <div class="col-12 col-md-6">
-              <p><strong>Payment Method:</strong> Credit Card</p>
+            <div class="col-6 col-md-5">
+              <p><strong>Payment Method:</strong> <span id="modalpaymode"></span></p>
             </div>
             <div class="col-6 col-md-3">
-              <p><strong>Total Price:</strong> ₱5000</p>
+              <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></p>
             </div>
-            <div class="col-6 col-md-3">
-              <p><strong>Balance Remaining:</strong> ₱2000</p>
+            <div class="col-6 col-md-4">
+              <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></p>
             </div>
           </div>
         </div>
@@ -319,7 +405,7 @@
             </button>
 
             <!-- Cancel Button -->
-            <button type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
+            <button id="cancelButton" type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
                 <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
             </button>
         </div>
@@ -349,4 +435,46 @@
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+let bookingId;
+
+function showDetails(row) {
+    // Extract data from the clicked row
+    bookingId = row.dataset.bookingId;
+    const dateRange = row.dataset.dateRange;
+    const timeRange = row.dataset.timeRange;
+    const adults = row.dataset.adult;
+    const children = row.dataset.child;
+    const pwds = row.dataset.pwd;
+    const totalPax = row.dataset.totalPax;
+    const type = row.dataset.roomtype;
+    const paymode = row.dataset.paymode;
+    const totalBill = row.dataset.totalBill;
+    const balance = row.dataset.balance;
+    const status = row.dataset.status;
+
+    // Populate the modal with the extracted data
+    document.getElementById('modalBookingId').textContent = bookingId;
+    document.getElementById('modalDateRange').textContent = dateRange;
+    document.getElementById('modalTimeRange').textContent = timeRange;
+    document.getElementById('modalAdults').textContent = adults;
+    document.getElementById('modalChild').textContent = children;
+    document.getElementById('modalPwd').textContent = pwds;
+    document.getElementById('modalTotalPax').textContent = totalPax;
+    document.getElementById('modalroomtype').textContent = type;
+    document.getElementById('modalpaymode').textContent = paymode;
+    document.getElementById('modalTotalBill').textContent = totalBill;
+    document.getElementById('modalBalance').textContent = balance;
+    document.getElementById('modalStatus').textContent = status;
+
+}
+function cancelBooking() {
+    if (bookingId) { // Make sure bookingId is set
+        // Navigate to the cancellation page with the bookingId
+        window.location.href = `cancellation_form.php?id=${bookingId}`;
+    } else {
+        console.log("No bookingId found!");
+    }
+}
+document.getElementById('cancelButton').addEventListener('click', cancelBooking);
+
 </script>

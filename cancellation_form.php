@@ -217,14 +217,25 @@
         </div>
     </div>
 </nav>
-
+<?php 
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    if (isset($_GET['id']) && !empty($_GET['id'])) {
+        // Store the selected choice in the session
+        $_SESSION['booking_id'] = $_GET['id'];
+        $bookingId = $_SESSION['booking_id'];
+    } else {
+        // If no choice is selected, display an error message
+        $error_message = "No payment method selected. Please choose one.";
+    }
+}
+?>
 <div id="main-content" class="container mt-2">
     <div class="form-container">
         <div class="form-header text-center">Cancellation Form</div>
         <form action="process_cancellation.php" method="POST">
             <div class="mb-3">
                 <label for="reservationId" class="form-label">Reservation ID</label>
-                <input type="text" class="form-control" id="reservationId" name="reservation_id" placeholder="Enter your reservation ID" required>
+                <input type="text" class="form-control" id="reservationId" name="reservation_id" placeholder="Enter your reservation ID" value="<?php echo $bookingId?>" required>
             </div>
             <div class="mb-3">
                 <label for="cancellationDate" class="form-label">Date</label>
