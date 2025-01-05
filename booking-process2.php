@@ -85,7 +85,9 @@
             color: white;
             font-weight: bold;
         }
-
+        .step span{
+            color: black;
+        }
         .step.completed .circle {
             background-color: #00214b; /* Blue background for completed steps */
             border-color: #00214b; /* Blue border */
@@ -131,7 +133,9 @@
         .collapse:not(.show){
             display: block;
         }
-
+        #selectedRooms:not(.show) {
+            display: none;
+        }
         .expand-summary {
             width: 100%;
             background-color: #00214b;
@@ -275,9 +279,9 @@
             }
 
             .step .circle {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
             }
             .step span{
                 display: none;
@@ -322,15 +326,9 @@
                 flex-direction: row;
                 gap: 1rem;
             }
-
-            .step .circle {
-                width: 30px;
-                height: 30px;
-                font-size: 15px;
-            }
             .container{
                 max-width: 100%;
-                padding: 10%;
+                padding: 5%;
             }
             .guest {
                 width: 100% !important; /* Override inline styles */
@@ -432,6 +430,22 @@
     $sql = "SELECT * FROM users where user_id = '$userId'";
     $result = $conn->query($sql);
     $user = $result->fetch_assoc();
+
+    $roomIds = $_SESSION['roomIds']; // Ensure $roomIds is set in the session
+    if (!empty($roomIds)) {
+        // Create a comma-separated string of room IDs for the SQL query
+        $roomIdsStr = implode(',', array_map('intval', $roomIds));
+
+        // Query to fetch room details
+        $query = "SELECT * FROM rooms WHERE room_id IN ($roomIdsStr)";
+        $result = mysqli_query($conn, $query);
+
+        if (!$result) {
+            die('Query Error: ' . mysqli_error($conn));
+        }
+
+        $rooms = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    }
 ?>
 
 <!-- Main content -->
@@ -467,8 +481,8 @@
                 </form>
                 <div class="section-header">Additionals</div>
                 <form action="">
-                    <label for="" class="form-label">is there any special request?</label>
-                    <input type="text" class="message-box" name="" placeholder="Type your message here...">
+                    <label for="" class="form-label">Is there any special request?</label>
+                    <input type="text" class="message-box" name="additional" placeholder="Type your message here...">
                 </form>
                 <div class="section-header">Payment Method</div>
                 <form action="booking-process2.1.php" method="get" id="paymentForm">
@@ -533,9 +547,35 @@
                         <td class="text-end"><?php echo number_format($origPrice ?? 0); ?></td>
                     </tr>
                     <tr>
-                        <td>Room:</td>
-                        <td class="text-end"><?php echo number_format($roomTotal ?? 0); ?></td>
+                        <td>
+                            <a href="#" onclick="toggleSelectedRooms(); return false;" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="selectedRooms" class="text-white">View</a>
+                            Room:
+                        </td>
+                        <td class="text-end">
+                            <?php echo number_format($roomTotal ?? 0); ?>
+                        </td>
                     </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div class="collapse" id="selectedRooms">
+                                <ul class="list-unstyled">
+                                    <?php if (!empty($rooms)): ?>
+                                        <?php foreach ($rooms as $room): ?>
+                                            <li>
+                                                <div class="d-flex justify-content-between">
+                                                    <span>Room Name: <?php echo htmlspecialchars($room['room_name']); ?></span>
+                                                    <span>Capacity: <?php echo htmlspecialchars($room['minpax']) . '-' . htmlspecialchars($room['maxpax']); ?> persons</span>
+                                                </div>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <li>No rooms selected.</li>
+                                    <?php endif; ?>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
                     <tr>
                         <td><strong>Total:</strong></td>
                         <td class="text-end"><strong><?php
@@ -587,6 +627,7 @@ document.getElementById('hamburger').addEventListener('click', function() {
     mainContent.classList.toggle('shifted');
 });
 
+
 function toggleSummary() {
     const summarySection = document.getElementById('bookingSummary');
     const expandButton = document.querySelector('.expand-summary');
@@ -601,6 +642,19 @@ function toggleSummary() {
         expandButton.textContent = 'View Booking Summary';
     }
 }
+
+function toggleSelectedRooms() {
+    const selectedRooms = document.getElementById('selectedRooms');
+    
+    if (selectedRooms.classList.contains('show')) {
+        selectedRooms.classList.remove('show');
+        selectedRooms.setAttribute('aria-expanded', 'false');
+    } else {
+        selectedRooms.classList.add('show');
+        selectedRooms.setAttribute('aria-expanded', 'true');
+    }
+}
+
 
 // Function to update the choice value
 function Choice() {

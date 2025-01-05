@@ -98,6 +98,9 @@
             color: white;
             font-weight: bold;
         }
+        .step span{
+            color: black;
+        }
 
         .step.completed .circle {
             background-color: #00214b; /* Blue background for completed steps */
@@ -251,9 +254,9 @@
         }
 
         .step .circle {
-            width: 20px;
-            height: 20px;
-            font-size: 10px;
+            width: 30px;
+            height: 30px;
+            font-size: 15px;
         }
         .step span{
             display: none;
@@ -315,12 +318,6 @@
         .progress-bar {
             flex-direction: row;
             gap: 1rem;
-        }
-
-        .step .circle {
-            width: 30px;
-            height: 30px;
-            font-size: 15px;
         }
 
         .bill-message {

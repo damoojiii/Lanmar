@@ -63,7 +63,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -305,6 +304,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
     <script>
+    document.getElementById('hamburger').addEventListener('click', function() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('show');
+    
+    const navbar = document.querySelector('.navbar');
+    navbar.classList.toggle('shifted');
+    
+    const mainContent = document.getElementById('main-content');
+    mainContent.classList.toggle('shifted');
+    });
+
     document.addEventListener("DOMContentLoaded", function() {
         var pass = document.getElementById("new_password"); // Reference the correct ID
         var msg = document.getElementById("message");

@@ -9,6 +9,15 @@
     include "role_access.php";
     checkAccess('user');
     $userId = $_SESSION['user_id'];
+
+    if (isset($_GET['continue'])) {
+        $_SESSION['dateIn'] = $_GET['dateIn'];
+        $_SESSION['dateOut'] = $_GET['dateOut'];
+        $_SESSION['checkin'] = $_GET['checkin'];
+        $_SESSION['checkout'] = $_GET['checkout'];
+        $_SESSION['numhours'] = $_GET['numhours'];
+    }
+    
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
         echo '<script>
                     window.location="/lanmar/index1.php"; 
@@ -285,9 +294,9 @@
             }
 
             .step .circle {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
             }
             .step span{
                 display: none;
@@ -326,6 +335,12 @@
                 height: 60px; /* Initial height for collapsed state */
                 border-radius: 15px;
             }
+            .check-btn{
+                margin-top: 15px;
+            }
+            .check{
+                width: 100%;
+            }
         }
         @media (min-width: 768px) {
             #room-selection-dropdown {
@@ -347,11 +362,6 @@
                 gap: 1rem;
             }
 
-            .step .circle {
-                width: 30px;
-                height: 30px;
-                font-size: 15px;
-            }
             .container{
                 max-width: 100%;
                 padding: 20px;
@@ -427,14 +437,6 @@
 <?php 
     $rooms = [];
     $totalpax = 0;
-
-    if (isset($_GET['continue'])) {
-        $_SESSION['dateIn'] = $_GET['dateIn'];
-        $_SESSION['dateOut'] = $_GET['dateOut'];
-        $_SESSION['checkin'] = $_GET['checkin'];
-        $_SESSION['checkout'] = $_GET['checkout'];
-        $_SESSION['numhours'] = $_GET['numhours'];
-    }
 
     // Load from session if available
     $dateIn = $_SESSION['dateIn'] ?? '';
@@ -547,7 +549,7 @@
                             </select>
 
                         </div>
-                        <div class=" col-md-2" style="align-content: flex-end;">
+                        <div class=" col-md-2 check-btn" style="align-content: flex-end;">
                             <button type="submit" name="check" class="btn check">Check Rooms</button>
                         </div>
                     </div>

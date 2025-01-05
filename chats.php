@@ -169,6 +169,11 @@
         .chat-footer textarea {
             font-size: 14px;
         }
+    
+        
+    }
+    @media (max-width: 430px){
+
     }
 </style>
 

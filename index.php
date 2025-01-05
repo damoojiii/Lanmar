@@ -165,6 +165,7 @@ $descriptions = [];
       position: relative;
       max-width: 100%;
       margin: auto;
+      overflow: hidden;
     }
 
     .mySlides {
@@ -269,7 +270,7 @@ $descriptions = [];
 
     .fade {
         animation-name: fade;
-        animation-duration: 4s;
+        animation-duration: 5s;
     }
 
     @keyframes fade {
@@ -389,8 +390,8 @@ $descriptions = [];
       </div>
     </section><!-- /Booking and About Section -->
 
-        <!-- Gallery Section -->
-        <section id="gallery" class="gallery section py-2">
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery section py-2">
       <div class="container-fluid px-0">
         <div class="section-header text-center mb-4">
           <h2>Our Gallery</h2>
@@ -399,8 +400,8 @@ $descriptions = [];
 
         <div class="slideshow-container">
           <?php foreach ($galleryImages as $index => $image): ?>
-          <div class="mySlides">
-            <img src="<?php echo htmlspecialchars($image); ?>" alt="Gallery image <?php echo $index + 1; ?>">
+          <div class="mySlides fade">
+            <img src="<?php echo htmlspecialchars($image); ?>" alt="Gallery image <?php echo $index + 1; ?>" style="width:100%">
           </div>
           <?php endforeach; ?>
 
@@ -408,9 +409,10 @@ $descriptions = [];
           <a class="prev" onclick="moveSlide(-1)">&#10094;</a>
           <a class="next" onclick="moveSlide(1)">&#10095;</a>
         </div>
-
       </div>
-    </section><!-- End Gallery Section -->
+    </section>
+
+    <!-- End Gallery Section -->
 
     <!-- Room Showcase Section -->
     <section id="room-showcase" class="room-showcase section">
@@ -580,7 +582,7 @@ $descriptions = [];
   function startRoomAutoSlide() {
       roomSlideInterval = setInterval(() => {
           moveRoomSlide(1);
-      }, 4000); // Show each slide for 4 seconds total
+      }, 5000); // Show each slide for 4 seconds total
   }
 
   function moveRoomSlide(n) {
@@ -613,7 +615,41 @@ $descriptions = [];
       dots[roomSlideIndex-1].className += " active";
   }
   </script>
+  <script>
+    let slideIndex1 = 0;
+    let slideInterval;
 
+    document.addEventListener('DOMContentLoaded', function() {
+        showSlides();
+        startAutoSlide();
+    });
+
+    function startAutoSlide() {
+        slideInterval = setInterval(() => {
+            moveSlide(1);
+        }, 5000); // Change image every 5 seconds
+    }
+
+    function moveSlide(n) {
+        clearInterval(slideInterval);
+        showSlides(slideIndex1 += n);
+        startAutoSlide();
+    }
+
+    function showSlides() {
+        let slides = document.getElementsByClassName("mySlides");
+
+        if (slideIndex1 >= slides.length) {slideIndex1 = 0}    
+        if (slideIndex1 < 0) {slideIndex1 = slides.length - 1}
+
+        for (let i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";  
+        }
+
+        slides[slideIndex1].style.display = "block";  
+    }
+
+  </script>
 </body>
 
 </html>

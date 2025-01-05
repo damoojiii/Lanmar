@@ -395,6 +395,19 @@ include("connection.php");
                 padding: 8px 15px;
                 font-size: 12px;
             }
+            .main-content{
+                padding: 0;
+            }
+            .btn-modal{
+                width: 100%;
+            }
+            .room-info {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+                grid-template-rows: repeat(2, auto); /* Two rows, auto height */
+                gap: 10px; /* Optional: spacing between items */
+                padding: 10px; /* Optional: padding around the grid */
+            }
         }
 
         @media (max-width: 480px) {
@@ -521,7 +534,7 @@ include("connection.php");
                     }
 
                     .tab-container .tab.active {
-                        background-color: #01968F; /* Keep active tab color */
+                        background-color: #19315D; /* Keep active tab color */
                         color: white; /* Ensure active tab font color is white */
                     }
 
@@ -543,7 +556,7 @@ include("connection.php");
                                     <?php while($row = $result->fetch_assoc()): ?>
                                         <div class='room-card'>
                                             <div class="room-image">
-                                                <img src='uploads/<?php echo $row['image_path']; ?>' alt='Room Image'>
+                                                <img src='<?php echo $row['image_path']; ?>' alt='Room Image'>
                                             </div>
                                             <div class="room-details">
                                                 <h2><?php echo $row['room_name']; ?></h2>
@@ -556,7 +569,7 @@ include("connection.php");
                                                     <p>Offered: <?php echo $row['is_offered']; ?></p>
                                                 </div>
                                                 <div class="action-buttons"> 
-                                                    <button type='button' class='openModal' 
+                                                    <button type='button' class='openModal btn-modal' 
                                                         data-id='<?php echo $row['room_id']; ?>' 
                                                         data-name='<?php echo $row['room_name']; ?>' 
                                                         data-capacity='<?php echo $row['description']; ?>' 
@@ -739,7 +752,7 @@ include("connection.php");
     }
 
     .tab-container .tab.active {
-        background-color: #01968F;
+        background-color: #19315D;
         color: white;
     }
 
@@ -818,7 +831,7 @@ include("connection.php");
 
     .openModal {
         padding: 8px 16px;
-        background-color: #03045e;
+        background-color: #19315D;
         color: white;
         border: none;
         border-radius: 5px;
@@ -856,9 +869,7 @@ include("connection.php");
     }
 
     @media (max-width: 480px) {
-        .room-info {
-            grid-template-columns: 1fr;
-        }
+    
     }
 </style>
 </html>

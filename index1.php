@@ -18,7 +18,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -223,9 +223,9 @@
             }
 
             .step .circle {
-                width: 20px;
-                height: 20px;
-                font-size: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
             }
             .step span{
                 display: none;
@@ -269,11 +269,6 @@
                 gap: 1rem;
             }
 
-            .step .circle {
-                width: 30px;
-                height: 30px;
-                font-size: 15px;
-            }
         }
     </style>
     

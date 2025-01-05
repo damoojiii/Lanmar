@@ -244,12 +244,6 @@
                 flex-direction: row;
                 gap: 1rem;
             }
-
-            .step .circle {
-                width: 30px;
-                height: 30px;
-                font-size: 15px;
-            }
             .container{
                 max-width: 100%;
                 padding: 10%;
