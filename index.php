@@ -21,19 +21,48 @@ if ($resultGallery->num_rows > 0) {
         $galleryImages[] = $row['image'];
     }
 }
-  // Fetch descriptions from the database
+
+// Fetch descriptions from the database
 $sqlDescriptions = "SELECT description, description_2 FROM about LIMIT 1"; 
 $resultDescriptions = $conn->query($sqlDescriptions);
 $descriptions = [];
 
-  if ($resultDescriptions->num_rows > 0) {
-      $row = $resultDescriptions->fetch_assoc();
-      $descriptions['description'] = $row['description'];
-      $descriptions['description_2'] = $row['description_2'];
-  } else {
-      $descriptions['description'] = "Default description 1 if not found.";
-      $descriptions['description_2'] = "Default description 2 if not found.";
-  }
+if ($resultDescriptions->num_rows > 0) {
+    $row = $resultDescriptions->fetch_assoc();
+    $descriptions['description'] = $row['description'];
+    $descriptions['description_2'] = $row['description_2'];
+} else {
+    $descriptions['description'] = "Default description 1 if not found.";
+    $descriptions['description_2'] = "Default description 2 if not found.";
+}
+
+try {
+  $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+  echo "Connection failed: " . $e->getMessage();
+}
+
+
+// Query featured feedbacks
+$featuredQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
+u.firstname, u.lastname 
+FROM feedback_tbl f
+JOIN users u ON f.user_id = u.user_id
+WHERE f.is_featured = 1 
+ORDER BY f.created_at DESC";
+$featuredStmt = $pdo->query($featuredQuery);
+$featuredFeedbacks = $featuredStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Query non-featured feedbacks
+$nonFeaturedQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
+u.firstname, u.lastname 
+FROM feedback_tbl f
+JOIN users u ON f.user_id = u.user_id
+WHERE f.is_featured = 0 
+ORDER BY f.created_at DESC";
+$nonFeaturedStmt = $pdo->query($nonFeaturedQuery);
+$nonFeaturedFeedbacks = $nonFeaturedStmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -64,7 +93,7 @@ $descriptions = [];
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     @font-face {
         font-family: 'nautigal';
@@ -163,35 +192,60 @@ $descriptions = [];
 
     .slideshow-container {
       position: relative;
-      max-width: 100%;
-      margin: auto;
+      height: 70vh;
+      overflow: hidden;
     }
 
     .mySlides {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.8s ease-in-out;
       display: none;
+    }
+
+    .mySlides.active {
+      opacity: 1;
+      display: block;
+    }
+
+    .mySlides img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .prev, .next {
       cursor: pointer;
       position: absolute;
       top: 50%;
-      width: auto;
+      transform: translateY(-50%);
       padding: 16px;
       color: white;
       font-weight: bold;
       font-size: 18px;
-      transition: 0.6s ease;
-      border-radius: 0 3px 3px 0;
-      user-select: none;
+      background-color: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+      z-index: 2;
     }
 
     .next {
-      right: 0;
-      border-radius: 3px 0 0 3px;
+      right: 20px;
+    }
+
+    .prev {
+      left: 20px;
     }
 
     .prev:hover, .next:hover {
-      background-color: rgba(0,0,0,0.8);
+      background-color: rgba(0,0,0,0.6);
     }
 
     .gallery .container-fluid {
@@ -211,91 +265,23 @@ $descriptions = [];
       object-fit: cover;
     }
 
-    .room-slideshow-container {
-        position: relative;
-        max-width: 1200px;
-        margin: auto;
-        background: white;
-        padding: 5px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    .slideshow-container-rooms {
+      position: relative;
+      margin: auto;
     }
-
+    
     .room-slide {
-        display: none;
-        padding: 5px;
+      display: none;
     }
-
-    .room-prev, .room-next {
-        cursor: pointer;
-        position: absolute;
-        top: 50%;
-        width: auto;
-        padding: 16px;
-        margin-top: -22px;
-        color: #333;
-        font-weight: bold;
-        font-size: 24px;
-        border-radius: 0 3px 3px 0;
-        user-select: none;
-        background-color: rgba(255,255,255,0.8);
-        transition: 0.3s ease;
-    }
-
-    .room-next {
-        right: 0;
-        border-radius: 3px 0 0 3px;
-    }
-
-    .room-prev:hover, .room-next:hover {
-        background-color: rgba(0,0,0,0.8);
-        color: white;
-    }
-
-    .room-dot {
-        cursor: pointer;
-        height: 12px;
-        width: 12px;
-        margin: 0 5px;
-        background-color: #bbb;
-        border-radius: 50%;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-    }
-
-    .room-dot.active, .room-dot:hover {
-        background-color: #717171;
-    }
-
+    
     .fade {
-        animation-name: fade;
-        animation-duration: 4s;
+      animation-name: fade;
+      animation-duration: 0.5s;
     }
-
+    
     @keyframes fade {
-        from {opacity: .1}
-        to {opacity: 1}
-    }
-
-    .room-description {
-        padding: 0 10px;
-    }
-
-    .room-description h3 {
-        margin: 0 0 5px 0;
-    }
-
-    .room-description p {
-        margin: 0 0 5px 0;
-    }
-
-    .room-features {
-        margin: 5px 0;
-        padding: 0;
-    }
-
-    .room-dots {
-        margin-top: 5px;
+      from {opacity: .4} 
+      to {opacity: 1}
     }
   </style>
 
@@ -414,61 +400,169 @@ $descriptions = [];
 
     <!-- Room Showcase Section -->
     <section id="room-showcase" class="room-showcase section">
-        <div class="container">
-            <div class="section-header text-center">  
-                <h2>Featured Rooms</h2>
-                <p>Experience luxury and comfort in our signature accommodations</p>
-            </div>
-            
-            <div class="room-slideshow-container">
-                <?php
-                // Fetch all rooms
-                $query = "SELECT * FROM rooms ORDER BY room_id ASC";
-                $result = mysqli_query($conn, $query);
-
-                if (!$result) {
-                    die('Query Error: ' . mysqli_error($conn));
-                }
-
-                while ($row = mysqli_fetch_assoc($result)) {
-                    ?>
-                    <div class="room-slide fade">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <img src="<?php echo htmlspecialchars($row['image_path']); ?>" 
-                                     class="img-fluid" 
-                                     alt="<?php echo htmlspecialchars($row['room_name']); ?>">
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="room-description">
-                                    <h3><?php echo htmlspecialchars($row['room_name']); ?></h3>
-                                    <p><?php echo htmlspecialchars($row['description']); ?></p>
-                                    <ul class="room-features list-unstyled">
-                                        <li><i class="bi bi-check-circle"></i> Minimum Capacity: <?php echo htmlspecialchars($row['minpax']); ?> persons</li>
-                                        <li><i class="bi bi-check-circle"></i> Maximum Capacity: <?php echo htmlspecialchars($row['maxpax']); ?> persons</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php } ?>
-                
-            </div>
-
-            <!-- Dots indicator -->
-            <div class="room-dots text-center">
-                <?php
-                mysqli_data_seek($result, 0); // Reset result pointer
-                $index = 0;
-                while ($row = mysqli_fetch_assoc($result)) {
-                    echo '<span class="room-dot" onclick="currentRoomSlide(' . ($index + 1) . ')"></span>';
-                    $index++;
-                }
-                ?>
-            </div>
+      <div class="container">
+        <div class="section-header text-center">  
+          <h2>Our Featured Rooms</h2>
+          <p>Experience luxury and comfort in our signature accommodations</p>
         </div>
-    </section>
+            
+        <div class="slideshow-container-rooms">
+          <?php
+            // Add error reporting for debugging
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
 
+            // Verify connection
+            if (!$conn) {
+                die("Connection failed: " . mysqli_connect_error());
+            }
+
+            $query = "SELECT * FROM rooms WHERE is_featured = 1";
+            $result = mysqli_query($conn, $query);
+
+            if (!$result) {
+                die('Query Error: ' . mysqli_error($conn));
+            }
+
+            while ($row = mysqli_fetch_assoc($result)) {
+          ?>
+              <div class="room-slide fade">
+                <div class="row gy-4 justify-content-center">
+                  <div class="col-lg-6">
+                    <div class="room-image">
+                      <img src="uploads/<?php echo htmlspecialchars($row['image_path']); ?>" 
+                           class="img-fluid" 
+                           alt="<?php echo htmlspecialchars($row['room_name']); ?>">
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <div class="room-description">
+                      <h3><?php echo htmlspecialchars($row['room_name']); ?></h3>
+                      <p><?php echo htmlspecialchars($row['description']); ?></p>
+                      <ul class="room-features list-unstyled">
+                        <li><i class="bi bi-check-circle"></i> Capacity: 
+                          <?php echo htmlspecialchars($row['minpax']) . '-' . htmlspecialchars($row['maxpax']); ?> persons
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          <?php
+            }
+          ?>
+          
+          <!-- Navigation arrows -->
+          <a class="prev" onclick="moveRoomSlide(-1)">&#10094;</a>
+          <a class="next" onclick="moveRoomSlide(1)">&#10095;</a>
+        </div>
+      </div>
+    </section><!-- End Room Showcase Section -->
+
+
+    <section id="feedback" class="feedback">
+      <div class="container">
+        <div class="section-header text-center">
+          <h2>Guest Feedbacks</h2>
+          <p>What Our Guests Say</p>
+        </div>
+
+        <div class="feedback-container">
+                <?php if (!empty($featuredFeedbacks)): ?>
+                    <?php foreach ($featuredFeedbacks as $feedback): ?>
+                        <div class="feedback-card selected">
+                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
+                            <div class="rating">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <p><strong><?= ['Not Good', 'Bad', 'Okay', 'Very Good', 'Amazing'][$feedback['rating'] - 1]; ?></strong></p>
+                            <p class="feedback-text"><?= htmlspecialchars($feedback['comment']); ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No featured feedbacks added yet.</p>
+                <?php endif; ?>
+            </div>
+
+
+      </div>
+    </section>
+    <style>
+      .settings-form button, 
+        .save-btn {
+            border-radius: 10px !important;
+            padding: 13px 30px;
+            background-color: #03045e;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+        .feedback-page {
+        padding: 20px;
+    }
+
+    .feedback-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: start;
+    }
+
+    .feedback-card {
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        width: calc(33.333% - 20px); / 3 cards per row /
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .feedback-card h4 {
+        margin: 0 0 10px;
+        font-size: 18px;
+    }
+
+    .rating {
+        color: #ffc107;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .feedback-card .feedback-text {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: auto; / Push the button to the bottom /
+    }
+
+    .feedback-card button {
+        margin: 0;
+    }
+
+    .feedback-line {
+        margin: 40px 0;
+    }
+
+    / Responsiveness for mobile devices /
+    @media (max-width: 768px) {
+        .feedback-card {
+            width: calc(50% - 20px); / 2 cards per row on tablets /
+        }
+    }
+
+    @media (max-width: 576px) {
+        .feedback-card {
+            width: 100%; / Full width for smaller screens */
+        }
+    }
+    </style>
     
   </main>
 
@@ -532,86 +626,70 @@ $descriptions = [];
   </script>
 
   <script>
-  let slideIndex = 1;
-  showSlides(slideIndex);
+    let roomSlideIndex = 1;
+    let roomSlideTimer;
+    showRoomSlides(roomSlideIndex);
 
-  function moveSlide(n) {
-    showSlides(slideIndex += n);
-  }
-
-  function currentSlide(n) {
-    showSlides(slideIndex = n);
-  }
-
-  function showSlides(n) {
-    let i;
-    const slides = document.getElementsByClassName("mySlides");
-    const dots = document.getElementsByClassName("dot");
-    
-    if (n > slides.length) { slideIndex = 1 }
-    if (n < 1) { slideIndex = slides.length }
-    
-    for (i = 0; i < slides.length; i++) {
-      slides[i].style.display = "none";  
+    function moveRoomSlide(n) {
+      clearTimeout(roomSlideTimer); // Clear the existing timer
+      showRoomSlides(roomSlideIndex += n);
     }
-    for (i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
-    }
-    
-    slides[slideIndex - 1].style.display = "block";  
-    dots[slideIndex - 1].className += " active";
-  }
 
-  // Optional: Automatic slideshow
-  setInterval(() => {
-    moveSlide(1);
-  }, 4000); // Show each slide for 4 seconds total
+    function showRoomSlides(n) {
+      let i;
+      let slides = document.getElementsByClassName("room-slide");
+      
+      if (slides.length === 0) return;
+      
+      if (n > slides.length) {roomSlideIndex = 1}    
+      if (n < 1) {roomSlideIndex = slides.length}
+      
+      for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";  
+      }
+      
+      slides[roomSlideIndex-1].style.display = "block";  
+
+      // Decreased display time to 3 seconds (3000 milliseconds) for faster transitions
+      roomSlideTimer = setTimeout(() => {
+        showRoomSlides(roomSlideIndex += 1);
+      }, 3000);
+    }
   </script>
 
   <script>
-  let roomSlideIndex = 1;
-  let roomSlideInterval;
+    let slideIndex = 0;
+    let slideTimer;
 
-  document.addEventListener('DOMContentLoaded', function() {
-      showRoomSlides(roomSlideIndex);
-      startRoomAutoSlide();
-  });
+    showSlides();
 
-  function startRoomAutoSlide() {
-      roomSlideInterval = setInterval(() => {
-          moveRoomSlide(1);
-      }, 4000); // Show each slide for 4 seconds total
-  }
+    function moveSlide(n) {
+      clearTimeout(slideTimer);
+      slideIndex += n;
+      showSlides();
+    }
 
-  function moveRoomSlide(n) {
-      clearInterval(roomSlideInterval);
-      showRoomSlides(roomSlideIndex += n);
-      startRoomAutoSlide();
-  }
-
-  function currentRoomSlide(n) {
-      clearInterval(roomSlideInterval);
-      showRoomSlides(roomSlideIndex = n);
-      startRoomAutoSlide();
-  }
-
-  function showRoomSlides(n) {
-      let slides = document.getElementsByClassName("room-slide");
-      let dots = document.getElementsByClassName("room-dot");
+    function showSlides() {
+      let slides = document.getElementsByClassName("mySlides");
+      if (slides.length === 0) return;
       
-      if (n > slides.length) {roomSlideIndex = 1}
-      if (n < 1) {roomSlideIndex = slides.length}
+      if (slideIndex >= slides.length) slideIndex = 0;
+      if (slideIndex < 0) slideIndex = slides.length - 1;
       
-      for (let i = 0; i < slides.length; i++) {
-          slides[i].style.display = "none";
-      }
-      for (let i = 0; i < dots.length; i++) {
-          dots[i].className = dots[i].className.replace(" active", "");
+      // Remove active class from all slides
+      for (let slide of slides) {
+        slide.classList.remove('active');
       }
       
-      slides[roomSlideIndex-1].style.display = "block";
-      dots[roomSlideIndex-1].className += " active";
-  }
+      // Add active class to current slide
+      slides[slideIndex].classList.add('active');
+      
+      // Auto advance
+      slideTimer = setTimeout(() => {
+        slideIndex++;
+        showSlides();
+      }, 5000);
+    }
   </script>
 
 </body>
