@@ -105,8 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
         #main-content {
             transition: margin-left 0.3s ease;
             margin-left: 250px; 
-            margin-top: 25px; /* Add top margin for header */
-            padding: 20px; /* Padding for content */
+            margin-top: 25px;
+            padding: 20px;
         }
 
         hr {
@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
             }
 
             #main-content {
-                margin-left: 0; /* Remove margin for smaller screens */
+                margin-left: 0;
             }
 
             #hamburger {
@@ -429,22 +429,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
                         <div class="tab active" id="roomInfoTab">
-                            Section 1
+                            Homescreen
                         </div>
                     </a>
                     <a href="homepage_section3.php">
                         <div class="tab " id="archiveInfoTab">
-                            Section 2
+                            About
                         </div>
                     </a>
                     <a href="homepage_section2.php">
                         <div class="tab" id="facilityInfoTab">
-                            Section 3
+                            Gallery
                         </div>
                     </a>
                     <a href="homepage_section4.php">
                         <div class="tab" id="facilityInfoTab">
-                            Section 4
+                            Rooms
                         </div>
                     </a>
                     <a href="section_5.php">
@@ -463,7 +463,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                         display: flex;
                         justify-content: center;
                         gap: 10px;
-                        flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
+                        flex-wrap: wrap;
                     }
 
                     .tab-container a {
@@ -485,14 +485,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                     }
 
                     .tab-container .tab.active {
-                        background-color: #00968f;
+                        background-color: #19315D;
                     }
 
                     .tab:hover {
                         background-color: #0175FE;
                     }
 
-                    /* Mobile-specific styles */
+                    /* Mobile responsiveness */
                     @media (max-width: 768px) {
                         .tab-container {
                             gap: 8px;
@@ -506,6 +506,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                         .tab-container .tab {
                             padding: 8px 15px;
                             font-size: 12px;
+                        }
+                        .main-content{
+                            padding: 0;
+                        }
+                        .btn-modal{
+                            width: 100%;
+                        }
+                        .room-info {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+                            grid-template-rows: repeat(2, auto); /* Two rows, auto height */
+                            gap: 10px; /* Optional: spacing between items */
+                            padding: 10px; /* Optional: padding around the grid */
                         }
                     }
 
@@ -563,7 +576,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
     }
 
     .tab-container .tab.active {
-        background-color: #01968F;
+        background-color: #19315D;
         color: white;
     }
 

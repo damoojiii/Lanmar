@@ -518,23 +518,23 @@ include("connection.php");
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
-                        <div class="tab " id="roomInfoTab">
-                            Section 1
+                        <div class="tab" id="roomInfoTab">
+                            Homescreen
                         </div>
                     </a>
                     <a href="homepage_section3.php">
-                        <div class="tab" id="archiveInfoTab">
-                            Section 2
+                        <div class="tab " id="archiveInfoTab">
+                            About
                         </div>
                     </a>
                     <a href="homepage_section2.php">
                         <div class="tab" id="facilityInfoTab">
-                            Section 3
+                            Gallery
                         </div>
                     </a>
                     <a href="homepage_section4.php">
                         <div class="tab active" id="facilityInfoTab">
-                            Section 4
+                            Rooms
                         </div>
                     </a>
                     <a href="section_5.php">
