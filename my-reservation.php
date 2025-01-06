@@ -215,6 +215,7 @@
                       data-child = "<?php echo htmlspecialchars($row['child']); ?>"
                       data-pwd = "<?php echo htmlspecialchars($row['pwd']); ?>"
                       data-total-pax="<?php echo htmlspecialchars($row['adult'] + $row['child'] + $row['pwd']); ?>"
+                      data-hours="<?php echo htmlspecialchars($row['hours']); ?>"
                       data-roomtype = "<?php echo htmlspecialchars($row['reservation_type']); ?>"
                       data-paymode="<?php echo htmlspecialchars(htmlspecialchars($row['pay_mode'])); ?>"
                       data-total-bill="<?php echo htmlspecialchars(number_format($row['total_bill'])); ?>"
@@ -343,7 +344,7 @@
               <p><strong>Time:</strong> <span id="modalTimeRange"></p>
             </div>
             <div class="col-12 col-md-3">
-              <p><strong>Total Hours:</strong> 4</p>
+              <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
             </div>
           </div>
           <div class="row g-2">
@@ -442,6 +443,7 @@ function showDetails(row) {
     bookingId = row.dataset.bookingId;
     const dateRange = row.dataset.dateRange;
     const timeRange = row.dataset.timeRange;
+    const hours = row.dataset.hours;
     const adults = row.dataset.adult;
     const children = row.dataset.child;
     const pwds = row.dataset.pwd;
@@ -456,6 +458,7 @@ function showDetails(row) {
     document.getElementById('modalBookingId').textContent = bookingId;
     document.getElementById('modalDateRange').textContent = dateRange;
     document.getElementById('modalTimeRange').textContent = timeRange;
+    document.getElementById('modalHours').textContent = hours;
     document.getElementById('modalAdults').textContent = adults;
     document.getElementById('modalChild').textContent = children;
     document.getElementById('modalPwd').textContent = pwds;

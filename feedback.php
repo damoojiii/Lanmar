@@ -117,6 +117,9 @@
             opacity: 0;
             overflow: hidden;
         }
+        #sidebar .drop{
+            height: 50px;
+        }
         .caret-icon .fa-caret-down {
             display: inline-block;
             font-size: 20px;
@@ -414,7 +417,7 @@
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2 drop" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
                     Manage Reservations
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>
@@ -444,7 +447,7 @@
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center drop" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
                     Settings
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>

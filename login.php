@@ -59,7 +59,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
     <style>
         body {
             background: linear-gradient(to bottom right, #006994, #00FFFF);
@@ -93,11 +95,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="mb-3">
-                <p class="mt-3 text-center"><a href="forgot_password.php">forgot Password</a></p>
+                <p class="mt-3 text-center"><a href="forgot_password.php">Forgot Password</a></p>
             </div>
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
         <p class="mt-3 text-center">Don't have an account? <a href="register_user.php">Register here</a></p>
     </div>
 </body>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/bootstrap/js/all.min.js"></script>
+<script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 </html>

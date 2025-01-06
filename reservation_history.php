@@ -98,6 +98,9 @@
             opacity: 0;
             overflow: hidden;
         }
+        #sidebar .drop{
+            height: 50px;
+        }
         .caret-icon .fa-caret-down {
             display: inline-block;
             font-size: 20px;
@@ -389,7 +392,7 @@
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2 drop" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
                     Manage Reservations
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>
@@ -419,7 +422,7 @@
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center drop" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
                     Settings
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>
@@ -436,6 +439,27 @@
         <hr>
         <a href="logout.php" class="nav-link text-white">Log out</a>
     </div>
+
+    <!-- tabel fetch-->
+    <?php
+        $sql_solo = "
+            SELECT 
+                booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.status,
+                reservationType_tbl.reservation_type,
+                pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
+                bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode,
+                users.firstname, users.lastname, users.contact_number
+            FROM booking_tbl
+            LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+            LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
+            LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
+            LEFT JOIN users ON booking_tbl.user_Id = users.user_id
+            ORDER BY booking_id DESC
+        ";
+        $stmt_solo = $pdo->prepare($sql_solo);
+        $stmt_solo->execute();
+        $results = $stmt_solo->fetchAll(PDO::FETCH_ASSOC);
+     ?>
     
     <div id="main-content" class="">
         <div class="">
@@ -455,24 +479,87 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(1)">
-                                <td>1</td>
-                                <td>Jani Doer</td>
-                                <td class="d-none d-sm-table-cell">0912345678</td>
-                                <td>mm-dd-yyyy</td>
-                                <td>hh:mm - hh:mm</td>
-                                <td class="d-none d-md-table-cell">12</td>
-                                <td><span class="status-badge completed">Completed</span></td>
-                            </tr>
-                            <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="showDetails(2)">
-                                <td>2</td>
-                                <td>Laufeyson</td>
-                                <td class="d-none d-sm-table-cell">0912345678</td>
-                                <td>mm-dd-yyyy</td>
-                                <td>hh:mm - hh:mm</td>
-                                <td class="d-none d-md-table-cell">20</td>
-                                <td><span class="status-badge cancel">Cancelled</span></td>
-                            </tr>
+                        <?php if(!empty($results)): ?>
+                            <?php foreach ($results as $row): ?>
+                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" 
+                                onclick="showDetails(this)"
+                                data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>"
+                                data-date-range="<?php echo ($row["dateIn"] != $row["dateOut"]) 
+                                    ? date("F j, Y", strtotime($row["dateIn"])) . ' to ' . date("F j, Y", strtotime($row["dateOut"])) 
+                                    : date("F j, Y", strtotime($row["dateIn"])); ?>"
+                                data-time-range="<?php echo date("g:i A", strtotime($row["checkin"])) . ' to ' . date("g:i A", strtotime($row["checkout"])); ?>"
+                                data-hours="<?php echo htmlspecialchars($row['hours']); ?>"
+                                data-adult = "<?php echo htmlspecialchars($row['adult']); ?>"
+                                data-child = "<?php echo htmlspecialchars($row['child']); ?>"
+                                data-pwd = "<?php echo htmlspecialchars($row['pwd']); ?>"
+                                data-total-pax="<?php echo htmlspecialchars($row['adult'] + $row['child'] + $row['pwd']); ?>"
+                                data-roomtype = "<?php echo htmlspecialchars($row['reservation_type']); ?>"
+                                data-paymode="<?php echo htmlspecialchars(htmlspecialchars($row['pay_mode'])); ?>"
+                                data-total-bill="<?php echo htmlspecialchars(number_format($row['total_bill'])); ?>"
+                                data-balance="<?php echo htmlspecialchars(number_format($row['balance'])); ?>"
+                                data-status="<?php echo htmlspecialchars($row['status']); ?>"
+                                data-fullname="<?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?>"
+                                data-contact="<?php echo htmlspecialchars($row['contact_number']); ?>">
+
+                                    <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['contact_number']); ?></td>
+                                    <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
+                                    echo date("F j, Y" , strtotime($row["dateIn"])) . " to " . date("F j, Y" , strtotime($row["dateOut"]));
+                                    } else {
+                                        echo date("F j, Y" , strtotime($row["dateIn"]));
+                                    } ?></td>
+                                    <td><?php 
+                                    echo date("g:i A" , strtotime($row["checkin"])) . " to " . date("g:i A" , strtotime($row["checkout"]));
+                                    ?></td>
+                                    <td class="d-none d-md-table-cell"><?php $totalPax = $row['adult'] + $row['child'] + $row['pwd'];
+                                    echo htmlspecialchars($totalPax); ?></td>
+                                    <?php 
+                                    switch ($row['status']) {
+                                    case "Approved":
+                                        $class = "approved";
+                                        break;
+                                    case "Pending":
+                                        $class = "pending";
+                                        break;
+                                    case "Cancelled":
+                                        $class = "cancel";
+                                        break;
+                                    case "Completed":
+                                        $class = "completed";
+                                        break;
+                                    }
+                                    ?>
+                                    <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
+                                    <td><span>
+                                    <?php 
+                                    $sql = "
+                                    SELECT 
+                                        booking_tbl.booking_id,
+                                        room_tbl.bill_id, room_tbl.room_name
+                                    FROM booking_tbl
+                                    LEFT JOIN room_tbl ON booking_tbl.bill_id = room_tbl.bill_id
+                                    WHERE booking_tbl.booking_id = :id
+                                        ";
+                                    $stmt = $pdo->prepare($sql);
+                                    $stmt->bindParam(":id", $row['booking_id'], PDO::PARAM_INT);
+                                    $stmt->execute();
+                                    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                    $room_data = [];
+                                    if (!empty($rows)) {
+                                        foreach ($rows as $row) {
+                                            $room_data[] = [
+                                                'room_name'=>$row['room_name'] ?? null,
+                                            ];
+                                        }
+                                    }
+                                    ?>
+                                    </span></td>
+                            <?php endforeach; ?>
+                            <?php elseif(empty($results)):?>
+                                <td colspan="7" style="text-align: center;">No Approved Reservations</td>
+                                </tr>
+                        <?php endif ?>
                         </tbody>
                     </table>
                 </div>

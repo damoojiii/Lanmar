@@ -41,7 +41,6 @@
 
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
     
@@ -116,6 +115,9 @@
             height: 0;
             opacity: 0;
             overflow: hidden;
+        }
+        #sidebar .drop{
+            height: 50px;
         }
         .caret-icon .fa-caret-down {
             display: inline-block;
@@ -410,7 +412,7 @@
                 <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2 drop" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
                     Manage Reservations
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>
@@ -440,7 +442,7 @@
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center drop" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
                     Settings
                     <span class="caret-icon">
                         <i class="fa-solid fa-caret-down"></i>
@@ -525,9 +527,11 @@
         </div>
     </div>
 
+    <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/all.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
 
         function toggleSidebar() {
