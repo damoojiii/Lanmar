@@ -131,6 +131,9 @@
         .mobile-room{
             width: 80%;
         }
+        .whole{
+            justify-content: space-between;
+        }
         .summary {
             background-color: #00214b;
             color: #fff;
@@ -276,7 +279,6 @@
                 font-size: 80px;
             }
             .progress-container.shifted{
-                margin-left: 250px;
                 transition: margin-left 0.3s ease;
             }
 
@@ -304,6 +306,13 @@
             .label-mobile{
                 display: block;
                 font-size: 13px;
+            }
+            .container{
+                max-width: 100%;
+                padding: 20px;
+            }
+            .guest {
+                width: 100% !important; /* Override inline styles */
             }
             #room-selection {
                 display: none !important;
@@ -360,14 +369,6 @@
             .progress-bar {
                 flex-direction: row;
                 gap: 1rem;
-            }
-
-            .container{
-                max-width: 100%;
-                padding: 20px;
-            }
-            .guest {
-                width: 100% !important; /* Override inline styles */
             }
             .summary{
                 width: 100% !important;
@@ -511,7 +512,7 @@
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
     <div class="container1">
-        <div class="row" style="justify-content:space-between;">
+        <div class="row whole">
             <div class="guest col-md-6" style="width: 75%;">
                 <div class="section-header">Number of Guest (Pax)</div>
                 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
@@ -624,16 +625,6 @@
                                         echo htmlspecialchars($reservationType);
                                     ?>
                                 </span></p>
-                            </div>
-        
-                            <div class="dropdown">
-                                <button class="btn btn-link p-0" type="button" id="editDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Edit
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="editDropdown">
-                                    <li><a class="dropdown-item" href="#">Edit Date</a></li>
-                                    <li><a class="dropdown-item" href="#">Edit Time</a></li>
-                                </ul>
                             </div>
                         </div>
                     </div>

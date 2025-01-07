@@ -376,9 +376,9 @@
 </div>
 <?php
     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-        if (isset($_POST['choice']) && !empty($_POST['choice'])) {
+        if (isset($_GET['choice']) && !empty($_GET['choice'])) {
             // Store the selected choice in the session
-            $_SESSION['payment_method'] = $_POST['choice'];
+            $_SESSION['payment_method'] = $_GET['choice'];
         } else {
             // If no choice is selected, display an error message
             $error_message = "No payment method selected. Please choose one.";
@@ -393,7 +393,7 @@
     $childs = $_SESSION['child'] ?? '';
     $pwd = $_SESSION['pwd'] ?? '';
     $totalPax = $_SESSION['totalpax'] ?? '';
-    $reservationType = $_SESSION['reservationType']?? '';
+    $reservationType = $_SESSION['reservationType']?? '' ?? '';
     $origPrice = $_SESSION['rate'] ?? '';
     $grandTotal = $_SESSION['grandTotal']  ?? '';
     $roomTotal = $_SESSION['roomTotal'] ?? '';
@@ -462,17 +462,19 @@
         //echo "New record created successfully in pax_tbl<br>";
     
         // Insert into room_tbl
-        foreach ($roomIds as $roomId) {
-        // Prepare the SQL to fetch room details based on room_id
-        $sql = "SELECT room_name FROM rooms WHERE room_id = :roomId";
-        $stmt = $pdo->prepare($sql);
-    
-        // Execute the statement with parameter binding
-        $stmt->execute([':roomId' => $roomId]);
-    
-        // Fetch the room data
-        $room = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+        if(!empty($roomIds)){
+            foreach ($roomIds as $roomId) {
+                // Prepare the SQL to fetch room details based on room_id
+                $sql = "SELECT room_name FROM rooms WHERE room_id = :roomId";
+                $stmt = $pdo->prepare($sql);
+            
+                // Execute the statement with parameter binding
+                $stmt->execute([':roomId' => $roomId]);
+            
+                // Fetch the room data
+                $room = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+         
     if ($room) {
         $room_name = $room['room_name']; // Extract the room name from the result
         

@@ -65,8 +65,11 @@
     }
     @media (max-width: 768px) {
             #sidebar {
-                transform: translateX(-250px);
+                position: absolute;
+                transform: translateX(-100%);
+                z-index: 199;
             }
+            
             #sidebar.show {
                 transform: translateX(0);
             }
@@ -82,9 +85,6 @@
 
             #main-content {
                 margin-left: 0;
-            }
-            #main-content.shifted {
-                margin-left: 250px; 
             }
         }
 </style>

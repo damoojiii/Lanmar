@@ -1,34 +1,33 @@
 <?php
 session_start();
-include("connection.php");
+include "connection.php";
 
-$success_message = "";
-$error_message = "";
-$gallery_success_message = "";
-$gallery_error_message = "";
-
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_personal_info'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION['user_id'];
-    $firstname = trim($_POST['firstname']);
-    $lastname = trim($_POST['lastname']);
-    $contact_number = trim($_POST['contact_number']);
+    $contact_number = $_POST['contact_number'];
 
-    // Prepare and execute the update statement
-    $stmt = $conn->prepare("UPDATE users SET firstname = ?, lastname = ?, contact_number = ? WHERE user_id = ?");
-    $stmt->bind_param("sssi", $firstname, $lastname, $contact_number, $user_id);
+    // Update user information
+    $update_query = "UPDATE users SET contact_number = ? WHERE user_id = ?";
+    $update_stmt = $conn->prepare($update_query);
+    $update_stmt->bind_param("si", $contact_number, $user_id);
     
-    if ($stmt->execute()) {
-        $success_message = "Background image updated successfully.";
+    if ($update_stmt->execute()) {
+        $_SESSION['success_message'] = "Your information has been updated successfully.";
     } else {
-        $error_message = "Error updating background image in the database: " . $stmt->error;
+        $_SESSION['error_message'] = "Error updating your information. Please try again.";
     }
-    
-    $stmt->close();
-    $conn->close();
-    
-    // Redirect back to account settings page
-    header("Location: account_settings.php");
+
+    // Check role and redirect accordingly
+    if (isset($_SESSION['role'])) {
+        if ($_SESSION['role'] === 'admin') {
+            header("Location: account_settings.php");
+        } else {
+            header("Location: settings_user.php");
+        }
+    } else {
+        // Fallback to previous page if role is not set
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+    }
     exit();
 }
 ?>

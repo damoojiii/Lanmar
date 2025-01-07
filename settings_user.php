@@ -11,7 +11,7 @@ $error_message = "";
 
 
 // Fetch current user information
-$user_id = $_SESSION['user_id']; // Make sure user_id is set
+$user_id = $_SESSION['user_id'];
 $query = "SELECT * FROM users WHERE user_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $user_id);
@@ -166,18 +166,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         .main-section {
             margin-left: 250px; /* Add margin to align with sidebar */
-            padding: 20px;
+            
         }
         @media (max-width: 768px) {
-            #sidebar {
-                position: absolute;
-                transform: translateX(-100%);
-            }
-            
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
             .main-section {
                 margin-left: 0; /* Remove margin on mobile */
             }
@@ -223,73 +214,107 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="main-section" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Account Settings</h1>
+                <h1 class="text-center mb-4 mt-4" style="font-weight: 700;">Account Settings</h1>
                 <div class="row">
-                    <div class="col-md-6"><!-- First column -->
-                        <div class="settings-form-container">
-                            <h2 class="mb-4">Personal Information</h2>
-                            <?php if (!empty($success_message)): ?>
-                                <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
-                            <?php endif; ?>
-                            <?php if (!empty($error_message)): ?>
-                                <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
-                            <?php endif; ?>
-                            <form class="settings-form" action="" method="POST">
-                                <div>
-                                    <label for="firstname" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['firstname']); ?>" required>
-                                </div>
-                                <div>
-                                    <label for="lastname" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['lastname']); ?>" required>
-                                </div>
-                                <div>
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                                </div>
-                                <div>
-                                    <label for="contact_number" class="form-label">Contact Number</label>
-                                    <input type="tel" class="form-control" id="contact_number" name="contact_number" value="<?php echo htmlspecialchars($user['contact_number']); ?>" required>
-                                </div>
-                            </form>
-                            <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-                                <?php
-                                    $user_id = $_SESSION['user_id']; 
-                                    $query = "SELECT profile FROM users WHERE user_id = ?";
-                                    $stmt = $conn->prepare($query);
-                                    $stmt->bind_param("i", $user_id);
-                                    $stmt->execute();
-                                    $result = $stmt->get_result();
-                                    $user = $result->fetch_assoc();
+                    <div class="col-md-4 mb-4"><!-- First column - Profile Picture only -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <h2 class="text-center card-title mb-4">Profile Picture</h2>
+                                    <!-- Image wrapped in a clickable element -->
+                                    <a href="#" id="profileImageLink" data-bs-toggle="modal" data-bs-target="#profileModal">
+                                        <img src="<?php echo htmlspecialchars($user['profile'] ?? 'profile/default_photo.jpg'); ?>" 
+                                             alt="Profile Picture" 
+                                             style="width: 200px; height: 200px; border-radius: 50%; margin-bottom: 20px;" />
+                                    </a>
+                                    
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-center w-100" style="font-weight: 600;" id="profileModalLabel">Profile Picture</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- Add image preview here -->
+                                                    <div class="text-center mb-3">
+                                                        <img id="modalProfileImage" src="" alt="Profile Picture" style="max-width: 100%; height: auto;">
+                                                    </div>
+                                                    <div class="d-grid gap-2">
+                                                        <button type="button" class="btn btn-secondary" id="changeProfileBtn">Change Profile</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                    if ($user) {
-                                        $photoPath = $user['profile']; // Get the profile photo path from the database
-                                    } else {
-                                        $photoPath = 'profile/default_photo.jpg'; // Fallback to default photo if user not found
-                                    }
-                                ?>
-                                <label for="profile_picture">Profile Picture:</label>
-                                <img src="<?php echo htmlspecialchars($photoPath); ?>" alt="Profile Picture" style="width: 100px; height: 100px;" />
-                                <input type="file" name="profile_picture" id="profile_picture" accept="image/*">
-                                <input type="submit" value="Update Profile">
-                            </form>
+                                    <!-- Hidden form for updating profile picture -->
+                                    <form action="update_profile.php" method="POST" enctype="multipart/form-data" id="profileForm" style="display: none;">
+                                        <div class="mb-3">
+                                            <input type="file" class="form-control" name="profile_picture" id="profile_picture" accept="image/*" onchange="this.form.submit()">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6"><!-- Second column -->
-                        <div class="settings-form-container">
-                            <h2 class="mb-4">Change Password</h2>
-                            <form class="settings-form" action="" method="POST">
-                                <div>
-                                    <label for="current_password" class="form-label">Current Password</label>
-                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
-                                </div>
-                                <div>
-                                    <label for="new_password" class="form-label">New Password </label>
-                                    <input type="password" class="form-control" id="new_password" name="new_password">
-                                    <p id="message" style="display: none;"><span id="strength"></span></p>
-                                </div>
-                                <button type="submit" class="btn" id="update_password">Update Information</button>
-                            </form>
+                    <div class="col-md-8 mb-4"><!-- Second column - All other inputs -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h2 class="text-center card-title mb-4">Account Information</h2>
+                                <?php if (!empty($success_message)): ?>
+                                    <div class="alert alert-success"><?php echo htmlspecialchars($success_message); ?></div>
+                                <?php endif; ?>
+                                <?php if (!empty($error_message)): ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($error_message); ?></div>
+                                <?php endif; ?>
+                                <form class="settings-form" action="" method="POST">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="firstname" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="firstname" name="firstname" 
+                                                   value="<?php echo htmlspecialchars($user['firstname']); ?>" readonly>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="lastname" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="lastname" name="lastname" 
+                                                   value="<?php echo htmlspecialchars($user['lastname']); ?>" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" 
+                                               value="<?php echo htmlspecialchars($user['email']); ?>" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="contact_number" class="form-label">Contact Number</label>
+                                        <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                               value="<?php echo htmlspecialchars($user['contact_number']); ?>" required>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" name="update_contact" class="btn">Update Information</button>
+                                    </div>
+                                </form>
+
+                                <hr class="my-4">
+
+                                <form class="settings-form" action="" method="POST">
+                                    <h2 class="card-title mb-3 text-center ">Change Password</h2>
+                                    <div class="mb-3">
+                                        <label for="current_password" class="form-label">Current Password</label>
+                                        <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="new_password" class="form-label">New Password</label>
+                                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                        <p id="message" style="display: none;"><span id="strength"></span></p>
+                                    </div>
+                                    <div class="text-end">
+                                        <button type="submit" name="update_password" class="btn" id="update_password">Update Password</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -363,6 +388,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 strength.style.color = "#26d730"; // Set strength text color to green
             }
         });
+    });
+
+    document.getElementById('profileModal').addEventListener('show.bs.modal', function (event) {
+        const imgSrc = document.querySelector('#profileImageLink img').src;
+        document.getElementById('modalProfileImage').src = imgSrc;
+    });
+
+    document.getElementById('changeProfileBtn').addEventListener('click', function() {
+        document.getElementById('profile_picture').click(); // Trigger file input directly
+        $('#profileModal').modal('hide');
+    });
+
+    // Optional: Add loading indicator when form is submitted
+    document.getElementById('profileForm').addEventListener('submit', function() {
+        // You could add a loading spinner here if desired
+        document.body.style.cursor = 'wait';
     });
 </script>
 </body>

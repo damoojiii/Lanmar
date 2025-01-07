@@ -546,7 +546,7 @@
                                             break;
                                       }
                                     ?>
-                                    <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
+                                    <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($textstatus); ?></span></td>
                                 
                             <?php endforeach; ?>
                             <?php elseif(empty($results)):?>

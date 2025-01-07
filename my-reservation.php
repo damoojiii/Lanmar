@@ -87,30 +87,18 @@
         td.highlight {
           background-color: rgba(var(--dt-row-hover), 0.052) !important;
         }
+        .active>.page-link, .page-link.active {
+          background-color: #004080;
+          border-color: #004080;
+        }
+        td.highlight {
+          background-color: rgba(var(--dt-row-hover), 0.052) !important;
+        }
 
         @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-250px);
-            }
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
-            .navbar {
-                margin-left: 0;
-                width: 100%; 
-            }
-            .navbar.shifted {
-                margin-left: 250px; 
-                width: calc(100% - 250px); 
-            }
-
             #main-content {
                 margin-left: 0;
                 padding-inline: 10px;
-            }
-            #main-content.shifted {
-                margin-left: 250px; 
             }
             .modal-body h6 {
                 font-size: 16px; /* Slightly larger headers for readability */
@@ -343,13 +331,13 @@
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
-            <div class="col-6 col-md-5">
+            <div class="col-sm-6 col-md-5">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-sm-6 col-md-3">
               <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></p>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-sm-6 col-md-4">
               <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></p>
             </div>
           </div>
