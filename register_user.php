@@ -15,6 +15,7 @@ if (isset($_POST["register"])) {
     $lastname = $_POST['lastname'];
     $contact_number = $_POST['contact_number'];
     $email = $_POST['email'];
+    $gender = $_POST['gender'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
     $role = $_POST['role'];
@@ -81,12 +82,12 @@ if (isset($_POST["register"])) {
                 $photoPath = 'profile/default_photo.jpg';
             }
 
-            $insert_query = "INSERT INTO users (firstname, lastname, contact_number, email, password, role, verification_code, email_verify, status, profile) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $insert_query = "INSERT INTO users (firstname, lastname, contact_number, email, gender, password, role, verification_code, email_verify, status, profile) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $insert_stmt = $conn->prepare($insert_query);
             $email_verify = NULL; // Assuming email is not verified initially
 
-            $insert_stmt->bind_param("ssissssiis", $firstname, $lastname, $contact_number, $email, $hashed_password, $role, $verification_code, $email_verify, $status, $photoPath);
+            $insert_stmt->bind_param("ssissssssis", $firstname, $lastname, $contact_number, $email, $gender, $hashed_password, $role, $verification_code, $email_verify, $status, $photoPath);
 
             // Execute the insert statement
             if ($insert_stmt->execute()) {
@@ -194,9 +195,16 @@ if (isset($_POST["register"])) {
             <input type="text" name="lastname" placeholder="Last Name" required>
             <input type="tel" name="contact_number" placeholder="Contact Number" required>
             <input type="email" name="email" placeholder="Email" required>
+            <select name="gender" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;" required>
+                <option value="" disabled selected>Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
             <input type="password" id="password" name="password" placeholder="Password" required>
+            <p id="message" style="display: none; font-size: 10px; margin-top: -5px; text-align: left;"><span id="strength"></span></p>
             <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-            <p id="message" style="display: none;"><span id="strength"></span></p>
+            
             <input type="hidden" name="role" value="user" required>
             <input type="hidden" name="photo" required>
             <button type="submit" name="register" id="submitButton">Register</button>
@@ -216,6 +224,9 @@ if (isset($_POST["register"])) {
         var confirmMsg = document.createElement("p");
         confirmMsg.id = "confirmMessage";
         confirmMsg.style.display = "none";
+        confirmMsg.style.fontSize = "10px";
+        confirmMsg.style.marginTop = "-5px";
+        confirmMsg.style.textAlign = "left";
         confirmPass.parentNode.insertBefore(confirmMsg, confirmPass.nextSibling);
 
         // Add event listener for confirm password
@@ -250,8 +261,8 @@ if (isset($_POST["register"])) {
                 return;
             }
 
-            if (pass.value.length < 5 || !hasUpperCase || !hasLowerCase || !hasNumbers || !hasSymbols) {
-                strength.innerHTML = "Password is Weak (Requires uppercase, lowercase, number, and symbol)";
+            if (pass.value.length < 5 || !hasUpperCase || !hasLowerCase || !hasNumbers) {
+                strength.innerHTML = "Password is Weak (Requires uppercase, lowercase, numbers)";
                 pass.style.borderColor = "#ff5925";
                 msg.style.color = "#ff5925";
                 strength.style.color = "#ff5925";
@@ -262,7 +273,7 @@ if (isset($_POST["register"])) {
                 msg.style.color = "#FFA500";
                 strength.style.color = "#FFA500";
                 submitButton.disabled = true;
-            } else if (pass.value.length >= 8 && hasUpperCase && hasLowerCase && hasNumbers && hasSymbols) {
+            } else if (pass.value.length >= 8 && hasUpperCase && hasLowerCase && hasNumbers) {
                 strength.innerHTML = "Password is Strong";
                 pass.style.borderColor = "#26d730";
                 msg.style.color = "#26d730";

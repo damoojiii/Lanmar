@@ -22,11 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
     $galleryImageName = basename($galleryImage['name']);
     $galleryTargetFilePath = $targetDir . $galleryImageName; // Use the same $targetDir
     $galleryImageType = $galleryImage['type'];
-    $galleryCaption = $_POST['gallery_caption']; // Get the caption from the form
 
     if (move_uploaded_file($galleryImage['tmp_name'], $galleryTargetFilePath)) {
-        $galleryStmt = $conn->prepare("INSERT INTO gallery (image, image_type, caption) VALUES (?, ?, ?)");
-        $galleryStmt->bind_param("sss", $galleryTargetFilePath, $galleryImageType, $galleryCaption); 
+        $galleryStmt = $conn->prepare("INSERT INTO gallery (image, image_type) VALUES ( ?, ?)");
+        $galleryStmt->bind_param("ss", $galleryTargetFilePath, $galleryImageType); 
 
         if ($galleryStmt->execute()) {
             $gallery_success_message = "Gallery image uploaded successfully.";
@@ -38,6 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
     } else {
         $gallery_error_message = "Error uploading the gallery file.";
     }
+}
+
+if (isset($_POST['delete_id'])) {
+    $delete_id = $_POST['delete_id'];
+    $conn->query("DELETE FROM gallery WHERE gallery_id = '$delete_id'");
+    exit;
 }
 ?>
 
@@ -630,14 +635,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
                                     <label for="gallery_image" class="mb-2">Upload New Gallery Image:</label>
                                     <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Gallery Image">
                                 </div>
-                                <div class="form-group text-center">
-                                    <label for="gallery_caption" class="mb-2">Caption:</label>
-                                    <input type="text" name="gallery_caption" id="gallery_caption" class="form-control" placeholder="Enter caption for gallery image">
-                                </div>
                                 <div class="button-container">
                                     <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
                                 </div>
                             </form>
+
+                            <div class="gallery-container">
+                                <?php
+                                // Fetch gallery images from the database
+                                $result = $conn->query("SELECT * FROM gallery");
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        echo '<div class="card" id="card-' . $row['gallery_id'] . '" style="width: 18rem; margin: 10px; display: inline-block;">';
+                                        echo '<img src="' . $row['image'] . '" class="card-img-top" alt="Gallery Image">';
+                                        echo '<div class="card-body">';
+                                        echo '<button class="btn btn-danger" onclick="deleteImage(' . $row['gallery_id'] . ')">Delete</button>';
+                                        echo '</div>';
+                                        echo '</div>';
+                                    }
+                                } else {
+                                    echo '<p>No images found in the gallery.</p>';
+                                }
+                                ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -663,6 +683,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
         });
     });
 </script>
+
+<script>
+        function deleteImage(imageId) {
+            if (confirm('Are you sure you want to delete this image?')) {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "homepage_section2.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onload = function() {
+                    if (xhr.status == 200) {
+                        var card = document.getElementById('card-' + imageId);
+                        card.style.display = 'none'; // Hide the deleted image's card
+                    } else {
+                        alert('Error deleting image!');
+                    }
+                };
+                xhr.send("delete_id=" + imageId);
+            }
+        }
+    </script>
+
 </body>
 <style>
       .tab-container {
