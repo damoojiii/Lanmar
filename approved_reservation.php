@@ -575,7 +575,12 @@
               <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <p><strong>Reservation Type:</strong> <span id="modalRoomType"></span></p>
+          <div class="row g-2">
+            <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
+          </div>
+          <div class="row g-2">
+            <div><p><strong>Rooms:</strong> <span id="modalRooms" class="row g-2"></p></div>
+          </div>
         </div>
 
         <!-- Booking Details Section -->
@@ -583,7 +588,7 @@
           <h6 class="fw-bold">Booking Details</h6>
           <div class="row g-2">
             <div class="col-12 col-md-4">
-              <p><strong>Additionals:</strong> <span id=""></p>
+              <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
           </div>
         </div>
@@ -737,6 +742,7 @@
                         `;
                         roomsContainer.appendChild(roomElement);
                     });
+                    document.getElementById('modalAdds').textContent = data.additional;
                     document.getElementById('modalPaymode').textContent = data.paymode;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;

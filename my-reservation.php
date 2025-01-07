@@ -322,7 +322,7 @@
           <h6 class="fw-bold">Booking Details</h6>
           <div class="row g-2">
             <div class="col-12 col-md-4">
-              <p><strong>Additionals:</strong> <span id=""></p>
+              <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
           </div>
         </div>
@@ -403,6 +403,16 @@ document.addEventListener('DOMContentLoaded', () => {
          .nodes()
          .each((el) => el.classList.add('highlight'));
  });
+ document.getElementById('hamburger').addEventListener('click', function() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('show');
+    
+    const navbar = document.querySelector('.navbar');
+    navbar.classList.toggle('shifted');
+    
+    const mainContent = document.getElementById('main-content');
+    mainContent.classList.toggle('shifted');
+});
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -453,6 +463,7 @@ let bookingIds;
                         roomsContainer.appendChild(roomElement);
                         ronum++;
                     });
+                    document.getElementById('modalAdds').textContent = data.additional;
                     document.getElementById('modalPaymode').textContent = data.paymode;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
