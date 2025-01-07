@@ -831,8 +831,6 @@ const approvedButton = document.querySelector('.btnApproved');
   } else {
     console.error('Error: The modal elements are not found.');
   }
-
-
 });
 
 
