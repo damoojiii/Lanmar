@@ -439,7 +439,7 @@
                 reservationType_tbl.reservation_type,
                 pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
                 bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode,
-                users.firstname, users.lastname, users.contact_number
+                users.firstname, users.lastname, users.contact_number, users.user_id
             FROM booking_tbl
             LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
             LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
@@ -472,7 +472,8 @@
                         <tbody>
                         <?php if(!empty($results)): ?>
                             <?php foreach ($results as $row): ?>
-                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
+                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>"
+                                data-user-id="<?php echo htmlspecialchars($row['user_id']); ?>">
 
                                     <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                                     <td><?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?></td>
@@ -605,7 +606,7 @@
       </div>
       <div class="modal-footer d-flex justify-content-end">
         
-            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+            <button id="chatsbutton" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
 
@@ -692,12 +693,14 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+        let userID;
     // Event delegation to handle row click events
     document.querySelector('tbody').addEventListener('click', function (event) {
         // Ensure the clicked element is a table row
         const row = event.target.closest('.table-row');
         if (row) {
             const bookingId = row.dataset.bookingId; // Get the booking ID
+            userID = row.dataset.userId;
 
             //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
             
@@ -747,6 +750,11 @@
                 alert(`An error occurred: ${error.message}`);
         }
     });
+    document.getElementById("chatsbutton").onclick = function() {
+     // Replace with your dynamic user_id value
+    const newUrl = `admin_chats.php?user_id=${userID}`;
+    window.location.href = newUrl; // Redirects to the new URL
+};
 });
 </script>
 </body>
