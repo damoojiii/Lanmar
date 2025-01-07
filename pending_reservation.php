@@ -10,7 +10,8 @@
     include "role_access.php";
     checkAccess('admin');
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bookingId'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
+        if (isset($_POST['bookingId'])){
         $bookingId = $_POST['bookingId'];
     
         // Here, connect to the database and update the booking status
@@ -30,8 +31,28 @@
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
         }
+    } else {
+        $bookingId = $_POST['bookingIdReject'];
+    
+        // Here, connect to the database and update the booking status
+        // Example using PDO for a MySQL database
+    
+        try {
+            // Prepare the SQL query to update the booking status
+            $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Rejected' WHERE booking_id = :bookingId");
+            $stmt->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
+    
+            // Execute the query
+            if ($stmt->execute()) {
+                //echo "Booking approved successfully!";
+            } else {
+                echo "Failed to update booking status.";
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
     }
-
+    }
 ?>
 
 <!DOCTYPE html>
@@ -657,7 +678,7 @@
             </button>
 
             <!-- Cancel Button -->
-            <button type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
+            <button type="button" class="btn btnReject" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
                 <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
             </button>
         </div>
@@ -796,6 +817,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = newUrl; // Redirects to the new URL
 };
 const approvedButton = document.querySelector('.btnApproved');
+const rejectedButton = document.querySelector('.btnReject');
   const bookingIdElement = document.getElementById('modalBookingId');
 
   if (approvedButton && bookingIdElement) {
@@ -831,6 +853,43 @@ const approvedButton = document.querySelector('.btnApproved');
   } else {
     console.error('Error: The modal elements are not found.');
   }
+
+  if (rejectedButton && bookingIdElement) {
+  // Function to handle the rejection action
+  rejectedButton.addEventListener('click', function (event) {
+    event.preventDefault();
+    const bookingId = bookingIdElement.textContent.trim();
+
+    const isConfirmed = confirm("Are you sure you want to reject this booking?");
+
+    // Create the form element if confirmed
+    if (isConfirmed) {
+      const form = document.createElement('form');
+      form.method = 'POST';  // Use POST method
+      form.action = '';  // Submitting to the same page
+
+      // Create a hidden input field for the bookingId
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'bookingIdReject';
+      input.value = bookingId;
+
+      // Append the input field to the form
+      form.appendChild(input);
+
+      // Append the form to the body
+      document.body.appendChild(form);
+
+      // Submit the form
+      form.submit();
+    } else {
+      // If the user cancels (clicks "Cancel"), do nothing
+      console.log('Booking rejection canceled');
+    }
+  });
+} else {
+  console.error('Error: The modal elements are not found.');
+}
 });
 
 
