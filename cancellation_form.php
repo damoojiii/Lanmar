@@ -220,45 +220,121 @@
 <?php 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if (isset($_GET['id']) && !empty($_GET['id'])) {
-        // Store the selected choice in the session
-        $_SESSION['booking_id'] = $_GET['id'];
-        $bookingId = $_SESSION['booking_id'];
+        $bookingId = $_GET['id'];
+
+        // Check if the booking already exists in cancel_tbl
+        $exist = "SELECT booking_id FROM cancel_tbl WHERE booking_id = :id";
+        $stmt_exist = $pdo->prepare($exist);
+        $stmt_exist->bindParam(":id", $bookingId, PDO::PARAM_INT);
+        $stmt_exist->execute();
+        $result_exist = $stmt_exist->fetch(PDO::FETCH_ASSOC);
+
+        if ($result_exist) {
+            echo '<script>  
+                    window.location="my-reservation.php"; 
+                  </script>';
+            exit(); 
+        }
+
     } else {
-        // If no choice is selected, display an error message
-        $error_message = "No payment method selected. Please choose one.";
+        echo '<script>  
+                window.location="my-reservation.php"; 
+        </script>';
+        exit(); 
+    }
+
+    
+
+    
+    $sql = "SELECT booking_id, dateIn, dateOut, checkin, checkout FROM booking_tbl WHERE booking_id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(":id", $bookingId, PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($result) {
+        $date = ($result["dateIn"] != $result["dateOut"]) 
+        ? date("F j, Y", strtotime($result["dateIn"])) . ' to ' . date("F j, Y", strtotime($result["dateOut"])) 
+        : date("F j, Y", strtotime($result["dateIn"]));
+        $time = date("g:i A", strtotime($result["checkin"])) . ' to ' . date("g:i A", strtotime($result["checkout"]));
     }
 }
 ?>
 <div id="main-content" class="container mt-2">
     <div class="form-container">
         <div class="form-header text-center">Cancellation Form</div>
-        <form action="process_cancellation.php" method="POST">
+        <form action="" method="POST">
             <div class="mb-3">
                 <label for="reservationId" class="form-label">Reservation ID</label>
-                <input type="text" class="form-control" id="reservationId" name="reservation_id" placeholder="Enter your reservation ID" value="<?php echo $bookingId?>" required>
+                <input type="text" class="form-control" id="reservationId" name="reservation_id" value="<?php echo $bookingId ?>" readonly>
             </div>
             <div class="mb-3">
                 <label for="cancellationDate" class="form-label">Date</label>
-                <input type="date" class="form-control" id="cancellationDate" name="cancellation_date" required>
+                <input type="text" class="form-control" id="cancellationDate" value="<?php echo $date ?>" readonly>
             </div>
             <div class="mb-3">
                 <label for="cancellationTime" class="form-label">Time</label>
-                <input type="time" class="form-control" id="cancellationTime" name="cancellation_time" required>
+                <input type="text" class="form-control" id="cancellationTime" value="<?php echo $time ?>" readonly>
             </div>
             <div class="mb-3">
                 <label for="cancellationReason" class="form-label">Reason for Cancellation</label>
                 <textarea class="form-control" id="cancellationReason" name="cancellation_reason" rows="4" placeholder="Please explain your reason..." required></textarea>
             </div>
             <button type="submit" class="btn btn-danger w-100">Submit Cancellation</button>
+            <a href="my-reservation.php" class="btn btn-secondary w-100 mt-1">Cancel</a>
         </form>
+        <?php
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $reservationId = $_POST['reservation_id'];
+            $cancellationReason = $_POST['cancellation_reason'];
+            $timestamp = date('Y-m-d H:i:s'); // Get the current timestamp
+
+            // Insert into cancel_tbl
+            $sql = "INSERT INTO cancel_tbl (booking_id, cancellation_reason,is_read, timestamp) VALUES (:booking_id, :cancellation_reason, 0, :timestamp)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':booking_id', $reservationId, PDO::PARAM_INT);
+            $stmt->bindParam(':cancellation_reason', $cancellationReason, PDO::PARAM_STR);
+            $stmt->bindParam(':timestamp', $timestamp, PDO::PARAM_STR);
+
+            $statusQuery = "SELECT status FROM booking_tbl WHERE booking_id = :booking_id";
+            $statusStmt = $pdo->prepare($statusQuery);
+            $statusStmt->bindParam(':booking_id', $reservationId, PDO::PARAM_INT);
+            $statusStmt->execute();
+            $currentStatus = $statusStmt->fetchColumn();
+
+            // Update the status based on the current status
+            if ($currentStatus === 'Pending') {
+                $updateQuery = "UPDATE booking_tbl SET status = 'Cancellation1' WHERE booking_id = :booking_id";
+            } else if ($currentStatus === 'Approved') {
+                $updateQuery = "UPDATE booking_tbl SET status = 'Cancellation2' WHERE booking_id = :booking_id";
+            }
+            
+
+            if ($stmt->execute()) {
+                if (isset($updateQuery)) {
+                    $updateStmt = $pdo->prepare($updateQuery);
+                    $updateStmt->bindParam(':booking_id', $reservationId, PDO::PARAM_INT);
+                    $updateStmt->execute();
+                }
+        
+                echo '<script>  
+                        alert("Cancellation submitted successfully.");  
+                        window.location="chats.php"; 
+                      </script>';
+            } else {
+                echo '<script>  
+                        alert("There was an error processing your request. Please try again."); 
+                      </script>';
+            }
+        }
+        ?>
+
     </div>
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

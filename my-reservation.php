@@ -48,7 +48,7 @@
         .table-row:hover {
         background-color: #f1f1f1;
         }
-        .pending {
+        .pending, .cancellation {
         padding: 0.4em 0.8em;
         font-size: 0.9rem;
         border-radius: 12px;
@@ -103,6 +103,7 @@
 
             #main-content {
                 margin-left: 0;
+                padding-inline: 10px;
             }
             #main-content.shifted {
                 margin-left: 250px; 
@@ -189,7 +190,7 @@
 <div id="main-content" class="mt-4 pt-3">
     <h2 class="mb-4">My Reservations</h2>
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover text-center">
                 <thead class="custom-header">
                     <tr>
                         <th>ID</th>
@@ -208,7 +209,7 @@
                     onclick="showDetails(this)"
                       data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>"
                       data-date-range="<?php echo ($row["dateIn"] != $row["dateOut"]) 
-                          ? date("F j, Y", strtotime($row["dateIn"])) . ' to ' . date("F j, Y", strtotime($row["dateOut"])) 
+                          ? date("F j", strtotime($row["dateIn"])) . ' to ' . date("F j, Y", strtotime($row["dateOut"])) 
                           : date("F j, Y", strtotime($row["dateIn"])); ?>"
                       data-time-range="<?php echo date("g:i A", strtotime($row["checkin"])) . ' to ' . date("g:i A", strtotime($row["checkout"])); ?>"
                       data-adult = "<?php echo htmlspecialchars($row['adult']); ?>"
@@ -225,7 +226,7 @@
                         <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                         
                         <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
-                          echo date("F j, Y" , strtotime($row["dateIn"])) . " to " . date("F j, Y" , strtotime($row["dateOut"]));
+                          echo date("F j" , strtotime($row["dateIn"])) . " to " . date("F j, Y" , strtotime($row["dateOut"]));
                           } else {
                             echo date("F j, Y" , strtotime($row["dateIn"]));
                           } ?></td>
@@ -240,20 +241,28 @@
                         switch ($row['status']) {
                           case "Approved":
                               $class = "approved";
+                              $textstatus = "Approved";
                               break;
                           case "Pending":
                               $class = "pending";
+                              $textstatus = "Pending";
                               break;
-                          case "Cancel":
+                          case "Cancelled":
                               $class = "cancel";
+                              $textstatus = "Cancelled";
                               break;
                           case "Completed":
                               $class = "completed";
+                              $textstatus = "Completed";
+                              break;
+                          case "Cancellation1":
+                              $class = "cancellation";
+                              $textstatus = "For Cancellation";
                               break;
                         }
                         ?>
-                        <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
-                        <td><span>
+                        <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($textstatus); ?></span></td>
+                        <td class="d-none"><span>
                           <?php 
                           $sql = "
                           SELECT 

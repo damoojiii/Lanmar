@@ -327,7 +327,15 @@
         background-color: #f1f1f1;
         }
 
-        .completed{
+        .pending, .cancellation {
+        padding: 0.4em 0.8em;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        background-color: #fbe9a1;
+        color: #856404;
+        font-weight: bold;
+        }
+        .completed, .approved{
             padding: 0.4em 0.8em;
             font-size: 0.9rem;
             border-radius: 12px;
@@ -335,7 +343,7 @@
             color: #1A5319;
             font-weight: bold;
         }
-        .cancel{
+        .cancel, .rejected{
             padding: 0.4em 0.8em;
             font-size: 0.9rem;
             border-radius: 12px;
@@ -465,7 +473,7 @@
         <div class="">
             <div class="main-container my-5">
                 <h2 class="mb-4">Reservation History</h2>
-                <div class="table-responsive">
+                <div class="table-responsive text-center">
                     <table class="table table-hover">
                         <thead class="custom-header">
                             <tr>
@@ -516,19 +524,27 @@
                                     echo htmlspecialchars($totalPax); ?></td>
                                     <?php 
                                     switch ($row['status']) {
-                                    case "Approved":
-                                        $class = "approved";
-                                        break;
-                                    case "Pending":
-                                        $class = "pending";
-                                        break;
-                                    case "Cancelled":
-                                        $class = "cancel";
-                                        break;
-                                    case "Completed":
-                                        $class = "completed";
-                                        break;
-                                    }
+                                        case "Approved":
+                                            $class = "approved";
+                                            $textstatus = "Approved";
+                                            break;
+                                        case "Pending":
+                                            $class = "pending";
+                                            $textstatus = "Pending";
+                                            break;
+                                        case "Cancelled":
+                                            $class = "cancel";
+                                            $textstatus = "Cancelled";
+                                            break;
+                                        case "Completed":
+                                            $class = "completed";
+                                            $textstatus = "Completed";
+                                            break;
+                                        case "Cancellation1" || "Cancellation2":
+                                            $class = "cancellation";
+                                            $textstatus = "For Cancellation";
+                                            break;
+                                      }
                                     ?>
                                     <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
                                     <td><span>

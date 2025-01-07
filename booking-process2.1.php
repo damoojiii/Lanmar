@@ -513,6 +513,16 @@
             ':status' => $status
         ]);
 
+        $bookingId = $pdo->lastInsertId();
+
+        // Insert into notification_tbl
+        $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
+                            VALUES (:booking_id, 0, 0, 0, NOW())";
+        $stmt_notification = $pdo->prepare($notification_sql);
+        $stmt_notification->execute([
+            ':booking_id' => $bookingId
+        ]);
+
         unset($_SESSION['dateIn']);
         unset($_SESSION['dateOut']);
         unset($_SESSION['checkin']);

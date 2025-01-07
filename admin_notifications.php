@@ -498,21 +498,55 @@
         <hr>
         <a href="logout.php" class="nav-link text-white">Log out</a>
     </div>
-
+    
     <div id="main-content" class="p-3">
         <div class="notification-page">
             <h2>New Reservation(s)</h2>
             <div class="notification-container">
+            <?php 
+                $sql = "SELECT n.notification_id, n.status, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, 
+                        u.user_id, 
+                        u.firstname, 
+                        u.lastname
+                    FROM 
+                        notification_tbl n
+                    JOIN 
+                        booking_tbl b ON n.booking_id = b.booking_id
+                    JOIN 
+                        users u ON b.user_id = u.user_id
+                    WHERE 
+                        n.is_read_admin = 0
+                    ORDER BY 
+                        n.timestamp DESC
+                    ";
+                    $query = $pdo->prepare($sql);
+                    $query->execute();
+                    $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($notifications as $notification) {
+                        $fullName = ucwords($notification['firstname']) . ' ' . ucwords($notification['lastname']);
+                        $dateIn = date('F j, Y', strtotime($notification['dateIn']));
+                        $dateOut = date('F j, Y', strtotime($notification['dateOut']));
+
+                        $dateDisplay = ($dateIn === $dateOut) ? $dateIn : "$dateIn - $dateOut";
+
+                        $checkinTime = date('h:i A', strtotime($notification['checkin']));
+                        $checkoutTime = date('h:i A', strtotime($notification['checkout']));
+                        $timestamp = $notification['timestamp'];
+                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
+                        $timeAgo = '3h ago';
+            ?>
+
                 <!-- Notification Card -->
                 <div class="notification-card new">
                     <span class="badge-new">New</span>
                     <div class="notification-content">
-                        <p><strong>From Jani Jani</strong></p>
-                        <p>Date & Time: mm-dd-yyyy hh:mm-hh:mm</p>
+                        <p><strong>From <?php echo  htmlspecialchars($fullName); ?></strong></p>
+                        <p>Date & Time: <br><?php echo  $dateDisplay . ' ' . $checkinTime.'-'.$checkoutTime; ?></p>
                     </div>
                     <div class="notification-footer">
                         <div class="time-container">
-                            <p class="time">3h ago</p>
+                            <p class="time"><?php echo  htmlspecialchars($timeAgo); ?></p>
                         </div>
                         <div class="buttons-container">
                             <button class="btn btn-primary btn-sm">View</button>
@@ -522,20 +556,20 @@
                     <span class="dot-indicator"></span>
                 </div>
                 <!-- Add more cards as needed -->
+            <?php } ?>
             </div>
 
             <hr />
 
-            <!-- Cancellation Notifications Section -->
-            <h2>Cancelled Reservation(s)</h2>
+            <!-- Cancellation Form Section -->
+            <h2>Cancellation Forms</h2>
             <div class="notification-container">
                 <!-- Cancellation Card -->
                 <div class="notification-card cancel">
-                    <span class="badge-cancel">Cancelled</span>
+                    <span class="badge-cancel">For Cancellation</span>
                     <div class="notification-content">
-                        <p><strong>From John Doe</strong></p>
-                        <p>Date & Time: mm-dd-yyyy hh:mm-hh:mm</p>
-                        <p>Reason: Customer requested cancellation.</p>
+                        <p><strong>Submitted by John Doe</strong></p>
+                        <p>Reservation # 1234 is requested to be cancel.</p>
                     </div>
                     <div class="notification-footer">
                         <div class="time-container">
@@ -555,17 +589,51 @@
 
             <h2>Read Reservation(s)</h2>
             <div class="notification-container">
+            <?php 
+                $sql1 = "SELECT n.notification_id, n.status, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, 
+                        u.user_id, 
+                        u.firstname, 
+                        u.lastname
+                    FROM 
+                        notification_tbl n
+                    JOIN 
+                        booking_tbl b ON n.booking_id = b.booking_id
+                    JOIN 
+                        users u ON b.user_id = u.user_id
+                    WHERE 
+                        n.is_read_admin = 1
+                    ORDER BY 
+                        n.timestamp DESC
+                    ";
+                    $query1 = $pdo->prepare($sql1);
+                    $query1->execute();
+                    $notifications1 = $query1->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($notifications1 as $notification) {
+                        $fullName = ucwords($notification['firstname']) . ' ' . ucwords($notification['lastname']);
+                        $dateIn = date('F j, Y', strtotime($notification['dateIn']));
+                        $dateOut = date('F j, Y', strtotime($notification['dateOut']));
+
+                        $dateDisplay = ($dateIn === $dateOut) ? $dateIn : "$dateIn - $dateOut";
+
+                        $checkinTime = date('h:i A', strtotime($notification['checkin']));
+                        $checkoutTime = date('h:i A', strtotime($notification['checkout']));
+                        $timestamp = $notification['timestamp'];
+                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
+                        $timeAgo = '1d ago';
+            ?>
                 <!-- Notification Card -->
                 <div class="notification-card read">
                     <div class="notification-content">
-                        <p><strong>From Jani Jani</strong></p>
-                        <p>Date & Time: mm-dd-yyyy hh:mm-hh:mm</p>
+                        <p><strong>From <?php echo  htmlspecialchars($fullName); ?></strong></p>
+                        <p>Date & Time: <br><?php echo  $dateDisplay . ' ' . $checkinTime.'-'.$checkoutTime; ?></p>
                     </div>
                     <div class="notification-footer">
-                        <p class="time">1d ago</p>
+                        <p class="time"><?php echo  htmlspecialchars($timeAgo); ?></p>
                         <button class="btn btn-primary btn-sm">View</button>
                     </div>
                 </div>
+            <?php } ?>
                 <!-- Add more cards as needed -->
             </div>
         </div>

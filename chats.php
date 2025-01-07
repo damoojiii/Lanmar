@@ -295,7 +295,7 @@
                     if (msg.role === 'admin') {
                         chatHTML += `
                             <div class="message received">
-                                <img src="https://via.placeholder.com/40" alt="Profile Picture">
+                                <img src="uploads/lanmar-pfp.jpg" alt="Profile Picture">
                                 <div class="message-content">
                                     ${msg.msg}
                                     <span class="message-timestamp">${formattedTime}</span>
