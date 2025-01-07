@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
     <?php include "sidebar-design.php"; ?>
     <style>
 
@@ -82,6 +83,9 @@
         .modal-body p {
         font-size: 14px; /* Slightly smaller text for mobile */
         margin: 0;
+        }
+        td.highlight {
+          background-color: rgba(var(--dt-row-hover), 0.052) !important;
         }
 
         @media (max-width: 768px) {
@@ -190,7 +194,8 @@
 <div id="main-content" class="mt-4 pt-3">
     <h2 class="mb-4">My Reservations</h2>
         <div class="table-responsive">
-            <table class="table table-hover text-center">
+        
+            <table class="table table-hover text-center" id="example" style="width:100%">
                 <thead class="custom-header">
                     <tr>
                         <th>ID</th>
@@ -206,22 +211,7 @@
                 <?php if(!empty($results)): ?>
                 <?php foreach ($results as $row): ?>
                     <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" 
-                    onclick="showDetails(this)"
-                      data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>"
-                      data-date-range="<?php echo ($row["dateIn"] != $row["dateOut"]) 
-                          ? date("F j", strtotime($row["dateIn"])) . ' to ' . date("F j, Y", strtotime($row["dateOut"])) 
-                          : date("F j, Y", strtotime($row["dateIn"])); ?>"
-                      data-time-range="<?php echo date("g:i A", strtotime($row["checkin"])) . ' to ' . date("g:i A", strtotime($row["checkout"])); ?>"
-                      data-adult = "<?php echo htmlspecialchars($row['adult']); ?>"
-                      data-child = "<?php echo htmlspecialchars($row['child']); ?>"
-                      data-pwd = "<?php echo htmlspecialchars($row['pwd']); ?>"
-                      data-total-pax="<?php echo htmlspecialchars($row['adult'] + $row['child'] + $row['pwd']); ?>"
-                      data-hours="<?php echo htmlspecialchars($row['hours']); ?>"
-                      data-roomtype = "<?php echo htmlspecialchars($row['reservation_type']); ?>"
-                      data-paymode="<?php echo htmlspecialchars(htmlspecialchars($row['pay_mode'])); ?>"
-                      data-total-bill="<?php echo htmlspecialchars(number_format($row['total_bill'])); ?>"
-                      data-balance="<?php echo htmlspecialchars(number_format($row['balance'])); ?>"
-                      data-status="<?php echo htmlspecialchars($row['status']); ?>">
+                    data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
 
                         <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                         
@@ -262,54 +252,15 @@
                         }
                         ?>
                         <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($textstatus); ?></span></td>
-                        <td class="d-none"><span>
-                          <?php 
-                          $sql = "
-                          SELECT 
-                              booking_tbl.booking_id,
-                              room_tbl.bill_id, room_tbl.room_name
-                          FROM booking_tbl
-                          LEFT JOIN room_tbl ON booking_tbl.bill_id = room_tbl.bill_id
-                          WHERE booking_tbl.booking_id = :id
-                            ";
-                          $stmt = $pdo->prepare($sql);
-                          $stmt->bindParam(":id", $row['booking_id'], PDO::PARAM_INT);
-                          $stmt->execute();
-                          $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                          $room_data = [];
-                          if (!empty($rows)) {
-                              foreach ($rows as $row) {
-                                  $room_data[] = [
-                                      'room_name'=>$row['room_name'] ?? null,
-                                  ];
-                              }
-                          }
-                          ?>
                         </span></td>
                   <?php endforeach; ?>
                   <?php elseif(empty($results)):?>
-                    <td colspan="7" style="text-align: center;">No reservations</td>
+                    <td style="text-align: center;">No reservations</td>
                     </tr>
                   <?php endif ?>
                 </tbody>
             </table>
         </div>
-        <nav>
-            <ul class="pagination justify-content-end">
-                <li class="page-item disabled">
-                    <a class="page-link">Previous</a>
-                </li>
-                <li class="page-item active">
-                    <a class="page-link">1</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link">2</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link">Next</a>
-                </li>
-            </ul>
-        </nav>
 </div>
 
 <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
@@ -323,7 +274,7 @@
         <!-- Reservation ID -->
         <div class="mb-4">
           <h6 class="fw-bold">Reservation ID:</h6>
-          <p id="reservation-id"><span id="modalBookingId"></p>
+          <p id="reservation-id">#<span id="modalBookingId"></p>
         </div>
 
         <!-- Personal Information Section -->
@@ -331,10 +282,10 @@
           <h6 class="fw-bold">Personal Information</h6>
           <div class="row g-2" >
             <div class="col-12 col-md-4">
-              <p><strong>Name:</strong> <?php echo $fullname ?></p>
+              <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
             <div class="col-12 col-md-4">
-              <p><strong>Contact No.:</strong> <?php echo $name['contact_number'] ?></p>
+              <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
             <div class="col-12 col-md-4">
               <p><strong>Gender:</strong> WRONG-TURN</p>
@@ -371,10 +322,10 @@
             </div>
           </div>
           <div class="row g-2">
-            <div><p><strong>Reservation Type:</strong> <span id="modalroomtype"></p></div>
+            <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
-            <div><p><strong>Rooms:</strong> <span id="modalrooms"></p></div>
+            <div><p><strong>Rooms:</strong> <span id="modalRooms" class="row g-2"></p></div>
           </div>
         </div>
 
@@ -393,7 +344,7 @@
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
             <div class="col-6 col-md-5">
-              <p><strong>Payment Method:</strong> <span id="modalpaymode"></span></p>
+              <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
             <div class="col-6 col-md-3">
               <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></p>
@@ -429,64 +380,114 @@
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+<script src="assets/DataTables/datatables.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>
 
 <script>
-    document.getElementById('hamburger').addEventListener('click', function () {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('show');
-    
-    const navbar = document.querySelector('.navbar');
-    navbar.classList.toggle('shifted');
-    
-    const mainContent = document.getElementById('main-content');
-    mainContent.classList.toggle('shifted');
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tableIndex = new DataTable('#example', {
+        columnDefs: [
+            {
+                searchable: false,
+                orderable: false,
+                targets: 0
+            }
+        ],
+        order: [],
+        paging: true,
+        scrollY: '100%'
+    });
+ 
+ tableIndex.on('mouseenter', 'td', function () {
+     let colIdx = tableIndex.cell(this).index().column;
+  
+     tableIndex
+         .cells()
+         .nodes()
+         .each((el) => el.classList.remove('highlight'));
+  
+     tableIndex
+         .column(colIdx)
+         .nodes()
+         .each((el) => el.classList.add('highlight'));
+ });
 });
-let bookingId;
 
-function showDetails(row) {
-    // Extract data from the clicked row
-    bookingId = row.dataset.bookingId;
-    const dateRange = row.dataset.dateRange;
-    const timeRange = row.dataset.timeRange;
-    const hours = row.dataset.hours;
-    const adults = row.dataset.adult;
-    const children = row.dataset.child;
-    const pwds = row.dataset.pwd;
-    const totalPax = row.dataset.totalPax;
-    const type = row.dataset.roomtype;
-    const paymode = row.dataset.paymode;
-    const totalBill = row.dataset.totalBill;
-    const balance = row.dataset.balance;
-    const status = row.dataset.status;
+document.addEventListener('DOMContentLoaded', () => {
 
-    // Populate the modal with the extracted data
-    document.getElementById('modalBookingId').textContent = bookingId;
-    document.getElementById('modalDateRange').textContent = dateRange;
-    document.getElementById('modalTimeRange').textContent = timeRange;
-    document.getElementById('modalHours').textContent = hours;
-    document.getElementById('modalAdults').textContent = adults;
-    document.getElementById('modalChild').textContent = children;
-    document.getElementById('modalPwd').textContent = pwds;
-    document.getElementById('modalTotalPax').textContent = totalPax;
-    document.getElementById('modalroomtype').textContent = type;
-    document.getElementById('modalpaymode').textContent = paymode;
-    document.getElementById('modalTotalBill').textContent = totalBill;
-    document.getElementById('modalBalance').textContent = balance;
-    document.getElementById('modalStatus').textContent = status;
+let bookingIds;
 
-}
-function cancelBooking() {
-    if (bookingId) { // Make sure bookingId is set
+    // Event delegation to handle row click events
+    document.querySelector('tbody').addEventListener('click', function (event) {
+        // Ensure the clicked element is a table row
+        const row = event.target.closest('.table-row');
+        if (row) {
+            const bookingId = row.dataset.bookingId; // Get the booking ID
+            bookingIds = bookingId;
+
+            //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
+            
+            // Fetch the booking details from the server
+            fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Booking not found');
+                        return;
+                    }
+
+                    // Populate the modal with the fetched data
+                    document.getElementById('modalBookingId').textContent = data.bookingId;
+                    document.getElementById('modalName').textContent = data.name;
+                    document.getElementById('modalContact').textContent = data.contact;
+                    document.getElementById('modalDateRange').textContent = data.dateRange;
+                    document.getElementById('modalTimeRange').textContent = data.timeRange;
+                    document.getElementById('modalHours').textContent = data.hours;
+                    document.getElementById('modalAdults').textContent = data.adult;
+                    document.getElementById('modalChild').textContent = data.child;
+                    document.getElementById('modalPwd').textContent = data.pwds;
+                    document.getElementById('modalTotalPax').textContent = data.totalPax;
+                    document.getElementById('modalRoomType').textContent = data.type;
+                    // Optionally, loop over the rooms and display them in the modal (if needed)
+                    const roomsContainer = document.getElementById('modalRooms');
+                    roomsContainer.innerHTML = ''; // Clear existing rooms
+                    let ronum = 1;
+                    data.roomName.forEach(room => {
+                        const roomElement = document.createElement('div');
+                        roomElement.classList.add('room-detail','col-3','col-md-3');
+                        roomElement.innerHTML = `
+                            <strong>Room ${ronum}:</strong> ${room.roomName}<br>
+                        `;
+                        roomsContainer.appendChild(roomElement);
+                        ronum++;
+                    });
+                    document.getElementById('modalPaymode').textContent = data.paymode;
+                    document.getElementById('modalTotalBill').textContent = data.totalBill;
+                    document.getElementById('modalBalance').textContent = data.balance;
+
+                    
+
+                    // Show the modal
+                    $('#reservationModal').modal('show');
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+    });
+
+    function cancelBooking() {
+    if (bookingIds) { // Make sure bookingId is set
         // Navigate to the cancellation page with the bookingId
-        window.location.href = `cancellation_form.php?id=${bookingId}`;
+        window.location.href = `cancellation_form.php?id=${bookingIds}`;
     } else {
         console.log("No bookingId found!");
     }
 }
 document.getElementById('cancelButton').addEventListener('click', cancelBooking);
+
+});
 
 </script>
