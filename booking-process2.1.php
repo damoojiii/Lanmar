@@ -376,9 +376,9 @@
 </div>
 <?php
     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-        if (isset($_POST['choice']) && !empty($_POST['choice'])) {
+        if (isset($_GET['choice']) && !empty($_GET['choice'])) {
             // Store the selected choice in the session
-            $_SESSION['payment_method'] = $_POST['choice'];
+            $_SESSION['payment_method'] = $_GET['choice'];
         } else {
             // If no choice is selected, display an error message
             $error_message = "No payment method selected. Please choose one.";
@@ -393,10 +393,10 @@
     $childs = $_SESSION['child'] ?? '';
     $pwd = $_SESSION['pwd'] ?? '';
     $totalPax = $_SESSION['totalpax'] ?? '';
-    $reservationType = $_SESSION['reservationType'];
+    $reservationType = $_SESSION['reservationType'] ?? '';
     $origPrice = $_SESSION['rate'] ?? '';
     $grandTotal = $_SESSION['grandTotal']  ?? '';
-    $roomTotal = $_SESSION['roomTotal'];
+    $roomTotal = $_SESSION['roomTotal'] ?? '';
     $roomIds = $_SESSION['roomIds'] ?? '';
     $paymode = $_SESSION['payment_method'] ?? '';
     $status = 'Pending';
@@ -406,7 +406,7 @@
     $stmt->execute();
     $priceData = $stmt->fetch(PDO::FETCH_ASSOC);
     $price = $priceData['price'];
-    $balance = $grandTotal - $price;
+    $balance = (int)$grandTotal - $price;
 
     // Check if the form is submitted
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && basename($_SERVER['PHP_SELF']) == 'booking-process2.1.php') {

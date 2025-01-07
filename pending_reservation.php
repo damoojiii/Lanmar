@@ -672,7 +672,7 @@
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
 
-            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+            <button type="button" id="editButton" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
             </button>
 
@@ -721,41 +721,61 @@
             collapse.style.height = '0px';
         });
     });
-    function showDetails(row) {
-    // Extract data from the clicked row
-    bookingId = row.dataset.bookingId;
-    const dateRange = row.dataset.dateRange;
-    const timeRange = row.dataset.timeRange;
-    const hours = row.dataset.hours;
-    const adults = row.dataset.adult;
-    const children = row.dataset.child;
-    const pwds = row.dataset.pwd;
-    const totalPax = row.dataset.totalPax;
-    const type = row.dataset.roomtype;
-    const paymode = row.dataset.paymode;
-    const totalBill = row.dataset.totalBill;
-    const balance = row.dataset.balance;
-    const status = row.dataset.status;
-    const fullname = row.dataset.fullname;
-    const contact = row.dataset.contact;
 
-    // Populate the modal with the extracted data
-    document.getElementById('modalBookingId').textContent = bookingId;
-    document.getElementById('modalName').textContent = fullname;
-    document.getElementById('modalContact').textContent = contact;
-    document.getElementById('modalDateRange').textContent = dateRange;
-    document.getElementById('modalTimeRange').textContent = timeRange;
-    document.getElementById('modalHours').textContent = hours;
-    document.getElementById('modalAdults').textContent = adults;
-    document.getElementById('modalChild').textContent = children;
-    document.getElementById('modalPwd').textContent = pwds;
-    document.getElementById('modalTotalPax').textContent = totalPax;
-    document.getElementById('modalRoomType').textContent = type;
-    document.getElementById('modalPaymode').textContent = paymode;
-    document.getElementById('modalTotalBill').textContent = totalBill;
-    document.getElementById('modalBalance').textContent = balance;
-    document.getElementById('modalStatus').textContent = status;
-}
+    document.addEventListener('DOMContentLoaded', function() { 
+        let bookingId;
+
+        document.getElementById('editButton').addEventListener('click', editBooking);
+    });
+
+
+    function showDetails(row) {
+        console.log(row.dataset.bookingId);
+        // Extract data from the clicked row
+        bookingId = row.dataset.bookingId;
+        const dateRange = row.dataset.dateRange;
+        const timeRange = row.dataset.timeRange;
+        const hours = row.dataset.hours;
+        const adults = row.dataset.adult;
+        const children = row.dataset.child;
+        const pwds = row.dataset.pwd;
+        const totalPax = row.dataset.totalPax;
+        const type = row.dataset.roomtype;
+        const paymode = row.dataset.paymode;
+        const totalBill = row.dataset.totalBill;
+        const balance = row.dataset.balance;
+        const status = row.dataset.status;
+        const fullname = row.dataset.fullname;
+        const contact = row.dataset.contact;
+
+        // Populate the modal with the extracted data
+        document.getElementById('modalBookingId').textContent = bookingId;
+        document.getElementById('modalName').textContent = fullname;
+        document.getElementById('modalContact').textContent = contact;
+        document.getElementById('modalDateRange').textContent = dateRange;
+        document.getElementById('modalTimeRange').textContent = timeRange;
+        document.getElementById('modalHours').textContent = hours;
+        document.getElementById('modalAdults').textContent = adults;
+        document.getElementById('modalChild').textContent = children;
+        document.getElementById('modalPwd').textContent = pwds;
+        document.getElementById('modalTotalPax').textContent = totalPax;
+        document.getElementById('modalRoomType').textContent = type;
+        document.getElementById('modalPaymode').textContent = paymode;
+        document.getElementById('modalTotalBill').textContent = totalBill;
+        document.getElementById('modalBalance').textContent = balance;
+        document.getElementById('modalStatus').textContent = status;
+
+    }
+
+    function editBooking() {
+        if (bookingId) { // Make sure bookingId is set
+            // Navigate to the cancellation page with the bookingId
+            window.location.href = `edit_reservation.php?id=${bookingId}`;
+        } else {
+            console.log("No bookingId found!");
+        }
+    }
+    
 </script>
 </body>
 </html>
