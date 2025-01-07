@@ -471,6 +471,7 @@
         $adult = $_SESSION['adult'] ?? 0;
         $child = $_SESSION['child'] ?? 0;
         $pwd = $_SESSION['pwd'] ?? 0;
+        $_SESSION['roomIds'] = 0;
         
         $additionalCharge = 0;
         if ($adult > 10) {
@@ -550,7 +551,7 @@
 
                         </div>
                         <div class=" col-md-2 check-btn" style="align-content: flex-end;">
-                            <button type="submit" name="check" class="btn check">Check Rooms</button>
+                            <button type="submit" name="check" class="btn check" id="firstform" >Check Rooms</button>
                         </div>
                     </div>
                 </form>
@@ -670,6 +671,7 @@
                     <input type="hidden" name="reservationType" value="<?php echo htmlspecialchars($reservationType); ?>">
                     <input type="hidden" name="grandTotal" id="grandTotal">
                     <input type="hidden" name="roomTotal" id="roomTotal">
+                    <div id="response-container"></div>
 
                     <button id="Continue" name="continue" type="submit" class="btn btn-primary w-100 mt-3" >Continue</button>
                 </form>
@@ -1010,22 +1012,46 @@ function updateTotal(priceChange) {
     document.getElementById("grandTotal").value = newGrandTotal;
     document.getElementById("roomTotal").value = newRoomTotal;
 }
-
-document.getElementById("secondForm").addEventListener("submit", function(event) {
-        var totalpax = document.getElementById("adults").value;
+document.getElementById("secondForm").addEventListener("click", function(event) {
+    //event.preventDefault(); // Prevent form from submitting normally
+    var totalpax = document.getElementById("adults").value;
+        var reservationType = document.getElementById("reservationType").value;
         const bookedRooms = document.getElementById("booked-rooms");
         const noRoomsMessage = document.getElementById("no-rooms-message");
         // Check if any room is selected
-        if (totalpax == '' || totalpax == 0) {
-            if(rateType === '2' || rateType === '1'){
-            alert("Enter number of guest.");
-            event.preventDefault();
+        if(rateType === '2' || rateType === '1'){
+            if (totalpax == '' || totalpax == 0) {
+                alert("Enter number of guest.");
+                event.preventDefault();
+            }
+            if(!reservationType.trim()){
+                alert("Enter a valid reservation type.");
+                event.preventDefault();
             }
         } else if (rateType === '2' && bookedRooms.children.length === 1 && noRoomsMessage.style.display !== "none") {
             alert("Please select at least one room before continuing.");
-            event.preventDefault(); // Prevent form submission
+            event.preventDefault();
         }
+
+    // Gather the form data
+    const formData = new FormData(document.querySelector("form"));
+
+    // Send data using Fetch API
+    fetch("booking-process.php", {
+        method: "POST", // or "POST" depending on your PHP setup
+        body: formData,
+    })
+    .then(response => response.text()) // Assuming you're returning text or HTML
+    /*.then(data => {
+        console.log(data); // Handle the response from the server
+        // Optionally, you can update part of the page with the response
+        document.getElementById("response-container").innerHTML = data;
+    })*/
+    .catch(error => {
+        console.error("Error:", error);
     });
+});
+
 
 </script>
 </body>
