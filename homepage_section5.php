@@ -531,12 +531,12 @@ include("connection.php");
                         </div>
                     </a>
                     <a href="homepage_section4.php">
-                        <div class="tab active" id="facilityInfoTab">
+                        <div class="tab " id="facilityInfoTab">
                             Rooms
                         </div>
                     </a>
                     <a href="homepage_section5.php">
-                        <div class="tab " id="facilityInfoTab">
+                        <div class="tab active" id="facilityInfoTab">
                             Prices
                         </div>
                     </a>
@@ -576,54 +576,175 @@ include("connection.php");
                         color: white; /* Ensure hover font color is white */
                     }
                 </style>
-                    <div class="flex-container">
-                    <div class="main-content">
-                        <?php
-                            $sql = "SELECT room_id, room_name, image_path, description, minpax, maxpax, price, is_featured, is_offered FROM rooms";
-                            $result = $conn->query($sql);
-                        ?>
-                        <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Featured Rooms</h2>
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
-                                Add Room
-                            </button>
-                            <div class="flex-container">
-                                <?php if ($result->num_rows > 0): ?>
-                                    <?php while($row = $result->fetch_assoc()): ?>
-                                        <div class='room-card'>
-                                            <div class="room-image">
-                                                <img src='<?php echo $row['image_path']; ?>' alt='Room Image'>
-                                            </div>
-                                            <div class="room-details">
-                                                <h2><?php echo $row['room_name']; ?></h2>
-                                                <p class="description"><?php echo $row['description']; ?></p>
-                                                <div class="room-info">
-                                                    <p>Minpax: <?php echo $row['minpax']; ?></p>
-                                                    <p>Maxpax: <?php echo $row['maxpax']; ?></p>
-                                                    <p>Price: <?php echo $row['price']; ?></p>
-                                                    <p>Featured: <?php echo $row['is_featured'];?></p>
-                                                    <p>Offered: <?php echo $row['is_offered']; ?></p>
-                                                </div>
-                                                <div class="action-buttons"> 
-                                                    <button type='button' class='openModal btn-modal' 
-                                                        data-id='<?php echo $row['room_id']; ?>' 
-                                                        data-name='<?php echo $row['room_name']; ?>' 
-                                                        data-capacity='<?php echo $row['description']; ?>' 
-                                                        data-price='<?php echo $row['price']; ?>' 
-                                                        data-maxpax='<?php echo $row['maxpax']; ?>' 
-                                                        data-minpax='<?php echo $row['minpax']; ?>'>
-                                                        Edit
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endwhile; ?>
-                                <?php else: ?>
-                                    <p>No rooms available.</p>
-                                <?php endif; ?>
-                            </div>
 
-                        </div>
+                <div class="flex-container">
+                    <div class="main-content">
+                        <style>
+                            .review-card-container {
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 20px; /* Space between cards */
+                                margin-top: 20px; /* Space above the card container */
+                            }
+
+                            .review-card {
+                                background-color: #f8f9fa; /* Light background for cards */
+                                border: 1px solid #ddd; /* Light border */
+                                border-radius: 8px; /* Rounded corners */
+                                padding: 15px; /* Inner padding */
+                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+                                flex: 1 1 calc(30% - 20px); /* Responsive card width */
+                                min-width: 250px; /* Minimum width for cards */
+                                transition: transform 0.3s; /* Smooth hover effect */
+                            }
+
+                            .review-card:hover {
+                                transform: translateY(-5px); /* Lift effect on hover */
+                            }
+
+                            .review-card h3 {
+                                font-size: 1.2rem; /* Font size for payment name */
+                                margin: 0 0 10px; /* Margin below the title */
+                            }
+
+                            .review-card h2 {
+                                font-size: 1rem; /* Font size for price */
+                                color: #007bff; /* Color for price */
+                                margin: 0; /* No margin */
+                            }
+                        </style>
+
+<?php
+// Fetch reviews with status = 0
+$stmt = $conn->prepare("SELECT id, payment_name, price FROM prices_tbl");
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Check if there are any reviews
+if ($result->num_rows > 0) {
+    echo '<table class="table">';
+    echo '<thead>';
+    echo '<tr>';
+    echo '<th>Payment Name</th>';
+    echo '<th>Price</th>';
+    echo '<th>Action</th>';
+    echo '</tr>';
+    echo '</thead>';
+    echo '<tbody>';
+    // Output data of each row
+    while ($row = $result->fetch_assoc()) {
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($row['payment_name']) . '</td>';
+        echo '<td>' . htmlspecialchars($row['price']) . '</td>';
+        echo '<td><button class="update-btn" data-id="' . $row['id'] . '" data-name="' . htmlspecialchars($row['payment_name']) . '" data-price="' . htmlspecialchars($row['price']) . '">Update Price</button></td>';
+        echo '</tr>';
+    }
+    echo '</tbody>';
+    echo '</table>';
+} else {
+    echo 'No reviews found.';
+}
+$stmt->close();
+?>
+
+<!-- Modal for updating price -->
+<div id="updatePriceModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Update Price</h2>
+        <form id="updatePriceForm">
+            <input type="hidden" id="priceId" name="id" />
+            <label for="paymentName">Payment Name</label>
+            <input type="text" id="paymentName" name="payment_name" readonly />
+            <label for="newPrice">New Price</label>
+            <input type="number" id="newPrice" name="price" required />
+            <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Styling -->
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+
+<!-- JavaScript for handling the modal and AJAX submission -->
+<script>
+    // Open modal when Update button is clicked
+    document.querySelectorAll('.update-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const paymentName = this.getAttribute('data-name');
+            const price = this.getAttribute('data-price');
+
+            document.getElementById('priceId').value = id;
+            document.getElementById('paymentName').value = paymentName;
+            document.getElementById('newPrice').value = price;
+
+            document.getElementById('updatePriceModal').style.display = 'block';
+        });
+    });
+
+    // Close modal
+    document.querySelector('.close-btn').addEventListener('click', function () {
+        document.getElementById('updatePriceModal').style.display = 'none';
+    });
+
+    // Submit form to update the price in the database via AJAX
+    document.getElementById('updatePriceForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('update_price.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Price updated successfully!');
+                window.location.reload();  // Optionally reload the page to see the updated price
+            } else {
+                alert('Failed to update the price');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
                     </div>
                 </div>
 
@@ -632,60 +753,37 @@ include("connection.php");
         </div>
     </div>
 
+    <!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Price</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="updateRoomId">
+                <p>Payment Name: <span id="updatePaymentName"></span></p>
+                <div class="form-group">
+                    <label for="updatePrice">New Price</label>
+                    <input type="text" class="form-control" id="updatePrice" placeholder="Enter new price">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updatePrice()">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
-
-<!-- Modal -->
-<div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editRoomModalLabel">Edit Room</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editRoomForm" enctype="multipart/form-data">
-                    <input type="hidden" name="room_id" id="room_id">
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="room_name" class="form-label">Room Name</label>
-                            <input type="text" class="form-control form-control-sm" id="room_name" name="room_name" required>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="number" class="form-control form-control-sm" id="price" name="price" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label for="minpax" class="form-label">Min Pax</label>
-                            <input type="number" class="form-control form-control-sm" id="minpax" name="minpax" required>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label for="maxpax" class="form-label">Max Pax</label>
-                            <input type="number" class="form-control form-control-sm" id="maxpax" name="maxpax" required>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control form-control-sm" id="description" name="description" rows="2" required></textarea>
-                    </div>
-                    <div class="mb-2">
-                        <label for="photo" class="form-label">Room Image</label>
-                        <input type="file" class="form-control form-control-sm" id="photo" name="photo">
-                    </div>
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-sm btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <style>
 /* Add these styles */
@@ -784,91 +882,6 @@ include("connection.php");
             },
             error: function() {
                 alert('Error updating room.');
-            }
-        });
-    });
-</script>
-
-<!-- Modal for Adding Room -->
-<div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addRoomModalLabel">Add New Room</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addRoomForm" enctype="multipart/form-data">
-                    <div class="mb-2">
-                        <label for="room_name" class="form-label">Room Name</label>
-                        <input type="text" class="form-control" id="room_name" name="room_name" required>
-                    </div>
-                    <div class="mb-2">
-                        <label for="image_path" class="form-label">Upload Room Image</label>
-                        <input type="file" class="form-control" id="image_path" name="image_path" accept="image/*" required>
-                    </div>
-                    <div class="mb-2">
-                        <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" id="description" name="description" required>
-                    </div>
-                    <div class="mb-2">
-                        <label for="minpax" class="form-label">Min Pax</label>
-                        <input type="number" class="form-control" id="minpax" name="minpax" required>
-                    </div>
-                    <div class="mb-2">
-                        <label for="maxpax" class="form-label">Max Pax</label>
-                        <input type="number" class="form-control" id="maxpax" name="maxpax" required>
-                    </div>
-                    <div class="mb-2">
-                        <label for="price" class="form-label">Price</label>
-                        <input type="number" class="form-control" id="price" name="price" required>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Is Featured?</label>
-                        <div>
-                            <input type="radio" id="is_featured_yes" name="is_featured" value="1" required>
-                            <label for="is_featured_yes">Yes</label>
-                            <input type="radio" id="is_featured_no" name="is_featured" value="0" required>
-                            <label for="is_featured_no">No</label>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Is Offered?</label>
-                        <div>
-                            <input type="radio" id="is_offered_yes" name="is_offered" value="1" required>
-                            <label for="is_offered_yes">Yes</label>
-                            <input type="radio" id="is_offered_no" name="is_offered" value="0" required>
-                            <label for="is_offered_no">No</label>
-                        </div>
-                    </div>
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-sm btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Add Room</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $('#addRoomForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent the default form submission
-
-        const formData = new FormData(this); // Create a FormData object
-
-        $.ajax({
-            type: 'POST',
-            url: 'add_room.php', // PHP script to handle the insertion
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                alert('Room added successfully!'); // Notify the user
-                location.reload(); // Reload the page to see changes
-            },
-            error: function() {
-                alert('Error adding room.'); // Notify the user of an error
             }
         });
     });
@@ -1004,3 +1017,4 @@ include("connection.php");
     }
 </style>
 </html>
+
