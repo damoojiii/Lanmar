@@ -415,8 +415,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
+<<<<<<< HEAD
                     <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
                     <li><a class="nav-link text-white" href="homepage_settings.php">Homepage Settings</a></li>
+=======
+                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+>>>>>>> e10f8c6446f12c487520231be0d5842c7ea2a7f9
                 </ul>
             </li>
         </ul>

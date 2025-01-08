@@ -17,6 +17,7 @@ include("connection.php");
 $user_id = $_SESSION['user_id'];
 
 $stmt = $conn->prepare("SELECT firstname, lastname, email, contact_number,profile FROM users WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT firstname, lastname, email, contact_number,profile FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $stmt->bind_result($firstname, $lastname, $email, $contact_number, $profile_path);
