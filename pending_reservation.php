@@ -29,6 +29,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -392,8 +397,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -422,10 +427,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                    <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Homepage Settings</a></li>
                 </ul>
             </li>
         </ul>
@@ -456,7 +459,7 @@
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
-                <h2 class="mb-4">Pending Reservations</h2>
+                <h2 class="mb-4"><strong>Pending Reservations</strong></h2>
                 <div class="table-responsive">
                     <table class="table table-hover" id="example" style="width:100%">
                         <thead class="custom-header">
@@ -555,32 +558,32 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2">
+          <div class="row g-2 mb-2">
             <div class="col-12 col-md-5">
               <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-4">
               <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
               <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
             </div>
           </div>
-          <div class="row g-2">
-            <div class="col-4 col-md-2">
+          <div class="row g-2 mb-2">
+            <div class="col-4 col-md-3">
               <p><strong>Adults:</strong> <span id="modalAdults"></span></p>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md-3">
               <p><strong>Children:</strong> <span id="modalChild"></span></p>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md-3">
               <p><strong>PWD:</strong> <span id="modalPwd"></span></p>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-3">
               <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <div class="row g-2">
+          <div class="row g-2 mb-2">
             <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
@@ -590,7 +593,7 @@
 
         <!-- Booking Details Section -->
         <div class="mb-4">
-          <h6 class="fw-bold">Booking Details</h6>
+          <h6 class="fw-bold">Special Requests</h6>
           <div class="row g-2">
             <div class="col-12 col-md-4">
               <p><strong>Additionals:</strong> <span id=""></p>
@@ -602,13 +605,13 @@
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4">
               <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4">
               <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
             </div>
           </div>
@@ -620,7 +623,7 @@
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
 
-            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+            <button type="button" class="btn" id="editButton" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
             </button>
 
@@ -733,11 +736,13 @@ table.on('mouseenter', 'td', function () {
 
 document.addEventListener('DOMContentLoaded', () => {
   // Event delegation to handle row click events
-  document.querySelector('tbody').addEventListener('click', function (event) {
+    let bookingIds;
+    document.querySelector('tbody').addEventListener('click', function (event) {
       // Ensure the clicked element is a table row
       const row = event.target.closest('.table-row');
       if (row) {
           const bookingId = row.dataset.bookingId; // Get the booking ID
+        bookingIds = bookingId;
 
           //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
           
@@ -785,6 +790,15 @@ document.addEventListener('DOMContentLoaded', () => {
               .catch(error => console.error('Error fetching data:', error));
       }
   });
+  function editBooking() {
+        if (bookingIds) { // Make sure bookingId is set
+            // Navigate to the cancellation page with the bookingId
+            window.location.href = `edit_reservation.php?id=${bookingIds}`;
+        } else {
+            console.log("No bookingId found!");
+        }
+    }
+    document.getElementById('editButton').addEventListener('click', editBooking);
 });
 
 </script>
