@@ -233,7 +233,7 @@
                               $class = "completed";
                               $textstatus = "Completed";
                               break;
-                          case "Cancellation1":
+                          case "Cancellation1"||"Cancellation2":
                               $class = "cancellation";
                               $textstatus = "For Cancellation";
                               break;
@@ -340,6 +340,10 @@
             <div class="col-sm-6 col-md-4">
               <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></p>
             </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+            </div>
+            <div id="modalProof"></div>
           </div>
         </div>
       </div>
@@ -467,8 +471,11 @@ let bookingIds;
                     document.getElementById('modalPaymode').textContent = data.paymode;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
-
-                    
+                    document.getElementById('modalrefNum').textContent = data.refNumber;
+                    const modalBody = document.getElementById('modalProof');
+                    modalBody.innerHTML = `
+                    <a href="${data.imageProof}" target="_blank">View image</a>
+                    `
 
                     // Show the modal
                     $('#reservationModal').modal('show');

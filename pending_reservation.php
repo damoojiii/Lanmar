@@ -659,6 +659,10 @@
             <div class="col-6 col-md-4">
               <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
             </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+            </div>
+            <div id="modalProof"></div>
           </div>
         </div>
       </div>
@@ -793,6 +797,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   document.getElementById('modalPaymode').textContent = data.paymode;
                   document.getElementById('modalTotalBill').textContent = data.totalBill;
                   document.getElementById('modalBalance').textContent = data.balance;
+                  const modalBody = document.getElementById('modalProof');
+                    modalBody.innerHTML = `
+                    <a href="${data.imageProof}" target="_blank">View image</a>
+                    `
 
                   
 

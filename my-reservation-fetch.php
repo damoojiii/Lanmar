@@ -19,7 +19,7 @@ function getBookingDetailsById($bookingId) {
         users.firstname, users.lastname, users.contact_number, 
         reservationType_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
-        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode
+        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, bill_tbl.ref_num, image
     FROM booking_tbl
     LEFT JOIN users ON booking_tbl.user_id = users.user_id
     LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
@@ -90,6 +90,7 @@ if (isset($_GET['booking_id'])) {
         // Return booking details along with the rooms in JSON format
         echo json_encode([
             'bookingId' => $bookingDetails['booking_id'],
+            'refNumber' => $bookingDetails['ref_num'],
             'name' => $bookingDetails['firstname'] . " " . $bookingDetails['lastname'],
             'contact' => $bookingDetails['contact_number'],
             'dateRange' => $bookingDetails['dateRange'],
@@ -105,6 +106,7 @@ if (isset($_GET['booking_id'])) {
             'totalBill' => number_format($bookingDetails['total_bill']),
             'balance' => number_format($bookingDetails['balance']),
             'roomName' => $bookingDetails['rooms'], // Include the rooms in the response
+            'imageProof' => $bookingDetails['image'],
         ]);
     } else {
         echo json_encode(['error' => 'Booking not found']);
