@@ -515,7 +515,8 @@ function initializeFlatpickr() {
     enableTime: false,
     dateFormat: "Y-m-d",
     minDate: new Date().fp_incr(1),
-    showMonths: 1, 
+    showMonths: 1,
+    disableMobile: "true", 
     onChange: function (selectedDates, dateStr, instance) {
       document.querySelector("#date-in").value = dateStr;
 
@@ -530,6 +531,7 @@ function initializeFlatpickr() {
   fp1 = flatpickr("#date-out", {
     enableTime: false,
     dateFormat: "Y-m-d",
+    disableMobile: "true",
     minDate: new Date().fp_incr(1),
     onChange: function (selectedDates, dateStr, instance) {
       document.querySelector("#date-out").value = dateStr;

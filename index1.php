@@ -204,8 +204,16 @@
             display: none;
         }
         @media (max-width: 768px) {
+            #sidebar {
+                position: absolute;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+            
+            #sidebar.show {
+                transform: translateX(0);
+            }
             .progress-container.shifted{
-                margin-left: 250px;
                 transition: margin-left 0.3s ease;
             }
 

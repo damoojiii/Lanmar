@@ -462,17 +462,19 @@
         //echo "New record created successfully in pax_tbl<br>";
     
         // Insert into room_tbl
-        foreach ($roomIds as $roomId) {
-        // Prepare the SQL to fetch room details based on room_id
-        $sql = "SELECT room_name FROM rooms WHERE room_id = :roomId";
-        $stmt = $pdo->prepare($sql);
-    
-        // Execute the statement with parameter binding
-        $stmt->execute([':roomId' => $roomId]);
-    
-        // Fetch the room data
-        $room = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+        if(!empty($roomIds)){
+            foreach ($roomIds as $roomId) {
+                // Prepare the SQL to fetch room details based on room_id
+                $sql = "SELECT room_name FROM rooms WHERE room_id = :roomId";
+                $stmt = $pdo->prepare($sql);
+            
+                // Execute the statement with parameter binding
+                $stmt->execute([':roomId' => $roomId]);
+            
+                // Fetch the room data
+                $room = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+         
     if ($room) {
         $room_name = $room['room_name']; // Extract the room name from the result
         
@@ -511,6 +513,16 @@
             ':pax_id' => $pax_id, 
             ':bill_id' => $bill_id,
             ':status' => $status
+        ]);
+
+        $bookingId = $pdo->lastInsertId();
+
+        // Insert into notification_tbl
+        $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
+                            VALUES (:booking_id, 0, 0, 0, NOW())";
+        $stmt_notification = $pdo->prepare($notification_sql);
+        $stmt_notification->execute([
+            ':booking_id' => $bookingId
         ]);
 
         unset($_SESSION['dateIn']);

@@ -187,7 +187,6 @@
                 font-size: 80px;
             }
             .progress-container.shifted{
-                margin-left: 250px;
                 transition: margin-left 0.3s ease;
             }
 

@@ -169,15 +169,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
         }
         @media (max-width: 768px) {
-            #sidebar {
-                position: absolute;
-                transform: translateX(-100%);
-            }
-            
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
             .main-section {
                 margin-left: 0; /* Remove margin on mobile */
             }
@@ -309,7 +300,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <hr class="my-4">
 
                                 <form class="settings-form" action="" method="POST">
-                                    <h5 class="card-title mb-3">Change Password</h5>
+                                    <h2 class="card-title mb-3 text-center ">Change Password</h2>
                                     <div class="mb-3">
                                         <label for="current_password" class="form-label">Current Password</label>
                                         <input type="password" class="form-control" id="current_password" name="current_password" required>

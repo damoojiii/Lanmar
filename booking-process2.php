@@ -261,7 +261,6 @@
                 font-size: 80px;
             }
             .progress-container.shifted{
-                margin-left: 250px;
                 transition: margin-left 0.3s ease;
             }
 
@@ -291,7 +290,11 @@
                 font-size: 13px;
             }
             .container{
-                max-width: 100% !important;
+                max-width: 100%;
+                padding: 20px;
+            }
+            .guest {
+                width: 100% !important; /* Override inline styles */
             }
             .summary {
                 width: 100%;
@@ -518,17 +521,6 @@
                                         echo htmlspecialchars($reservationType);
                                     ?></span></p>
                         </div>
-    
-                        <div class="dropdown">
-                            <button class="btn btn-link p-0" type="button" id="editDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                Edit
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="editDropdown">
-                                <li><a class="dropdown-item" href="#">Edit Date</a></li>
-                                <li><a class="dropdown-item" href="#">Edit Time</a></li>
-                            </ul>
-                        </div>
-
 
                     </div>
                 </div>

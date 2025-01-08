@@ -87,30 +87,15 @@
         td.highlight {
           background-color: rgba(var(--dt-row-hover), 0.052) !important;
         }
+        .active>.page-link, .page-link.active {
+          background-color: #004080;
+          border-color: #004080;
+        }
 
         @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-250px);
-            }
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
-            .navbar {
-                margin-left: 0;
-                width: 100%; 
-            }
-            .navbar.shifted {
-                margin-left: 250px; 
-                width: calc(100% - 250px); 
-            }
-
             #main-content {
                 margin-left: 0;
                 padding-inline: 10px;
-            }
-            #main-content.shifted {
-                margin-left: 250px; 
             }
             .modal-body h6 {
                 font-size: 16px; /* Slightly larger headers for readability */
@@ -343,13 +328,13 @@
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
-            <div class="col-6 col-md-5">
+            <div class="col-sm-6 col-md-5">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-sm-6 col-md-3">
               <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></p>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-sm-6 col-md-4">
               <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></p>
             </div>
           </div>
@@ -387,7 +372,16 @@
 </html>
 
 <script>
-
+document.getElementById('hamburger').addEventListener('click', function () {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('show');
+      
+      const navbar = document.querySelector('.navbar');
+      navbar.classList.toggle('shifted');
+      
+      const mainContent = document.getElementById('main-content');
+      mainContent.classList.toggle('shifted');
+  });
 document.addEventListener('DOMContentLoaded', () => {
   const tableIndex = new DataTable('#example', {
         columnDefs: [
@@ -415,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tables = new DataTable('#example', {
     paging: false,
     scrollY: '100%'
-});
+  });
  
 document.querySelectorAll('a.toggle-vis').forEach((el) => {
     el.addEventListener('click', function (e) {
@@ -444,16 +438,6 @@ const table = new DataTable('#example');
          .each((el) => el.classList.add('highlight'));
  });
 
-    document.getElementById('hamburger').addEventListener('click', function () {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('show');
-    
-    const navbar = document.querySelector('.navbar');
-    navbar.classList.toggle('shifted');
-    
-    const mainContent = document.getElementById('main-content');
-    mainContent.classList.toggle('shifted');
-});
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -495,7 +479,7 @@ let bookingIds;
                     let ronum = 1;
                     data.roomName.forEach(room => {
                         const roomElement = document.createElement('div');
-                        roomElement.classList.add('room-detail','col-3','col-md-3');
+                        roomElement.classList.add('room-detail','col-sm-3','col-md-3');
                         roomElement.innerHTML = `
                             <strong>Room ${ronum}:</strong> ${room.roomName}<br>
                         `;

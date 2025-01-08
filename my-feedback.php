@@ -112,23 +112,27 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
         .feedback-card {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;  
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            flex-wrap: wrap; 
         }
 
         .feedback-content {
             flex: 1;
+            word-wrap: break-word; 
+            word-break: break-word; 
         }
 
         .feedback-card p {
             margin: 0 0 10px;
             font-size: 16px;
             color: #333;
+            line-height: 1.6; /* Optional: Adjust line height for better readability */
         }
 
         .feedback-card button {
@@ -138,7 +142,6 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
         .rating-star {
             width: 24px;
             height: 24px;
-            margin-right: 5px;
             vertical-align: middle;
         }
 
@@ -156,13 +159,6 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
         
 
         @media (max-width: 768px) {
-            #sidebar {
-                transform: translateX(-250px);
-            }
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
             .navbar {
                 margin-left: 0;
                 width: 100%; 
@@ -170,13 +166,6 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
             .navbar.shifted {
                 margin-left: 250px; 
                 width: calc(100% - 250px); 
-            }
-
-            #main-content {
-                margin-left: 0;
-            }
-            #main-content.shifted {
-                margin-left: 250px; 
             }
             .feedback-form, .my-feedback {
                 padding: 15px;
