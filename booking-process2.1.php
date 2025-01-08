@@ -393,7 +393,7 @@
     $childs = $_SESSION['child'] ?? '';
     $pwd = $_SESSION['pwd'] ?? '';
     $totalPax = $_SESSION['totalpax'] ?? '';
-    $reservationType = $_SESSION['reservationType']?? '' ?? '';
+    $reservationType = $_SESSION['reservationType'] ?? '' ;
     $origPrice = $_SESSION['rate'] ?? '';
     $grandTotal = $_SESSION['grandTotal']  ?? '';
     $roomTotal = $_SESSION['roomTotal'] ?? '';
