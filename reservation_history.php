@@ -632,7 +632,7 @@
           <h6 class="fw-bold">Booking Details</h6>
           <div class="row g-2">
             <div class="col-12 col-md-4">
-              <p><strong>Additionals:</strong> <span id=""></p>
+              <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
           </div>
         </div>
@@ -641,14 +641,14 @@
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
-            <div class="col-12 col-md-6">
-              <p><strong>Payment Method:</strong> Credit Card</p>
+          <div class="col-12 col-md-6">
+              <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
             <div class="col-6 col-md-3">
-              <p><strong>Total Price:</strong> ₱5000</p>
+              <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
             </div>
             <div class="col-6 col-md-3">
-              <p><strong>Balance Remaining:</strong> ₱2000</p>
+              <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
             </div>
           </div>
         </div>
@@ -767,6 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       roomsContainer.appendChild(roomElement);
                       ronum++;
                   });
+                  document.getElementById('modalAdds').textContent = data.additional;
                   document.getElementById('modalPaymode').textContent = data.paymode;
                   document.getElementById('modalTotalBill').textContent = data.totalBill;
                   document.getElementById('modalBalance').textContent = data.balance;
