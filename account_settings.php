@@ -16,10 +16,10 @@ include("connection.php");
 
 $user_id = $_SESSION['user_id'];
 
-$stmt = $conn->prepare("SELECT firstname, lastname, email, contact_number FROM users WHERE user_id = ?");
+$stmt = $conn->prepare("SELECT firstname, lastname, email, contact_number,profile FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stmt->bind_result($firstname, $lastname, $email, $contact_number);
+$stmt->bind_result($firstname, $lastname, $email, $contact_number, $profile_path);
 $stmt->fetch();
 $stmt->close();
 
@@ -244,7 +244,30 @@ $stmt->close();
             flex: 1;
             padding: 25px;
             background-color: #ffff;
+        }
 
+        .main-section {
+            margin-left: 250px; /* Add margin to align with sidebar */
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                position: absolute;
+                transform: translateX(-100%);
+            }
+            
+            #sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
+            }
+        }
+        @media (max-width: 480px) {
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
+            }
         }
     </style>
 </head>
@@ -307,9 +330,7 @@ $stmt->close();
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                    <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
-                </ul>
+                    </ul>
             </li>
         </ul>
         <hr>
@@ -319,57 +340,120 @@ $stmt->close();
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Account Settings</h1>
-                <div class="row"> <!-- Add this row container -->
-                    <div class="col-md-6"> <!-- First column -->
-                        <div class="settings-form-container">
-                            <h2 class="mb-4">Personal Information</h2>
+                <h1 class="text-center mb-4 mt-4" style="font-weight: 700;">Account Settings</h1>
+                <div class="row">
+                    <div class="col-md-4 mb-4"><!-- First column - Profile Picture only -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <h2 class="text-center card-title mb-4">Profile Picture</h2>
+                                    <!-- Image wrapped in a clickable element -->
+                                    <a href="#" id="profileImageLink" data-bs-toggle="modal" data-bs-target="#profileModal">
+                                        <img src="<?php echo htmlspecialchars($profile_path ?? 'profile/default_photo.jpg'); ?>" 
+                                             alt="Profile Picture" 
+                                             style="width: 200px; height: 200px; border-radius: 50%; margin-bottom: 20px;" />
+                                    </a>
+                                    
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-center w-100" style="font-weight: 600;" id="profileModalLabel">Profile Picture</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- Add image preview here -->
+                                                    <div class="text-center mb-3">
+                                                        <img id="modalProfileImage" src="" alt="Profile Picture" style="max-width: 100%; height: auto;">
+                                                    </div>
+                                                    <div class="d-grid gap-2">
+                                                        <button type="button" class="btn btn-secondary" id="changeProfileBtn">Change Profile</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden form for updating profile picture -->
+                                    <form action="update_profile.php" method="POST" enctype="multipart/form-data" id="profileForm" style="display: none;">
+                                        <div class="mb-3">
+                                            <input type="file" class="form-control" name="profile_picture" id="profile_picture" accept="image/*" onchange="this.form.submit()">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8 mb-4"><!-- Second column - All other inputs -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
                             <?php if ($success_message): ?>
                                 <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
                             <?php endif; ?>
                             <?php if ($error_message): ?>
                                 <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
                             <?php endif; ?>
-                            <form class="settings-form" method="POST" action="update_personal_info.php">
-                                <div class="form-group">
-                                    <label for="firstname">First Name</label>
-                                    <input type="text" id="firstname" name="firstname" class="form-control" value="<?php echo htmlspecialchars($firstname); ?>" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="lastname">Last Name</label>
-                                    <input type="text" id="lastname" name="lastname" class="form-control" value="<?php echo htmlspecialchars($lastname); ?>" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="contact_number">Phone Number</label>
-                                    <input type="tel" id="contact_number" name="contact_number" class="form-control" value="<?php echo htmlspecialchars($contact_number); ?>" required>
-                                </div>
-                                <div class="button-container text-center">
-                                    <button type="submit" name="update_personal_info" class="save-btn">Save Changes</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-md-6"> <!-- Second column -->
-                        <div class="settings-form-container">
-                            <h2 class="mb-4">Change Password</h2>
-                            <form class="settings-form" method="POST" action="update_password.php">
-                                <div class="form-group">
-                                    <label for="email">Current Email</label>
-                                    <input type="email" id="email" name="email" class="form-control" value="<?php echo htmlspecialchars($email); ?>" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="new_password">New Password</label>
-                                    <input type="password" id="password" name="password" class="form-control" required>
-                                    <p id="message"><span id="strength"></span></p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirm_password">Confirm New Password</label>
-                                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-                                </div>
-                                <div class="button-container text-center">
-                                    <button type="submit" name="update_password" class="save-btn" id="updatePasswordBtn">Update Password</button>
-                                </div>
-                            </form>
+                                <form class="settings-form" method="POST" action="update_personal_info.php">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="firstname" class="form-label">First Name</label>
+                                                <input type="text" class="form-control" id="firstname" name="firstname" 
+                                                    value="<?php echo htmlspecialchars($firstname); ?>" readonly>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="lastname" class="form-label">Last Name</label>
+                                                <input type="text" class="form-control" id="lastname" name="lastname" 
+                                                value="<?php echo htmlspecialchars($lastname); ?>" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                value="<?php echo htmlspecialchars($email); ?>" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="contact_number" class="form-label">Contact Number</label>
+                                            <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                                value="<?php echo htmlspecialchars($contact_number); ?>" required>
+                                        </div>
+
+                                    <div class="button-container text-center">
+                                        <button type="submit" name="update_personal_info" class="save-btn">Update Changes</button>
+                                    </div>
+                                </form>
+                                        <hr class="my-4">
+                                        <h5 class="card-title mb-3">Change Password</h5>
+                                                               <form class="settings-form" method="POST" action="update_password.php" >
+                                    <div class="mb-3">
+                                            <input type="hidden" class="form-control" id="email" name="email" 
+                                                value="<?php echo htmlspecialchars($email); ?>" readonly>
+                                        </div>
+                                    <div class="mb-3">
+                                        <label for="new_password" class="form-label">New Password</label>
+                                        <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                    </div>
+                                    <?php if (isset($_GET['error'])): ?>
+                                        <div class="alert alert-danger">
+                                            <?php echo htmlspecialchars($_GET['error']); ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (isset($_GET['success'])): ?>
+                                        <div class="alert alert-success">
+                                            <?php echo htmlspecialchars($_GET['success']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="mb-3">
+                                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <button type="submit" class="btn" id="update_password">Update Password</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -420,7 +504,7 @@ $stmt->close();
             event.preventDefault();
 
             if (pass.value.length === 0) {
-                alert("Tip💡: Add UPPERCASE, lowercase, symbols, letters for more secure passwords");
+                alert("Tip💡: Add UPPERCASE, lowercase, numbers for more secure passwords");
             } else if (pass.value.length < 4) {
                 alert("Password seems to be weak, Try more secure passwords.");
             } else if (pass.value.length >= 6 && pass.value.length < 12) {
@@ -454,6 +538,22 @@ $stmt->close();
             }
         });
 
+    </script>
+
+    <script>
+    document.getElementById('profileModal').addEventListener('show.bs.modal', function (event) {
+        const imgSrc = document.querySelector('#profileImageLink img').src;
+        document.getElementById('modalProfileImage').src = imgSrc;
+    });
+
+    document.getElementById('changeProfileBtn').addEventListener('click', function() {
+        document.getElementById('profile_picture').click();
+        $('#profileModal').modal('hide');
+    });
+
+   document.getElementById('profileForm').addEventListener('submit', function() {
+        document.body.style.cursor = 'wait';
+    });
     </script>
 
 </body>

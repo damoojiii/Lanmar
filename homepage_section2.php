@@ -479,6 +479,45 @@ if (isset($_POST['delete_id'])) {
                 flex: 1 1 calc(50% - 8px);
             }
         }
+
+        .gallery-container {
+            width: 100%;
+            padding: 20px 0;
+        }
+
+        .gallery-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #001A3E #f0f0f0;
+        }
+
+        .gallery-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: #001A3E;
+            border-radius: 4px;
+        }
+
+        .gallery-scroll .card {
+            min-width: 250px;
+            margin: 0;
+            flex: 0 0 auto;
+        }
+
+        .gallery-scroll .card img {
+            height: 200px;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -540,8 +579,6 @@ if (isset($_POST['delete_id'])) {
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                    <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>
@@ -639,20 +676,22 @@ if (isset($_POST['delete_id'])) {
                                     <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
                                 </div>
                             </form>
-
+                            <hr>
                             <div class="gallery-container">
                                 <?php
                                 // Fetch gallery images from the database
                                 $result = $conn->query("SELECT * FROM gallery");
                                 if ($result->num_rows > 0) {
+                                    echo '<div class="gallery-scroll">';
                                     while ($row = $result->fetch_assoc()) {
-                                        echo '<div class="card" id="card-' . $row['gallery_id'] . '" style="width: 18rem; margin: 10px; display: inline-block;">';
+                                        echo '<div class="card" id="card-' . $row['gallery_id'] . '">';
                                         echo '<img src="' . $row['image'] . '" class="card-img-top" alt="Gallery Image">';
                                         echo '<div class="card-body">';
                                         echo '<button class="btn btn-danger" onclick="deleteImage(' . $row['gallery_id'] . ')">Delete</button>';
                                         echo '</div>';
                                         echo '</div>';
                                     }
+                                    echo '</div>';
                                 } else {
                                     echo '<p>No images found in the gallery.</p>';
                                 }
