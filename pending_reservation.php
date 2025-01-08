@@ -797,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   document.getElementById('modalPaymode').textContent = data.paymode;
                   document.getElementById('modalTotalBill').textContent = data.totalBill;
                   document.getElementById('modalBalance').textContent = data.balance;
+document.getElementById('modalrefNum').textContent = data.refNumber;
                   const modalBody = document.getElementById('modalProof');
                     modalBody.innerHTML = `
                     <a href="${data.imageProof}" target="_blank">View image</a>
