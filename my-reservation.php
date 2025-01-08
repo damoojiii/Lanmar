@@ -91,6 +91,9 @@
           background-color: #004080;
           border-color: #004080;
         }
+        td.highlight {
+          background-color: rgba(var(--dt-row-hover), 0.052) !important;
+        }
 
         @media (max-width: 768px) {
             #main-content {
@@ -267,10 +270,10 @@
           <h6 class="fw-bold">Personal Information</h6>
           <div class="row g-2" >
             <div class="col-12 col-md-4">
-              <p><strong>Name:</strong> <?php echo $fullname ?></p>
+              <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
             <div class="col-12 col-md-4">
-              <p><strong>Contact No.:</strong> <?php echo $name['contact_number'] ?></p>
+              <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
             <div class="col-12 col-md-4">
               <p><strong>Gender:</strong> WRONG-TURN</p>
@@ -372,16 +375,7 @@
 </html>
 
 <script>
-document.getElementById('hamburger').addEventListener('click', function () {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('show');
-      
-      const navbar = document.querySelector('.navbar');
-      navbar.classList.toggle('shifted');
-      
-      const mainContent = document.getElementById('main-content');
-      mainContent.classList.toggle('shifted');
-  });
+
 document.addEventListener('DOMContentLoaded', () => {
   const tableIndex = new DataTable('#example', {
         columnDefs: [
@@ -391,53 +385,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 targets: 0
             }
         ],
-        order: [[1, 'asc']]
+        order: [],
+        paging: true,
+        scrollY: '100%'
     });
-
-    // Automatically update row numbering on order or search
-    table
-        .on('order.dt search.dt', function () {
-            let i = 1;
-            table
-                .cells(null, 0, { search: 'applied', order: 'applied' })
-                .every(function (cell) {
-                    this.data(i++);
-                });
-        })
-        .draw();
-
-  const tables = new DataTable('#example', {
-    paging: false,
-    scrollY: '100%'
-  });
  
-document.querySelectorAll('a.toggle-vis').forEach((el) => {
-    el.addEventListener('click', function (e) {
-        e.preventDefault();
- 
-        let columnIdx = e.target.getAttribute('data-column');
-        let column = tables.column(columnIdx);
- 
-        // Toggle the visibility
-        column.visible(!column.visible());
-    });
-});
-const table = new DataTable('#example');
- 
- table.on('mouseenter', 'td', function () {
-     let colIdx = table.cell(this).index().column;
+ tableIndex.on('mouseenter', 'td', function () {
+     let colIdx = tableIndex.cell(this).index().column;
   
-     table
+     tableIndex
          .cells()
          .nodes()
          .each((el) => el.classList.remove('highlight'));
   
-     table
+     tableIndex
          .column(colIdx)
          .nodes()
          .each((el) => el.classList.add('highlight'));
  });
-
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -465,6 +430,8 @@ let bookingIds;
 
                     // Populate the modal with the fetched data
                     document.getElementById('modalBookingId').textContent = data.bookingId;
+                    document.getElementById('modalName').textContent = data.name;
+                    document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;
@@ -479,7 +446,7 @@ let bookingIds;
                     let ronum = 1;
                     data.roomName.forEach(room => {
                         const roomElement = document.createElement('div');
-                        roomElement.classList.add('room-detail','col-sm-3','col-md-3');
+                        roomElement.classList.add('room-detail','col-3','col-md-3');
                         roomElement.innerHTML = `
                             <strong>Room ${ronum}:</strong> ${room.roomName}<br>
                         `;

@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
     <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
+    <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
 
     <style>
         @font-face {
@@ -456,7 +457,7 @@
             <div class="main-container my-5">
                 <h2 class="mb-4">Approved Reservations</h2>
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="example" style="width:100%">
                         <thead class="custom-header">
                             <tr>
                                 <th>ID</th>
@@ -471,7 +472,7 @@
                         <tbody>
                         <?php if(!empty($results)): ?>
                             <?php foreach ($results as $row): ?>
-                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" id="example">
+                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
 
                                     <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                                     <td><?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?></td>
@@ -659,52 +660,24 @@
                 targets: 0
             }
         ],
-        order: [[1, 'asc']]
+        order: [],
+        paging: true,
+        scrollY: '100%'
     });
 
-    // Automatically update row numbering on order or search
-    table
-        .on('order.dt search.dt', function () {
-            let i = 1;
-            table
-                .cells(null, 0, { search: 'applied', order: 'applied' })
-                .every(function (cell) {
-                    this.data(i++);
-                });
-        })
-        .draw();
-
-const tables = new DataTable('#example', {
-  paging: false,
-  scrollY: '100%'
-});
-
-document.querySelectorAll('a.toggle-vis').forEach((el) => {
-  el.addEventListener('click', function (e) {
-      e.preventDefault();
-
-      let columnIdx = e.target.getAttribute('data-column');
-      let column = tables.column(columnIdx);
-
-      // Toggle the visibility
-      column.visible(!column.visible());
-  });
-});
-const table = new DataTable('#example');
-
-table.on('mouseenter', 'td', function () {
-   let colIdx = table.cell(this).index().column;
-
-   table
-       .cells()
-       .nodes()
-       .each((el) => el.classList.remove('highlight'));
-
-   table
-       .column(colIdx)
-       .nodes()
-       .each((el) => el.classList.add('highlight'));
-});
+ tableIndex.on('mouseenter', 'td', function () {
+     let colIdx = tableIndex.cell(this).index().column;
+  
+     tableIndex
+         .cells()
+         .nodes()
+         .each((el) => el.classList.remove('highlight'));
+  
+     tableIndex
+         .column(colIdx)
+         .nodes()
+         .each((el) => el.classList.add('highlight'));
+ });
 
   document.getElementById('hamburger').addEventListener('click', function () {
   const sidebar = document.getElementById('sidebar');
@@ -739,6 +712,8 @@ table.on('mouseenter', 'td', function () {
 
                     // Populate the modal with the fetched data
                     document.getElementById('modalBookingId').textContent = data.bookingId;
+                    document.getElementById('modalName').textContent = data.name;
+                    document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;
