@@ -47,6 +47,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -341,6 +346,8 @@
         flex-wrap: wrap;
         gap: 20px;
         justify-content: start;
+        word-wrap: break-word; 
+        word-break: break-word; 
     }
 
     .feedback-card {
@@ -424,8 +431,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -456,8 +463,6 @@
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                    <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>
@@ -473,7 +478,7 @@
                 <?php if (!empty($featuredFeedbacks)): ?>
                     <?php foreach ($featuredFeedbacks as $feedback): ?>
                         <div class="feedback-card selected">
-                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
+                            <h4><?= htmlspecialchars(ucwords($feedback['firstname'] . ' ' . $feedback['lastname'])); ?></h4>
                             <div class="rating">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>
@@ -499,7 +504,7 @@
                 <?php if (!empty($nonFeaturedFeedbacks)): ?>
                     <?php foreach ($nonFeaturedFeedbacks as $feedback): ?>
                         <div class="feedback-card">
-                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
+                            <h4><?= htmlspecialchars(ucwords($feedback['firstname'] . ' ' . $feedback['lastname'])); ?></h4>
                             <div class="rating">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>

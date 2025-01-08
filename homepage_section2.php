@@ -63,6 +63,11 @@ if (isset($_POST['delete_id'])) {
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -479,6 +484,45 @@ if (isset($_POST['delete_id'])) {
                 flex: 1 1 calc(50% - 8px);
             }
         }
+
+        .gallery-container {
+            width: 100%;
+            padding: 20px 0;
+        }
+
+        .gallery-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #001A3E #f0f0f0;
+        }
+
+        .gallery-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: #001A3E;
+            border-radius: 4px;
+        }
+
+        .gallery-scroll .card {
+            min-width: 250px;
+            margin: 0;
+            flex: 0 0 auto;
+        }
+
+        .gallery-scroll .card img {
+            height: 200px;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -508,8 +552,8 @@ if (isset($_POST['delete_id'])) {
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -540,8 +584,6 @@ if (isset($_POST['delete_id'])) {
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                    <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>
@@ -639,20 +681,22 @@ if (isset($_POST['delete_id'])) {
                                     <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
                                 </div>
                             </form>
-
+                            <hr>
                             <div class="gallery-container">
                                 <?php
                                 // Fetch gallery images from the database
                                 $result = $conn->query("SELECT * FROM gallery");
                                 if ($result->num_rows > 0) {
+                                    echo '<div class="gallery-scroll">';
                                     while ($row = $result->fetch_assoc()) {
-                                        echo '<div class="card" id="card-' . $row['gallery_id'] . '" style="width: 18rem; margin: 10px; display: inline-block;">';
+                                        echo '<div class="card" id="card-' . $row['gallery_id'] . '">';
                                         echo '<img src="' . $row['image'] . '" class="card-img-top" alt="Gallery Image">';
                                         echo '<div class="card-body">';
                                         echo '<button class="btn btn-danger" onclick="deleteImage(' . $row['gallery_id'] . ')">Delete</button>';
                                         echo '</div>';
                                         echo '</div>';
                                     }
+                                    echo '</div>';
                                 } else {
                                     echo '<p>No images found in the gallery.</p>';
                                 }
@@ -674,6 +718,22 @@ if (isset($_POST['delete_id'])) {
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 <script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const header = document.getElementById('header');
+
+        sidebar.classList.toggle('show');
+
+        if (sidebar.classList.contains('show')) {
+            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
+            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
+        } else {
+            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
+            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
+        }
+    }
+    
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {
             collapse.style.height = collapse.scrollHeight + 'px';

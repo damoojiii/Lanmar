@@ -333,6 +333,8 @@ $descriptions = [];
         flex-wrap: wrap;
         gap: 20px;
         justify-content: start;
+        word-wrap: break-word; 
+        word-break: break-word;
     }
 
     .feedback-card {
@@ -465,9 +467,9 @@ $descriptions = [];
             
             <div class="about-content">
               <h2 class="text-center mb-4">About Our Resort</h2>
-              <p style="text-indent: 2em; text-align: justify;">
+              <h5 style="text-align: justify;">
                 <?php echo htmlspecialchars($descriptions['description']); ?>
-              </p>
+              </h5>
               <p style="text-indent: 2em; text-align: justify;">
                 <?php echo htmlspecialchars($descriptions['description_2']); ?>
               </p>
@@ -569,7 +571,7 @@ $descriptions = [];
                 <?php if (!empty($featuredFeedbacks)): ?>
                     <?php foreach ($featuredFeedbacks as $feedback): ?>
                         <div class="feedback-card selected">
-                            <h4><?= htmlspecialchars($feedback['firstname'] . ' ' . $feedback['lastname']); ?></h4>
+                            <h4><?= htmlspecialchars(ucwords($feedback['firstname'] . ' ' . $feedback['lastname'])); ?></h4>
                             <div class="rating">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <i class="fa-solid fa-star" style="color: <?= $i <= $feedback['rating'] ? '#FFD43B' : '#CCC'; ?>"></i>
