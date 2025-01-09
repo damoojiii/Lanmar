@@ -3,10 +3,11 @@
 include("connection.php");
 
 // Fetch report data from the database
-$query = "SELECT MONTH(booking_date) as month, COUNT(*) as bookings, SUM(total_amount) as revenue 
-          FROM bookings 
-          WHERE YEAR(booking_date) = YEAR(CURDATE()) 
-          GROUP BY MONTH(booking_date)";
+$query = "SELECT MONTH(booking_tbl.dateIn) as month, COUNT(*) as bookings, SUM(bill_tbl.total_bill) as revenue 
+          FROM booking_tbl
+            LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
+          WHERE YEAR(booking_tbl.dateIn) = YEAR(CURDATE()) 
+          GROUP BY MONTH(booking_tbl.dateIn)";
 $result = $conn->query($query);
 
 $months = [];

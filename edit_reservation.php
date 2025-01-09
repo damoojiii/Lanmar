@@ -29,6 +29,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -406,7 +411,7 @@
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
-                <h2 class="text-center mb-4">Edit Reservation</h2>
+                <h2 class="text-center mb-4"><strong>Edit Reservation</strong></h2>
                 <form action="update_reservation.php" method="POST">
                     <?php 
                     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -655,7 +660,7 @@
                     } ?>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-success">Save Changes</button>
-                        <a href="pending_reservation.php" class="btn btn-secondary">Cancel</a>
+                        <a onclick="history.back()" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -695,7 +700,6 @@
     });
 
     $(document).ready(function() {
-        let count = 0;
         $('#add-button').on('click', function() {
         let addAmount = parseInt($('#add-total-bill').val()) || 0;
         let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
@@ -754,39 +758,46 @@
     }
 
     function recomputeTotalBill() {
-    let offeredCount = 0;
-    let baseRate = parseInt($('input[name="base_rate"]').val()) || 0;
-    let extraAdultRate = parseInt($('input[name="extra_adult_rate"]').val()) || 0;
-    let adults = parseInt($('input[name="adult"]').val()) || 0;
-    let children = parseInt($('input[name="child"]').val()) || 0;
-    let pwd = parseInt($('input[name="pwd"]').val()) || 0;
+        let offeredCount = 0;
+        let baseRate = parseInt($('input[name="base_rate"]').val()) || 0;
+        let extraAdultRate = parseInt($('input[name="extra_adult_rate"]').val()) || 0;
+        let adults = parseInt($('input[name="adult"]').val()) || 0;
+        let children = parseInt($('input[name="child"]').val()) || 0;
+        let pwd = parseInt($('input[name="pwd"]').val()) || 0;
 
-    let totalPax = adults + children + pwd;
-    let extraAdults = Math.max(0, adults - 10);
-    let additionalCharge = extraAdults * extraAdultRate;
+        let totalPax = adults + children + pwd;
+        let extraAdults = Math.max(0, adults - 10);
+        let additionalCharge = extraAdults * extraAdultRate;
 
-    // Total room price calculation
-    let totalRoomPrice = 0;
-    let freeRoomApplied = false; // Track if free room discount has been applied
+        // Get the date-in and date-out values
+        let dateIn = $('input[name="dateIn"]').val();
+        let dateOut = $('input[name="dateOut"]').val();
+        let isOvernight = dateIn !== dateOut;
 
-    $('#selected-rooms .room-item').each(function() {
-        let roomPrice = parseInt($(this).data('price')) || 0;
-        const offered = parseInt($(this).data('offered')) || 0;
+        // Total room price calculation
+        let totalRoomPrice = 0;
+        let freeRoomApplied = false; // Track if free room discount has been applied
 
-        if (offered === 1 && !freeRoomApplied) {
-            freeRoomApplied = true; // Apply free room discount only once
-        } else {
-            totalRoomPrice += roomPrice;
-        }
-    });
+        $('#selected-rooms .room-item').each(function() {
+            let roomPrice = parseInt($(this).data('price')) || 0;
+            const offered = parseInt($(this).data('offered')) || 0;
 
-    // Total bill calculation including base rate and additional charges
-    let totalBill = baseRate + additionalCharge + totalRoomPrice;
-    
-    // Update the total bill input and balance
-    $('#total-bill-input').val(totalBill);
-    updateBalance();
-}
+            if (isOvernight && offered === 1 && !freeRoomApplied) {
+                freeRoomApplied = true; // Apply free room discount only once
+            } else {
+                totalRoomPrice += roomPrice;
+            }
+        });
+        console.log(baseRate, additionalCharge, totalRoomPrice);
+        // Total bill calculation including base rate and additional charges
+        let totalBill = baseRate + additionalCharge + totalRoomPrice;
+        
+
+        // Update the total bill input and balance
+        $('#total-bill-input').val(totalBill);
+        updateBalance();
+    }
+
 
 
     function updateBalance() {
@@ -796,34 +807,45 @@
         $('#balance-input').val(balance);
     }
 
-    function updateTotalPrice(amount, operation) {
+    function updateTotalPrice(amount, operation, offered) {
         let totalBill = parseInt($('#total-bill-input').val()) || 0;
-        $('#selected-rooms .room-item').each(function() {
-            const offered = parseInt($(this).data('offered')) || 0;
+        let countOffered = 0;
+        let dateIn = $('input[name="dateIn"]').val();
+        let dateOut = $('input[name="dateOut"]').val();
+        let isOvernight = dateIn !== dateOut;
 
-            if (offered === 1) {
-                console.log('+1 kay PAPA JESUS');
-                count++;
+        // Count rooms with data-offered = 1
+        $('#selected-rooms .room-item').each(function() {
+            const roomOffered = parseInt($(this).data('offered')) || 0;
+            if (roomOffered === 1) {
+                countOffered++;
             }
         });
-        console.log(count);
-        if (count <= 1) {
-            console.log('LIBRE');
-            totalBill; // Set total price to 0 if exactly one room is offered
-        } else {
-            if (operation === 'add') {
-                console.log('NAKAPASOK SA ADD');
-                totalBill += amount;
-            } else if (operation === 'subtract') {
-                console.log('NAKAPASOK SA SUBTRACT');
-                count--;
-                totalBill -= amount;
-            }
+
+        console.log(offered, countOffered, operation, isOvernight);
+
+        // Adjust the amount for the first offered room during an overnight stay
+        if (offered === 1 && (countOffered === 1 || countOffered === 0 ) && operation === 'add' && isOvernight) {
+            amount = 0; // Make the first offered room free for an overnight stay
+            console.log(amount);
         }
 
+        // Apply the operation
+        if (operation === 'add') {
+            totalBill += amount;
+        } else if (operation === 'subtract') {
+            totalBill -= amount;
+        }
+
+        // Update the total bill input and balance
         $('#total-bill-input').val(totalBill);
         updateBalance();
     }
+
+
+
+
+
 
     $('#date-in, #date-out').on('change', function() {
         fetchBaseRate();
@@ -840,7 +862,6 @@
         const selectedRoomText = selectedOption.text();
         const roomPrice = parseInt(selectedOption.data('price')) || 0;
         const offered = parseInt(selectedOption.data('offered')) || 0;
-
 
         if (selectedRoomId) {
             if ($(`[data-room-id="${selectedRoomId}"]`).length > 0) {
@@ -861,15 +882,17 @@
             $('#hidden-rooms').append(`<input type="hidden" name="rooms[]" value="${selectedRoomId}">`);
             $('#no-rooms-message').hide();
             $('#room-dropdown').val('');
-            updateTotalPrice(roomPrice, 'add');
+            updateTotalPrice(roomPrice, 'add', offered); // Pass the offered value
         } else {
             alert('Please select a room to add.');
         }
     });
 
+
     $('#selected-rooms').on('click', '.remove-room', function() {
         const roomId = $(this).data('room-id');
         const roomPrice = parseInt($(this).closest('.room-item').data('price')) || 0;
+        const offered = parseInt($(this).closest('.room-item').data('offered')) || 0;
 
         $(this).closest('.room-item').remove();
         $(`#hidden-rooms input[value="${roomId}"]`).remove();
@@ -878,8 +901,9 @@
             $('#no-rooms-message').show();
         }
 
-        updateTotalPrice(roomPrice, 'subtract');
+        updateTotalPrice(roomPrice, 'subtract', offered); // Pass the offered value
     });
+
 
     // Initial balance computation
     updateBalance();

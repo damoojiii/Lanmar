@@ -73,6 +73,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -641,19 +646,21 @@
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
           <div class="row g-2">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-4">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4">
               <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4">
               <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-6 col-md-4">
               <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
             </div>
-            <div id="modalProof"></div>
+            <div class="col-6 col-md-4">
+                <div id="modalProof"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -663,7 +670,7 @@
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
 
-            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+            <button type="button" id="editButton" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
             </button>
 
@@ -735,13 +742,15 @@
 });
 
     document.addEventListener('DOMContentLoaded', () => {
+        let bookingIds;
         let userID;
     // Event delegation to handle row click events
     document.querySelector('tbody').addEventListener('click', function (event) {
         // Ensure the clicked element is a table row
         const row = event.target.closest('.table-row');
         if (row) {
-            const bookingId = row.dataset.bookingId; // Get the booking ID
+            const bookingId = row.dataset.bookingId;
+            bookingIds = bookingId; // Get the booking ID
             userID = row.dataset.userId;
 
             //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
@@ -799,10 +808,20 @@
         }
     });
     document.getElementById("chatsbutton").onclick = function() {
-     // Replace with your dynamic user_id value
-    const newUrl = `admin_chats.php?user_id=${userID}`;
-    window.location.href = newUrl; // Redirects to the new URL
-};
+        // Replace with your dynamic user_id value
+        const newUrl = `admin_chats.php?user_id=${userID}`;
+        window.location.href = newUrl; // Redirects to the new URL
+    };
+    function editBooking() {
+        if (bookingIds) { // Make sure bookingId is set
+            // Navigate to the cancellation page with the bookingId
+            window.location.href = `edit_reservation.php?id=${bookingIds}`;
+        } else {
+            console.log("No bookingId found!");
+        }
+    }
+    document.getElementById('editButton').addEventListener('click', editBooking);
+
 const approvedButton = document.querySelector('.btnCompleted');
 const cancelButton = document.querySelector('.btnCancel');
 const bookingIdElement = document.getElementById('modalBookingId');

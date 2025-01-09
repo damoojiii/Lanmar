@@ -27,6 +27,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;

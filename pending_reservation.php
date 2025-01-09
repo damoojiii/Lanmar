@@ -579,15 +579,15 @@
       </div>
       <div class="modal-body">
         <!-- Reservation ID -->
-        <div class="mb-4">
+        <div class="mb-4" >
           <h6 class="fw-bold">Reservation ID:</h6>
-          <p id="reservation-id"> #<span id="modalBookingId"></span> </p>
+          <p id="reservation-id" class="py-1" style="background-color: #d6d6d6;"> #<span id="modalBookingId"></span> </p>
         </div>
 
         <!-- Personal Information Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2">
+          <div class="row g-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
@@ -603,7 +603,7 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2 mb-2">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-5">
               <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
@@ -628,7 +628,7 @@
               <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <div class="row g-2 mb-2">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
             <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
@@ -639,7 +639,7 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Special Requests</h6>
-          <div class="row g-2">
+          <div class="row g-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
@@ -649,7 +649,7 @@
         <!-- Payment Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
-          <div class="row g-2">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
@@ -659,11 +659,15 @@
             <div class="col-6 col-md-4">
               <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
             </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-            </div>
-            <div id="modalProof"></div>
           </div>
+          <div class="row g-2">
+                <div class="col-6 col-md-4">
+                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div id="modalProof"></div>
+                </div>  
+            </div>     
         </div>
       </div>
       <div class="modal-footer d-flex justify-content-end">

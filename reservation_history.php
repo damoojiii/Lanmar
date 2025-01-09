@@ -29,6 +29,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -425,8 +430,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -457,8 +462,6 @@
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
                     <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                    <li><a class="dropdown-item" href="privacy_settings.php">Privacy Settings</a></li>
-                    <li><a class="dropdown-item" href="room_settings.php">Room Settings</a></li>
                 </ul>
             </li>
         </ul>
