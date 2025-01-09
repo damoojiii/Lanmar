@@ -34,7 +34,7 @@
         height: 100vh;
         overflow-y: auto; 
         transition: transform 0.3s ease;
-        background: #001A3E;
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
     }
 
     #main-content {
@@ -60,7 +60,7 @@
     }
 
     #sidebar .nav-link:hover, #sidebar .nav-link.active {
-        background-color: #fff !important;
+        background-color: #FFFDEC !important;
         color: #000 !important;
     }
     @media (max-width: 768px) {

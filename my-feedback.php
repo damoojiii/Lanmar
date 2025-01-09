@@ -155,7 +155,9 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
             border: 1px solid #ddd;
             border-radius: 8px;
         }
-
+        .btn-primary{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+        }
         
 
         @media (max-width: 768px) {

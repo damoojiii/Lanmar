@@ -77,7 +77,7 @@
         }
 
         .step.completed .circle {
-            background-color: #00214b; /* Blue background for completed steps */
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D); /* Blue background for completed steps */
             border-color: #00214b; /* Blue border */
             color: white; 
         }

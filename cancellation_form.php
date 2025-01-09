@@ -6,6 +6,8 @@
         echo "Connection failed: " . $e->getMessage();
     }   
     session_start();
+    include "role_access.php";
+    checkAccess('user');
     $userId = $_SESSION['user_id']; 
 
 ?>

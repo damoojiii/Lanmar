@@ -1,7 +1,8 @@
 <?php
 // Start the session at the very beginning of the file
 session_start();
-
+include "role_access.php";
+checkAccess('admin');
 include("connection.php");
 
 
@@ -22,6 +23,11 @@ include("connection.php");
         @font-face {
             font-family: 'nautigal';
             src: url(font/TheNautigal-Regular.ttf);
+        }
+
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
         }
 
         #sidebar span {
@@ -487,7 +493,7 @@ include("connection.php");
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>

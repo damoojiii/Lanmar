@@ -11,7 +11,6 @@
     $userId = $_SESSION['user_id']; 
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +37,7 @@
         }
 
         thead.custom-header, thead.custom-header th {
-            background-color: #19315D !important;
+            background: linear-gradient(25deg,rgb(29, 69, 104),#19315D) !important;
             color: white !important;
         }
         .table-row {

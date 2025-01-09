@@ -441,13 +441,13 @@
                 <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
             </li>
             <li>
-                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
+                <a href="reservation_history.php" class="nav-link active text-white">Reservation History</a>
             </li>
             <li>
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -567,21 +567,21 @@
 <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
+    <div class="modal-header">
         <h5 class="modal-title" id="reservationModalLabel">Reservation Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <!-- Reservation ID -->
-        <div class="mb-4">
+        <div class="mb-4" >
           <h6 class="fw-bold">Reservation ID:</h6>
-          <p id="reservation-id"># <span id="modalBookingId"></span></p>
+          <p id="reservation-id" class="py-1" style="background-color: #d6d6d6;"> #<span id="modalBookingId"></span> </p>
         </div>
 
         <!-- Personal Information Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2">
+          <div class="row g-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
@@ -597,32 +597,32 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2">
-            <div class="col-12 col-md-4">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
+            <div class="col-12 col-md-5">
               <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
             <div class="col-12 col-md-4">
               <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Total Hours:</strong> <span id="modalHours"></p>
+            <div class="col-12 col-md-3">
+              <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
             </div>
           </div>
-          <div class="row g-2">
-            <div class="col-4 col-md-2">
-              <p><strong>Adults:</strong> <span id="modalAdults"></p>
+          <div class="row g-2 mb-2">
+            <div class="col-4 col-md-3">
+              <p><strong>Adults:</strong> <span id="modalAdults"></span></p>
             </div>
-            <div class="col-4 col-md-2">
-              <p><strong>Children:</strong> <span id="modalChild"></p>
+            <div class="col-4 col-md-3">
+              <p><strong>Children:</strong> <span id="modalChild"></span></p>
             </div>
-            <div class="col-4 col-md-2">
+            <div class="col-4 col-md-3">
               <p><strong>PWD:</strong> <span id="modalPwd"></span></p>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-3">
               <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <div class="row g-2">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
             <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
@@ -632,8 +632,8 @@
 
         <!-- Booking Details Section -->
         <div class="mb-4">
-          <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2">
+          <h6 class="fw-bold">Special Requests</h6>
+          <div class="row g-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
@@ -643,21 +643,25 @@
         <!-- Payment Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
-          <div class="row g-2">
-          <div class="col-12 col-md-6">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
+            <div class="col-12 col-md-4">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4">
               <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-4">
               <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
             </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-            </div>
-            <div id="modalProof"></div>
           </div>
+          <div class="row g-2">
+                <div class="col-6 col-md-4">
+                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div id="modalProof"></div>
+                </div>  
+            </div>     
         </div>
       </div>
       <div id="modalFooter" class="modal-footer d-flex justify-content-end">
@@ -781,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('modalrefNum').textContent = data.refNumber;
                   const modalBody = document.getElementById('modalProof');
                     modalBody.innerHTML = `
-                    <a href="${data.imageProof}" target="_blank">View image</a>
+                    <a href="${data.imageProof}" target="_blank">View Image</a>
                     `
 
                   // Show the modal

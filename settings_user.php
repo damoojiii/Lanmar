@@ -101,12 +101,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         .settings-form button, 
         .save-btn {
-            border-radius: 10   px !important;  /* Added !important to override Bootstrap */
+            border-radius: 10px !important;
             padding: 13px 30px;
-            background-color: #03045e;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             border: none;
             cursor: pointer;
             color: white;
+        }
+        .btn:hover{
+            color: #ffffff;
         }
 
         .flex-container {

@@ -14,9 +14,6 @@
         if (isset($_POST['bookingId'])){
         $bookingId = $_POST['bookingId'];
     
-        // Here, connect to the database and update the booking status
-        // Example using PDO for a MySQL database
-    
         try {
             // Prepare the SQL query to update the booking status
             $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Approved' WHERE booking_id = :bookingId");
@@ -24,6 +21,13 @@
     
             // Execute the query
             if ($stmt->execute()) {
+                // Insert into notification_tbl
+                    $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
+                            VALUES (:booking_id, 1, 0, 0, NOW())";
+                    $stmt_notification = $pdo->prepare($notification_sql);
+                    $stmt_notification->execute([
+                    ':booking_id' => $bookingId
+                    ]);
                 //echo "Booking approved successfully!";
             } else {
                 echo "Failed to update booking status.";
@@ -44,6 +48,12 @@
     
             // Execute the query
             if ($stmt->execute()) {
+                $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
+                        VALUES (:booking_id, 1, 0, 0, NOW())";
+                $stmt_notification = $pdo->prepare($notification_sql);
+                $stmt_notification->execute([
+                ':booking_id' => $bookingId
+                ]);
                 //echo "Booking approved successfully!";
             } else {
                 echo "Failed to update booking status.";
@@ -441,7 +451,7 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link active text-white" href="pending_reservation.php">Pending Reservations</a></li>
                     <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
@@ -458,7 +468,7 @@
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -681,13 +691,13 @@
             </button>
 
             <!-- Check Button -->
-            <button type="button" class="btn btnApproved" style="width:50px; background-color: #1daa2d; border-color: #1daa2d;">
-                <i class="fa-solid fa-check" style="color: #ffffff;"></i>
+            <button type="button" class="btn btnApproved" style="width:auto; background-color: #1daa2d; border-color: #1daa2d; color: #ffffff;">
+                <i class="fa-solid fa-check" style="color: #ffffff;"></i> Approved
             </button>
 
             <!-- Cancel Button -->
-            <button type="button" class="btn btnReject" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
-                <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
+            <button type="button" class="btn btnReject" style="width:auto; background-color: #ee1717; border-color: #ee1717; color: #ffffff;">
+                <i class="fa-solid fa-xmark" style="color: #ffffff;"></i> Reject
             </button>
         </div>
 

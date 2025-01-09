@@ -506,7 +506,7 @@
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
-                <h2 class="mb-4">Approved Reservations</h2>
+                <h2 class="mb-4">Cancellation Forms</h2>
                 <div class="table-responsive">
                     <table class="table table-hover" id="example" style="width:100%">
                         <thead class="custom-header">

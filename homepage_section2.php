@@ -1,6 +1,8 @@
 <?php
 // Start the session at the very beginning of the file
 session_start();
+include "role_access.php";
+checkAccess('admin');
 
 include("connection.php");
 
@@ -569,7 +571,7 @@ if (isset($_POST['delete_id'])) {
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -603,7 +605,7 @@ if (isset($_POST['delete_id'])) {
                         </div>
                     </a>
                     <a href="homepage_section3.php">
-                        <div class="tab" id="archiveInfoTab">
+                        <div class="tab " id="archiveInfoTab">
                             About
                         </div>
                     </a>
@@ -617,9 +619,9 @@ if (isset($_POST['delete_id'])) {
                             Rooms
                         </div>
                     </a>
-                    <a href="section_5.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Section 5
+                    <a href="homepage_section5.php">
+                        <div class="tab " id="facilityInfoTab">
+                            Prices
                         </div>
                     </a>
                     <a href="section_6.php">

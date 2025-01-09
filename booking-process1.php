@@ -88,12 +88,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: black;
             font-weight: bold;
         }
 
         .step.completed .circle {
-            background-color: #00214b; /* Blue background for completed steps */
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D); /* Blue background for completed steps */
             border-color: #00214b; /* Blue border */
             color: white; 
         }
@@ -102,6 +102,10 @@
             background-color: lightgrey;
             border-color: white; 
             color: white; 
+        }
+
+        .step.completed span{
+            color: black;
         }
 
         .step::after {
@@ -128,6 +132,10 @@
         }
     </style>
     <style>
+        .add-room:hover, .check:hover{
+            background:#19315D;
+            color: #fff;
+        }
         .mobile-room{
             width: 80%;
         }
@@ -135,7 +143,7 @@
             justify-content: space-between;
         }
         .summary {
-            background-color: #00214b;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             color: #fff;
             width: 25%;
             height: 100%;
@@ -145,7 +153,7 @@
         }
         .expand-summary {
             width: 100%;
-            background-color: #00214b;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             text-align: center;
             border: none;
             color: #fff;
@@ -214,7 +222,7 @@
         }
         .btn-primary {
             color: #fff;
-            background-color: #0d6efd;
+            background:rgb(24, 50, 99);
             border-color: #0d6efd;
         }
         .btn-secondary {
@@ -235,7 +243,7 @@
         }
 
         #room-selection .list-group-item.active, .add-room, .check{
-            background-color: #004080;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             color: white;
         }
         .table-summary{
@@ -455,7 +463,9 @@
     $rate = $rateQuery->fetchColumn();
 
     $_SESSION['rate'] = $rate;
-
+    
+    $dateInDisplay = date("F j, Y" , strtotime($dateIn));
+    $dateOutDisplay = date("F j, Y" , strtotime($dateOut));
     $checkinDisplay = (new DateTime($checkin))->format('g:i A');
     $checkoutDisplay = (new DateTime($checkout))->format('g:i A');
 
@@ -599,14 +609,14 @@
             </div>
                     
             <div class="col-md-6 p-3 summary collapse" id="bookingSummary">
-                <button class="btn btn-link expand-summary" onclick="toggleSummary()">View Booking Summary</button>
+                <button class="btn btn-link expand-summary" type="button" onclick="toggleSummary()">View Booking Summary</button>
                 <form action="booking-process2.php" method="$_GET" id="secondForm">
                     <div class="section-header">Booking Summary</div>
 
                     <div class="bg-light p-3 rounded mb-3">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <p><strong>Date:</strong> <span id="date-input"><?php echo "$dateIn to $dateOut";?></span></p>
+                                <p><strong>Date:</strong> <span id="date-input"><?php echo "$dateInDisplay to $dateOutDisplay";?></span></p>
                                 <p><strong>Time:</strong> <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
                                 <p><strong>Total of Hours:</strong> <span id="hour-input"><?php echo $numhours;?></span></p>
                                 <p><strong>No. of Pax:</strong> <span id="total-pax"><?php echo $totalpax; ?></span></p>

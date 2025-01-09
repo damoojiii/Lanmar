@@ -89,7 +89,7 @@
             color: black;
         }
         .step.completed .circle {
-            background-color: #00214b; /* Blue background for completed steps */
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D); /* Blue background for completed steps */
             border-color: #00214b; /* Blue border */
             color: white; 
         }
@@ -125,7 +125,7 @@
     </style>
     <style>
         .summary {
-            background-color: #00214b;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             color: #fff;
             width: 25%;
             height: 100%;
@@ -430,6 +430,11 @@
     }
     $roomTotal = $_SESSION['roomTotal'] ?? '';
 
+    $dateInDisplay = date("F j, Y" , strtotime($dateIn));
+    $dateOutDisplay = date("F j, Y" , strtotime($dateOut));
+    $checkinDisplay = (new DateTime($checkin))->format('g:i A');
+    $checkoutDisplay = (new DateTime($checkout))->format('g:i A');
+
     $sql = "SELECT * FROM users where user_id = '$userId'";
     $result = $conn->query($sql);
     $user = $result->fetch_assoc();
@@ -504,8 +509,8 @@
                 <div class="bg-light p-2 rounded mb-3">
                     <div class="d-flex justify-content-between">
                         <div>                        
-                            <p>Date: <span id="date-input"><?php echo "$dateIn to $dateOut";?></span></p>
-                            <p>Time: <span id="time-input"><?php echo "$checkin to $checkout";?></span></p>
+                            <p>Date: <span id="date-input"><?php echo "$dateInDisplay to $dateOutDisplay";?></span></p>
+                            <p>Time: <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
                             <p>Total No. of Pax: <span id="total-pax"><?php echo "$totalPax";?></span></p>
                             <p>Reservation Type: <span id="reservation-type"><?php 
                                         $reservationTypeId = $_SESSION['reservationType'] ?? null;

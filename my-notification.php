@@ -63,7 +63,7 @@
     }
 
     .notification-card.new {
-        border-left: 5px solid #007bff;
+        border-left: 5px solid rgb(29, 69, 104);
     }
 
     .notification-card.read {
@@ -80,7 +80,7 @@
         top: 10px;
         left: 10px;
         font-size: 12px;
-        background-color: #007bff; /* New */
+        background-color: rgb(29, 69, 104); /* New */
         color: white;
         padding: 3px 6px;
         border-radius: 4px;
@@ -127,6 +127,10 @@
     .btn {
         font-size: 12px;
         padding: 5px 10px;
+    }
+
+    .btn-primary{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
     }
 
     .dot-indicator {
