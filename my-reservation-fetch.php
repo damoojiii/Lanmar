@@ -15,7 +15,7 @@ function getBookingDetailsById($bookingId) {
     // Query to fetch booking details
     $bookingQuery = "SELECT 
         booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout,
-        booking_tbl.hours, booking_tbl.additionals,
+        booking_tbl.hours, booking_tbl.additionals,booking_tbl.status,
         users.firstname, users.lastname, users.contact_number, 
         reservationType_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
@@ -32,6 +32,7 @@ function getBookingDetailsById($bookingId) {
     $bookingResult = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($bookingResult) {
+        $fullname = ucwords($bookingResult['firstname'] . " " . $bookingResult['lastname']);
         // Format date range (dateIn to dateOut)
         $dateIn = strtotime($bookingResult['dateIn']);
         $dateOut = strtotime($bookingResult['dateOut']);
@@ -72,6 +73,7 @@ function getBookingDetailsById($bookingId) {
         $bookingResult['dateRange'] = $dateRange;
         $bookingResult['timeRange'] = $timeRange;
         $bookingResult['rooms'] = $rooms;
+        $bookingResult['fullname'] = $fullname;
         
         return $bookingResult;
     }
@@ -91,10 +93,11 @@ if (isset($_GET['booking_id'])) {
         echo json_encode([
             'bookingId' => $bookingDetails['booking_id'],
             'refNumber' => $bookingDetails['ref_num'],
-            'name' => $bookingDetails['firstname'] . " " . $bookingDetails['lastname'],
+            'name' => $bookingDetails['fullname'],
             'contact' => $bookingDetails['contact_number'],
             'dateRange' => $bookingDetails['dateRange'],
             'timeRange' => $bookingDetails['timeRange'],
+            'status' => $bookingDetails['status'],
             'hours' => $bookingDetails['hours'],
             'adult' => $bookingDetails['adult'],
             'child' => $bookingDetails['child'],

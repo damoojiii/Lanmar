@@ -52,7 +52,7 @@
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
         }
 
         #sidebar {
@@ -61,7 +61,7 @@
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
             z-index: 1000; /* Ensure sidebar is above other content */
         }
@@ -151,7 +151,7 @@
         .contact-container {
             position: relative;
             width: 100%;
-            background: #19315D;
+            background: rgb(29, 69, 104);
             overflow-x: auto;
             white-space: nowrap;
             padding: 10px 0;
@@ -236,7 +236,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 10px 15px;
-        background-color: #001A3E;
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
         color: #fff;
         border-radius: 8px;
     }
@@ -282,7 +282,7 @@
     }
 
     .message.sent .message-content {
-        background-color: #001A3E;
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
         color: #fff;
     }
     .message.received .message-content {
@@ -341,6 +341,9 @@
     }
 
     @media (max-width: 768px) {
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+        }
         #sidebar {
             position: fixed;
             transform: translateX(-100%); /* Hide sidebar off-screen */
@@ -394,7 +397,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>

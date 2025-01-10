@@ -82,7 +82,7 @@
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
         }
 
         #sidebar {
@@ -91,7 +91,7 @@
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
             z-index: 1000; /* Ensure sidebar is above other content */
         }
@@ -399,7 +399,26 @@
         margin: 0;
         }
 
+        @media (max-width: 768px){
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
         @media (max-width: 576px) {
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
             .modal-body h6 {
                 font-size: 16px; /* Slightly larger headers for readability */
             }
@@ -418,7 +437,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
@@ -506,7 +525,7 @@
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
-                <h2 class="mb-4">Approved Reservations</h2>
+                <h2 class="mb-4"><strong>Approved Reservations</strong></h2>
                 <div class="table-responsive">
                     <table class="table table-hover" id="example" style="width:100%">
                         <thead class="custom-header">
@@ -652,10 +671,10 @@
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
             <div class="col-6 col-md-4">
-              <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
+              <p><strong>Total Price:</strong>₱ <span id="modalTotalBill"></span></p>
             </div>
             <div class="col-6 col-md-4">
-              <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
+              <p><strong>Balance Remaining:</strong>₱ <span id="modalBalance"></span></p>
             </div>
           </div>
           <div class="row g-2">

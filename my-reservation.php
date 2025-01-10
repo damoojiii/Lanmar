@@ -174,12 +174,12 @@
     $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = $userId");
     $stmt->execute();
     $name = $stmt->fetch(PDO::FETCH_ASSOC);
-    $fullname = $name['firstname'] . " " . $name['lastname'];
+    $fullname = ucwords($name['firstname'] . " " . $name['lastname']);
  ?> 
 
 <!-- Main content -->
 <div id="main-content" class="mt-4 pt-3">
-    <h2 class="mb-4">My Reservations</h2>
+    <h2 class="mb-4"><strong>My Reservations</strong></h2>
         <div class="table-responsive">
         
             <table class="table table-hover text-center" id="example" style="width:100%">
@@ -259,15 +259,15 @@
       </div>
       <div class="modal-body">
         <!-- Reservation ID -->
-        <div class="mb-4">
+        <div class="mb-4" >
           <h6 class="fw-bold">Reservation ID:</h6>
-          <p id="reservation-id">#<span id="modalBookingId"></p>
+          <p id="reservation-id" class="py-1" style="background-color: #d6d6d6;"> #<span id="modalBookingId"></span> </p>
         </div>
 
         <!-- Personal Information Section -->
-        <div class="mb-4 ">
+        <div class="mb-4">
           <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2" >
+          <div class="row g-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
@@ -275,7 +275,7 @@
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
             <div class="col-12 col-md-4">
-              <p><strong>Gender:</strong> WRONG-TURN</p>
+              <p><strong>Gender:</strong> Female</p>
             </div>
           </div>
         </div>
@@ -283,32 +283,32 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-5">
-              <p><strong>Date:</strong> <span id="modalDateRange"></p>
+              <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
-            <div class="col-12 col-md-3">
-              <p><strong>Time:</strong> <span id="modalTimeRange"></p>
+            <div class="col-12 col-md-4">
+              <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
             <div class="col-12 col-md-3">
               <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
             </div>
           </div>
-          <div class="row g-2">
-            <div class="col-4 col-md-2">
-              <p><strong>Adults:</strong> <span id="modalAdults"></p>
+          <div class="row g-2 mb-2">
+            <div class="col-4 col-md-3">
+              <p><strong>Adults:</strong> <span id="modalAdults"></span></p>
             </div>
-            <div class="col-4 col-md-2">
-              <p><strong>Children:</strong> <span id="modalChild"></p>
+            <div class="col-4 col-md-3">
+              <p><strong>Children:</strong> <span id="modalChild"></span></p>
             </div>
-            <div class="col-4 col-md-2">
-              <p><strong>PWD:</strong> <span id="modalPwd"></p>
+            <div class="col-4 col-md-3">
+              <p><strong>PWD:</strong> <span id="modalPwd"></span></p>
             </div>
-            <div class="col-12 col-md-6">
-              <p><strong>Total Pax:</strong> <span id="modalTotalPax"></p>
+            <div class="col-12 col-md-3">
+              <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <div class="row g-2">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
             <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
@@ -318,8 +318,8 @@
 
         <!-- Booking Details Section -->
         <div class="mb-4">
-          <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2">
+          <h6 class="fw-bold">Special Requests</h6>
+          <div class="row g-2" style="background-color: #d6d6d6;">
             <div class="col-12 col-md-4">
               <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
@@ -329,21 +329,25 @@
         <!-- Payment Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
-          <div class="row g-2">
-            <div class="col-sm-6 col-md-5">
+          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
+            <div class="col-12 col-md-4">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-sm-6 col-md-3">
-              <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></p>
+            <div class="col-6 col-md-4">
+              <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></span></p>
             </div>
-            <div class="col-sm-6 col-md-4">
-              <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></p>
+            <div class="col-6 col-md-4">
+              <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></span></p>
             </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-            </div>
-            <div id="modalProof"></div>
           </div>
+          <div class="row g-2">
+                <div class="col-6 col-md-4">
+                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div id="modalProof"></div>
+                </div>  
+            </div>     
         </div>
       </div>
       <div class="modal-footer d-flex justify-content-end">

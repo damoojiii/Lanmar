@@ -304,7 +304,7 @@ $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
         </div>
 
         <div class="feedback-section">
-            <h2 class="section-title">My Feedback</h2>
+            <h2 class="section-title"><strong>My Feedback</strong></h2>
 
             <?php if ($feedback): ?>
                 <div class="feedback-card">
