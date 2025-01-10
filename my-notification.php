@@ -197,13 +197,35 @@
 
 <div id="main-content" class="container mt-2">
     <div class="notification-page">
-        <h2>New Notification(s) from Lanmar</h2>
+        <h2><strong>New Notification(s) from Lanmar</strong></h2>
         <div class="notification-container">
+        <?php 
+                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
+                        b.booking_id
+
+                    FROM 
+                        notification_tbl n
+                    JOIN 
+                        booking_tbl b ON n.booking_id = b.booking_id
+                    WHERE 
+                        n.is_read_user = 0 AND n.status = 1
+                    ORDER BY 
+                        n.timestamp DESC
+                    ";
+                    $query = $pdo->prepare($sql);
+                    $query->execute();
+                    $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($notifications as $notification) {
+                        $timestamp = $notification['timestamp'];
+                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
+                        $timeAgo = '3h ago';
+            ?>
             <!-- Notification Card -->
             <div class="notification-card new">
                 <span class="badge-new">New</span>
                 <div class="notification-content">
-                    <p>Your Reservation # 1234 has been approved.</p>
+                    <p>Your Reservation #<?php echo $notification['booking_id']; ?> has been approved.</p>
                 </div>
                 <div class="notification-footer">
                     <div class="time-container">
@@ -217,11 +239,34 @@
                 <span class="dot-indicator"></span>
             </div>
             <!-- Add more cards as needed -->
+             <?php } ?>
+             <?php 
+                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
+                        b.booking_id
+
+                    FROM 
+                        notification_tbl n
+                    JOIN 
+                        booking_tbl b ON n.booking_id = b.booking_id
+                    WHERE 
+                        n.is_read_user = 0 AND n.status = 3
+                    ORDER BY 
+                        n.timestamp DESC
+                    ";
+                    $query = $pdo->prepare($sql);
+                    $query->execute();
+                    $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($notifications as $notification) {
+                        $timestamp = $notification['timestamp'];
+                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
+                        $timeAgo = '3h ago';
+            ?>
             <!-- Cancellation Card -->
             <div class="notification-card cancel">
                 <span class="badge-cancel">Cancelled</span>
                 <div class="notification-content">
-                    <p>Your Reservation # 1234 has been cancelled.</p>
+                    <p>Your Reservation #<?php echo $notification['booking_id']; ?> has been cancelled.</p>
                 </div>
                 <div class="notification-footer">
                     <div class="time-container">
@@ -234,16 +279,41 @@
                 </div>
                 <span class="dot-indicator"></span>
             </div>
+            <?php } ?>
         </div>
 
         <hr />
 
         <h2>Read Notification(s)</h2>
         <div class="notification-container">
+        <?php 
+                $sql1 = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
+                        b.booking_id
+
+                    FROM 
+                        notification_tbl n
+                    JOIN 
+                        booking_tbl b ON n.booking_id = b.booking_id
+                    JOIN 
+                        users u ON b.user_id = u.user_id
+                    WHERE 
+                        n.is_read_user = 1
+                    ORDER BY 
+                        n.timestamp DESC
+                    ";
+                    $query1 = $pdo->prepare($sql1);
+                    $query1->execute();
+                    $notifications1 = $query1->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($notifications1 as $notification) {
+                        $timestamp = $notification['timestamp'];
+                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
+                        $timeAgo = '3h ago';
+            ?>
             <!-- Notification Card -->
             <div class="notification-card read">
                 <div class="notification-content">
-                    <p>Your Reservation # 1324 has been approved.</p>
+                    <p>Your Reservation #<?php echo $notification['booking_id']; ?> has been approved.</p>
                 </div>
                 <div class="notification-footer">
                     <p class="time">1d ago</p>
@@ -251,7 +321,7 @@
                 </div>
             </div>
             <!-- Add more cards as needed -->
-             
+             <?php } ?>
         </div>
     </div>
 </div>

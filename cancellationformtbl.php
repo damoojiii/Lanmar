@@ -91,7 +91,7 @@
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
             z-index: 1000; /* Ensure sidebar is above other content */
         }
@@ -413,12 +413,44 @@
             }
         }
 
+        @media (max-width: 768px){
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
 
     </style>
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
@@ -506,7 +538,7 @@
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
-                <h2 class="mb-4">Cancellation Forms</h2>
+                <h2 class="mb-4"><strong>Cancellation Forms</strong></h2>
                 <div class="table-responsive">
                     <table class="table table-hover" id="example" style="width:100%">
                         <thead class="custom-header">

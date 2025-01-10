@@ -70,7 +70,7 @@ if (isset($_GET['unblockid'])) {
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
             z-index: 1000; /* Ensure sidebar is above other content */
         }
@@ -354,11 +354,44 @@ if (isset($_GET['unblockid'])) {
             text-align: left; /* Optional: for text alignment */
             border: 1px solid #ddd; /* Optional: for borders */
         }
+
+        @media (max-width: 768px){
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
@@ -425,7 +458,7 @@ if (isset($_GET['unblockid'])) {
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Account List</h1>
+                <h2 class="text-center mb-3 mt-4"><strong>Account List</strong></h2>
                 <div class="" style="display: flex; justify-content:flex-end;">
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#blockedUsersModal">
                         See Blocked Users

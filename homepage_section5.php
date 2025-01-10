@@ -42,7 +42,7 @@ include("connection.php");
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
             z-index: 1000; /* Ensure sidebar is above other content */
         }
@@ -53,7 +53,6 @@ include("connection.php");
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -448,11 +447,45 @@ include("connection.php");
                 flex: 1 1 calc(50% - 8px);
             }
         }
+
+        @media (max-width: 768px){
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px){
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            }
+            .modal-body h6 {
+                font-size: 16px; /* Slightly larger headers for readability */
+            }
+            .table thead th {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            .table tbody td {
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>

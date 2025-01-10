@@ -60,7 +60,7 @@
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
             z-index: 1000; /* Ensure sidebar is above other content */
         }
@@ -149,7 +149,7 @@
         }
 
         .header {
-            background-color: #1e3a8a;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             color: white;
             padding: 20px;
         }
@@ -311,7 +311,7 @@
             <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Weekly Earnings</h5>
-                    <h3>PHP <?php echo number_format($weekly_earnings); ?></h3>
+                    <h3>₱ <?php echo number_format($weekly_earnings); ?></h3>
                     <p>+8.35% More earnings than usual</p>
                 </div>
             </div>
