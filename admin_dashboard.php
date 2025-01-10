@@ -2,6 +2,22 @@
     try {
         $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations FROM booking_tbl WHERE status = 'Pending'");
+        $pending_stmt->execute();
+        $pending_data = $pending_stmt->fetch(PDO::FETCH_ASSOC);
+        $pending_reservations = $pending_data['pending_reservations'];
+    
+        $incoming_stmt = $pdo->prepare("SELECT COUNT(*) AS incoming_books FROM booking_tbl WHERE WEEK(dateIn) = WEEK(CURDATE()) AND YEAR(dateIn) = YEAR(CURDATE())");
+        $incoming_stmt->execute();
+        $incoming_data = $incoming_stmt->fetch(PDO::FETCH_ASSOC);
+        $incoming_books = $incoming_data['incoming_books'];
+    
+        $earnings_stmt = $pdo->prepare("SELECT SUM(bill_tbl.total_bill) AS weekly_earnings FROM booking_tbl LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id WHERE WEEK(booking_tbl.dateIn) = WEEK(CURDATE()) AND YEAR(booking_tbl.dateIn) = YEAR(CURDATE())");
+        $earnings_stmt->execute();
+        $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
+        $weekly_earnings = $earnings_data['weekly_earnings'];
+    
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
     }
@@ -35,7 +51,7 @@
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
         }
 
         #sidebar {
@@ -132,12 +148,22 @@
             color: #000 !important;
         }
 
+        .header {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 20px;
+        }
+
         .stats-card {
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             padding: 20px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%; /* Ensures full height within the flex parent */
         }
         .stats-card h5{
             font-size: 1.2rem;
@@ -165,6 +191,7 @@
         #main-content {
             margin-left: 0; /* Remove margin for smaller screens */
             padding: 0;
+            max-width: 100%;
         }
 
         #hamburger {
@@ -172,6 +199,18 @@
         }
         .container {
             max-width: 100%;
+        }
+
+        .header {
+        padding: 15px;
+        }
+
+        .stats-card {
+            padding: 15px;
+        }
+
+        .chart-container {
+            padding: 15px;
         }
 
     }
@@ -189,7 +228,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -244,7 +283,7 @@
     </div>
 
     <div id="main-content" class="container mt-1">
-    <div class="container-fluid">
+        <div class="container-fluid">
         <!-- Header Section -->
         <div class="row">
             <div class="col-12 header">
@@ -255,60 +294,59 @@
 
         <!-- Statistics Cards Section -->
         <div class="row mt-4">
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Pending Reservations</h5>
-                    <h2>2,562</h2>
+                    <h2><?php echo number_format($pending_reservations); ?></h2>
                     <p>-2.65% Less booking than usual</p>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+                <div class="stats-card">
+                    <h5>Incoming Books this Week</h5>
+                    <h3><?php echo number_format($incoming_books); ?></h3>
+                    <p>+8.35% More incoming books than usual</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Weekly Earnings</h5>
-                    <h3>$24,300</h3>
+                    <h3>PHP <?php echo number_format($weekly_earnings); ?></h3>
                     <p>+8.35% More earnings than usual</p>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Visitors Today</h5>
                     <h2>17,212</h2>
                     <p>+5.50% More visitors than usual</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <h5>No. of Users</h5>
-                    <h2>43</h2>
-                    <p>-4.25% Less users than usual</p>
-                </div>
-            </div>
         </div>
 
         <!-- Charts and Widgets Section -->
         <div class="row mt-4">
-            <div class="col-md-6">
+            <div class="col-md-6 col-12 mb-4">
                 <div class="chart-container">
                     <h5>Yearly Earnings</h5>
-                    <!-- Insert Chart.js or any chart library here -->
                     <canvas id="movementChart"></canvas>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-6 col-12 mb-4">
                 <div class="chart-container">
                     <h5>Monthly Earnings</h5>
-                    <!-- Insert  here -->
+                    <!-- Insert chart here -->
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 col-sm-6 col-12 mb-4">
                 <div class="chart-container">
                     <h5>Pax Chart</h5>
-                    <!-- Insert Chart.js or any chart library here -->
                     <canvas id="browserUsageChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
+
 
     </div>
 
