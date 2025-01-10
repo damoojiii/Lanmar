@@ -382,7 +382,68 @@
 </html>
 
 <script>
+document.getElementById('hamburger').addEventListener('click', function() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('show');
+  
+  const navbar = document.querySelector('.navbar');
+  navbar.classList.toggle('shifted');
+  
+  const mainContent = document.getElementById('main-content');
+  mainContent.classList.toggle('shifted');
+  });
+document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('booking_id');
 
+    if (bookingId) {
+        fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Booking not found');
+                    return;
+                }
+
+                // Populate the modal with the fetched data
+                document.getElementById('modalBookingId').textContent = data.bookingId;
+                document.getElementById('modalName').textContent = data.name;
+                document.getElementById('modalContact').textContent = data.contact;
+                document.getElementById('modalDateRange').textContent = data.dateRange;
+                document.getElementById('modalTimeRange').textContent = data.timeRange;
+                document.getElementById('modalHours').textContent = data.hours;
+                document.getElementById('modalAdults').textContent = data.adult;
+                document.getElementById('modalChild').textContent = data.child;
+                document.getElementById('modalPwd').textContent = data.pwds;
+                document.getElementById('modalTotalPax').textContent = data.totalPax;
+                document.getElementById('modalRoomType').textContent = data.type;
+
+                // Populate rooms
+                const roomsContainer = document.getElementById('modalRooms');
+                roomsContainer.innerHTML = '';
+                let ronum = 1;
+                data.roomName.forEach(room => {
+                    const roomElement = document.createElement('div');
+                    roomElement.classList.add('room-detail', 'col-3', 'col-md-3');
+                    roomElement.innerHTML = `<strong>Room ${ronum}:</strong> ${room.roomName}<br>`;
+                    roomsContainer.appendChild(roomElement);
+                    ronum++;
+                });
+
+                document.getElementById('modalAdds').textContent = data.additional;
+                document.getElementById('modalPaymode').textContent = data.paymode;
+                document.getElementById('modalTotalBill').textContent = data.totalBill;
+                document.getElementById('modalBalance').textContent = data.balance;
+                document.getElementById('modalrefNum').textContent = data.refNumber;
+                const modalBody = document.getElementById('modalProof');
+                modalBody.innerHTML = `<a href="${data.imageProof}" target="_blank">View image</a>`;
+
+                // Show the modal
+                $('#reservationModal').modal('show');
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+    });
 document.addEventListener('DOMContentLoaded', () => {
   const tableIndex = new DataTable('#example', {
         columnDefs: [

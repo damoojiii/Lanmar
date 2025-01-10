@@ -1086,14 +1086,16 @@ function isCheckoutTimeBlocked(date, time) {
     return bookedTimeSlots[date].some(slot => {
       const [slotStartHour, slotStartMin] = slot.start.split(':').map(Number);
       const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
-
+      
       const slotStart = slotStartHour * 60 + slotStartMin;  // Start time in minutes
       const slotEnd = slotEndHour * 60 + slotEndMin;        // End time in minutes
-      const currentTime = time * 60;                        // Current time in minutes
+      const currentTime = Math.round(time * 60);                        // Current time in minutes
 
+      // Calculate cleanup time (2 hours before the next booking starts)
       const nextBookingStartWithCleanup = slotStart - (cleanupTime * 60); // Subtract cleanup period (120 minutes)
 
-      if ((currentTime >= slotStart && currentTime <= slotEnd) || currentTime >= nextBookingStartWithCleanup) {
+      // Block if the current time overlaps with the booking 
+      if ((currentTime >= slotStart && currentTime <= slotEnd) || currentTime > nextBookingStartWithCleanup) {
         return true;  // Time is blocked
       }
 
@@ -1111,7 +1113,7 @@ function hasPreviousDaySpillover(date) {
   if (bookedTimeSlots[formattedPrevDate]) {
     return bookedTimeSlots[formattedPrevDate].some(slot => {
       const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
-      return slotEndHour < earliestTime; // Spillover to the next day if the checkout is before 6 AM
+      return slotEndHour > earliestTime; // Spillover to the next day if the checkout is before 6 AM
     });
   }
   return false;

@@ -554,7 +554,6 @@ function isCheckoutTimeBlocked(date, time) {
       // Calculate cleanup time (2 hours before the next booking starts)
       const nextBookingStartWithCleanup = slotStart - (cleanupTime * 60); // Subtract cleanup period (120 minutes)
 
-      console.log((currentTime >= slotStart && currentTime <= slotEnd), 'Current Time:', currentTime, time, 'Slot Start:', slotStart,slotStartHour, slotStartMin, 'Slot End:', slotEnd, slotEndHour,slotEndMin);
       // Block if the current time overlaps with the booking 
       if ((currentTime >= slotStart && currentTime <= slotEnd) || currentTime > nextBookingStartWithCleanup) {
         return true;  // Time is blocked
@@ -1092,7 +1091,7 @@ function renderCalendar() {
     }
 
     for (let i = 1; i <= lastDayDate; i++) {
-        const today = new Date();
+        const today = new Date().fp_incr(1);
         const currentDate = new Date(currentYear, currentMonth, i);
         const currentDateString = currentDate.toISOString().split('T')[0];
 
