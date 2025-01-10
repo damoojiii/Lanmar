@@ -242,7 +242,7 @@
                         </span></td>
                   <?php endforeach; ?>
                   <?php elseif(empty($results)):?>
-                    <td style="text-align: center;">No reservations</td>
+                    <td colspan="7" style="text-align: center;">No reservations</td>
                     </tr>
                   <?php endif ?>
                 </tbody>

@@ -231,13 +231,14 @@
             ];
 
             foreach ($statuses as $status => $details) {
-                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp, b.booking_id
+                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp, b.booking_id, b.user_id
                         FROM notification_tbl n
                         JOIN booking_tbl b ON n.booking_id = b.booking_id
-                        WHERE n.is_read_user = 0 AND n.status = :status
+                        JOIN users u ON b.user_id = u.user_id
+                        WHERE n.is_read_user = 0 AND n.status = :status AND b.user_id = :userId
                         ORDER BY n.timestamp DESC";
                 $query = $pdo->prepare($sql);
-                $query->execute(['status' => $status]);
+                $query->execute(['status' => $status, 'userId' => $userId]);
                 $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
                 
                 foreach ($notifications as $notification) {
@@ -271,7 +272,7 @@
 
     <hr />
 
-    <h2>Read Notification(s)</h2>
+    <h2><strong>Read Notification(s)</strong></h2>
     <div class="notification-container read">
     
     </div>

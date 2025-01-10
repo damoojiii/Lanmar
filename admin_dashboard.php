@@ -17,6 +17,17 @@
         $earnings_stmt->execute();
         $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
         $weekly_earnings = $earnings_data['weekly_earnings'];
+
+        $sql = "SELECT YEAR(dateIn) AS year, MONTH(dateIn) AS month, SUM(p.adult + p.child + p.pwd) AS totalPax
+        FROM booking_tbl b
+        JOIN pax_tbl p ON b.pax_id = p.pax_id
+        GROUP BY year, month
+        ORDER BY year, month";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+        $bookingData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
@@ -171,12 +182,28 @@
         .chart-container {
             background-color: white;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            margin-top: 20px;
+            height: 100%;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
         }
         .container-fluid{
             margin-inline: 10px ;
+        }
+        #paxChart{
+            height: 100% !important;
+            width: 100% !important;
         }
     @media (max-width: 768px) {
         #sidebar {
@@ -218,7 +245,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
@@ -327,21 +354,30 @@
         <!-- Charts and Widgets Section -->
         <div class="row mt-4">
             <div class="col-md-6 col-12 mb-4">
-                <div class="chart-container">
-                    <h5>Yearly Earnings</h5>
-                    <canvas id="movementChart"></canvas>
+                <div class="chart-container d-flex flex-column">
+                    <div class="chart-header mb-3">
+                        <h5 id="chart-title" class="mb-0">Monthly Earnings</h5>
+                        <select id="earnings-filter" class="form-select form-select-sm w-25" onchange="updateChart()">
+                            <option value="yearly">Yearly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                    </div>
+                    <div class="chart-body flex-grow-1">
+                        <canvas id="Earnings"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-6 col-12 mb-4">
-                <div class="chart-container">
-                    <h5>Monthly Earnings</h5>
-                    <!-- Insert chart here -->
-                </div>
-            </div>
-            <div class="col-md-3 col-sm-6 col-12 mb-4">
-                <div class="chart-container">
-                    <h5>Pax Chart</h5>
-                    <canvas id="browserUsageChart"></canvas>
+            <div class="col-md-6 col-sm-6 col-12 mb-4">
+                <div class="chart-container d-flex flex-column">
+                    <div class="chart-header mb-3">
+                        <h5 class="mb-0">Pax Chart</h5>
+                        <div class="d-flex justify-content-end">
+                            <select id="yearSelect" class="form-select form-select-sm"></select>
+                        </div>
+                    </div>
+                    <div class="chart-body flex-grow-1">
+                        <canvas id="paxChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -349,13 +385,161 @@
 
 
     </div>
-
+    <?php echo '<script>const bookingData = ' . json_encode($bookingData) . ';</script>'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let chart;
+
+            function createChart(labels, overallData, daytimeData, overnightData) {
+                const ctx = document.getElementById('Earnings').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Overall Earnings',
+                                data: overallData,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Daytime Earnings',
+                                data: daytimeData,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            },
+                            {
+                                label: 'Overnight Earnings',
+                                data: overnightData,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            function fetchDataAndUpdateChart(filter) {
+                fetch(`fetch_earnings.php?type=${filter}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const labels = data.map(entry => filter === 'yearly' ? entry.year : entry.month);
+                        const overallData = data.map(entry => entry.overallEarnings);
+                        const daytimeData = data.map(entry => entry.daytimeEarnings);
+                        const overnightData = data.map(entry => entry.overnightEarnings);
+
+                        if (!chart) {
+                            // Create the chart if it doesn't exist
+                            createChart(labels, overallData, daytimeData, overnightData);
+                        } else {
+                            // Update existing chart
+                            chart.data.labels = labels;
+                            chart.data.datasets[0].data = overallData;
+                            chart.data.datasets[1].data = daytimeData;
+                            chart.data.datasets[2].data = overnightData;
+                            chart.update();
+                        }
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+            document.getElementById('earnings-filter').addEventListener('change', updateChart);
+
+            function updateChart() {
+                const filter = document.getElementById('earnings-filter').value;
+                const chartTitle = document.getElementById('chart-title');
+                chartTitle.textContent = filter === 'monthly' ? 'Monthly Earnings' : 'Yearly Earnings';
+                fetchDataAndUpdateChart(filter);
+            }
+
+            // Initialize with default filter
+            fetchDataAndUpdateChart('monthly');
+        });
+
+        const ctx = document.getElementById('paxChart').getContext('2d');
+        let paxChart;
+
+        // Initialize the dropdown with available years
+        const yearSelect = document.getElementById('yearSelect');
+        const years = [...new Set(bookingData.map(booking => booking.year))];
+        years.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.text = year;
+            yearSelect.add(option);
+        });
+
+        // Function to create or update the bar chart
+        function createPaxChart(year) {
+            const chartData = {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Pax',
+                    data: Array(12).fill(0),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            // Populate the data array with pax counts for the selected year
+            const yearBookings = bookingData.filter(booking => booking.year === year);
+            yearBookings.forEach(booking => {
+                const month = booking.month - 1; // Months are zero-based
+                chartData.datasets[0].data[month] += booking.totalPax;
+            });
+
+            // Destroy the existing chart instance if it exists
+            if (paxChart) {
+                paxChart.destroy();
+            }
+
+            // Create or update the chart instance
+            paxChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial render with the first year
+        createPaxChart(years[0]);
+
+        // Event listener for year change
+        yearSelect.addEventListener('change', () => {
+            const selectedYear = yearSelect.value;
+            createPaxChart(selectedYear);
+        });
+
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('main-content');

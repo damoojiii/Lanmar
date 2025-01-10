@@ -1,7 +1,10 @@
 <?php
+session_start();
+$userId = $_SESSION['user_id'];
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
     function timeAgo($timestamp) {
         $timeAgo = '';
@@ -26,19 +29,20 @@ try {
         return $timeAgo;
     }
     
-    $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
-                b.booking_id
+    $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp, b.booking_id, b.user_id
             FROM 
                 notification_tbl n
             JOIN 
                 booking_tbl b ON n.booking_id = b.booking_id
+            JOIN 
+                users u ON b.user_id = u.user_id
             WHERE 
-                n.is_read_user = 1
+                n.is_read_user = 1 AND b.user_id = :userId
             ORDER BY 
                 n.timestamp DESC";
 
     $query = $pdo->prepare($sql);
-    $query->execute();
+    $query->execute(['userId' => $userId]);
     $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
     
     foreach ($notifications as $notification) {

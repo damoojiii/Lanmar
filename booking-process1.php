@@ -527,19 +527,19 @@
                 <div class="section-header">Number of Guest (Pax)</div>
                 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                     <div class="row mb-2">
-                        <div class="col-md-2">
+                        <div class="col-12 col-md-2">
                             <label for="adults" class="form-label">Adult(s)</label>
                             <input type="number" min="0" id="adults" name="adults" class="form-control" value="<?php echo $adult; ?>" required>
                         </div>
-                        <div class="col-md-2">
-                            <label for="children" class="form-label">Child(ren)</label>
+                        <div class="col-12 col-md-3">
+                            <label for="children" class="form-label">Child(ren) (5 years below)</label>
                             <input type="number" min="0" id="children" name="children" class="form-control" value="<?php echo $child; ?>">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-12 col-md-2">
                             <label for="pwd" class="form-label">PWD(s)</label>
                             <input type="number" min="0" id="pwd" name="pwd" class="form-control" value="<?php echo $pwd; ?>">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-3">
                             <label for="reservationType" class="form-label">Type of Reservation:</label>
                             <select id="reservationType" name="reservationType" class="form-control" required>
                                 <?php 
@@ -561,7 +561,7 @@
                             </select>
 
                         </div>
-                        <div class=" col-md-2 check-btn" style="align-content: flex-end;">
+                        <div class="col-12 col-md-2 check-btn" style="align-content: flex-end;">
                             <button type="submit" name="check" class="btn check" id="firstform" >Check Rooms</button>
                         </div>
                     </div>
@@ -681,7 +681,6 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -720,6 +719,13 @@ function toggleSummary() {
         expandButton.textContent = 'View Booking Summary';
     }
 }
+
+$('input[name="adults"], input[name="children"], input[name="pwd"]').on('input', function() {
+        let value = $(this).val();
+        if (value.length > 2) {
+            $(this).val(value.slice(0, 2)); // Limit to 2 digits
+        }
+});
 
 
 document.addEventListener("DOMContentLoaded", function () {
