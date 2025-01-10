@@ -29,6 +29,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -406,14 +411,14 @@
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
-                <h2 class="text-center mb-4">Edit Reservation</h2>
+                <h2 class="text-center mb-4"><strong>Edit Reservation</strong></h2>
                 <form action="update_reservation.php" method="POST">
                     <?php 
                     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         if (isset($_GET['id']) && !empty($_GET['id'])) {
                             $bookingId = $_GET['id'];
                             // Fetch the booking details
-                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, reservationType_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
+                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, reservationType_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
                                     FROM booking_tbl 
                                     LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id 
                                     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id 
@@ -427,6 +432,8 @@
                             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
                             if ($reservation): ?>
                                 <input type="hidden" id="booking-id" name="booking_id" value="<?= htmlspecialchars($reservation['booking_id']); ?>">
+                                <input type="hidden" id="status" name="status" value="<?= htmlspecialchars($reservation['status']); ?>">
+
                                 <!-- Customer Information -->
                                 <div class="form-section">
                                     <h4>Customer Information</h4>
@@ -455,7 +462,7 @@
                                         </div>
                                         <div class="col-sm-10 col-md-2">
                                             <label class="form-label">Check-In Time</label>
-                                            <select name="checkin" class="form-control" id="checkin-time">
+                                            <select name="checkin" class="form-control" id="checkin-time" required>
                                                 <option value="<?= htmlspecialchars($reservation['checkin']); ?>" selected><?= date("g:i A", strtotime($reservation['checkin'])); ?></option>
                                                 <!-- You can add other options here if necessary -->
                                             </select>
@@ -480,9 +487,13 @@
                                         SELECT 
                                             booking_tbl.booking_id,
                                             room_tbl.bill_id, 
-                                            room_tbl.room_name
+                                            room_tbl.room_name,
+                                            room_tbl.room_Id,
+                                            rooms.price,
+                                            rooms.is_offered
                                         FROM booking_tbl
                                         LEFT JOIN room_tbl ON booking_tbl.bill_id = room_tbl.bill_id
+                                        LEFT JOIN rooms ON room_tbl.room_Id = rooms.room_id
                                         WHERE booking_tbl.booking_id = :id
                                     ";
                                     $stmt1 = $pdo->prepare($sql1);
@@ -493,10 +504,15 @@
                                     $room_data = [];
                                     if (!empty($rows)) {
                                         foreach ($rows as $row) {
-                                            $room_data[] = [
-                                                'room_name' => $row['room_name'],
-                                                'bill_id' => $row['bill_id'] 
-                                            ];
+                                            if ($row['room_name'] !== NULL && $row['bill_id'] !== NULL && $row['room_Id'] !== NULL && $row['price'] !== NULL && $row['is_offered'] !== NULL) {
+                                                $room_data[] = [
+                                                    'room_name' => $row['room_name'],
+                                                    'bill_id' => $row['bill_id'],
+                                                    'room_Id' =>$row['room_Id'],
+                                                    'price' =>$row['price'],
+                                                    'is_offered' =>$row['is_offered']
+                                                ];
+                                            }                                    
                                         }
                                     }
 
@@ -504,6 +520,11 @@
                                     $stmt2 = $pdo->prepare($sql2);
                                     $stmt2->execute();
                                     $roomsList = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+                                    $sql3 = "SELECT price FROM prices_tbl WHERE id = 4";
+                                    $stmt3 = $pdo->prepare($sql3);
+                                    $stmt3->execute();
+                                    $priceForBalance = $stmt3->fetchColumn();
                                 ?>
                                     <h4>Room Information</h4>
                                     <div class="row">
@@ -513,7 +534,7 @@
                                                 <select class="form-select" id="room-dropdown">
                                                     <option value="" selected hidden>Select a room</option>
                                                     <?php foreach ($roomsList as $room): ?>
-                                                        <option value="<?= htmlspecialchars($room['room_id']); ?>"><?= htmlspecialchars($room['room_name']); ?></option>
+                                                        <option value="<?= htmlspecialchars($room['room_id']); ?>" data-price="<?= htmlspecialchars($room['price']); ?>" data-offered="<?= htmlspecialchars($room['is_offered']); ?>"><?= htmlspecialchars($room['room_name']); ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <button type="button" class="btn btn-success" id="add-room-button">Add</button>
@@ -522,33 +543,42 @@
                                     </div>
 
                                     <div class="row mt-3" id="selected-rooms">
-                                        <?php foreach ($room_data as $room): ?>
-                                            <div class="col-sm-12 col-md-3 room-item">
-                                                <label class="form-label">Room</label>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control" value="<?= htmlspecialchars($room['room_name']); ?>" readonly>
-                                                    <button type="button" class="btn btn-danger remove-room" data-bill-id="<?= htmlspecialchars($room['bill_id']); ?>">Remove</button>
+                                        <p id="no-rooms-message" class="ms-1" style="<?= !empty($room_data) ? 'display: none;' : ''; ?>">User has No Rooms Selected.</p>
+                                        <?php if (!empty($room_data)): ?>
+                                            <?php foreach ($room_data as $room): ?>
+                                                <div class="col-sm-12 col-md-3 room-item" data-bill-id="<?= htmlspecialchars($room['bill_id']); ?>" data-room-id="<?= htmlspecialchars($room['room_Id']); ?>" data-price="<?= htmlspecialchars($room['price']); ?>" data-offered="<?= htmlspecialchars($room['is_offered']); ?>">
+                                                    <label class="form-label">Room</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" value="<?= htmlspecialchars($room['room_name']); ?>" readonly>
+                                                        <button type="button" class="btn btn-danger remove-room" data-room-id="<?= htmlspecialchars($room['room_Id']); ?>">Remove</button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        <?php endforeach; ?>
+                                                <input type="hidden" name="rooms[]" value="<?= htmlspecialchars($room['room_Id']); ?>">
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div id="hidden-rooms">
+                                        <!-- Dynamically added rooms will be appended here -->
                                     </div>
                                 </div>
                                 <!-- Pax Information -->
                                 <div class="form-section">
                                     <h4>Pax Information</h4>
                                     <div class="row">
-                                        <div class="col-sm-12 col-md-2">
-                                            <label class="form-label">Adults</label>
-                                            <input type="number" name="adult" class="form-control" value="<?= htmlspecialchars($reservation['adult']); ?>">
-                                        </div>
-                                        <div class="col-sm-12 col-md-2">
-                                            <label class="form-label">Children</label>
-                                            <input type="number" name="child" class="form-control" value="<?= htmlspecialchars($reservation['child']); ?>">
-                                        </div>
-                                        <div class="col-sm-12 col-md-2">
-                                            <label class="form-label">PWD</label>
-                                            <input type="number" name="pwd" class="form-control" value="<?= htmlspecialchars($reservation['pwd']); ?>">
-                                        </div>
+                                    <div class="col-sm-12 col-md-2">
+                                        <label class="form-label">Adults</label>
+                                        <input type="number" name="adult" class="form-control" value="<?= htmlspecialchars($reservation['adult']); ?>" required maxlength="2">
+                                    </div>
+                                    <div class="col-sm-12 col-md-2">
+                                        <label class="form-label">Children</label>
+                                        <input type="number" name="child" class="form-control" value="<?= htmlspecialchars($reservation['child']); ?>" maxlength="2">
+                                    </div>
+                                    <div class="col-sm-12 col-md-2">
+                                        <label class="form-label">PWD</label>
+                                        <input type="number" name="pwd" class="form-control" value="<?= htmlspecialchars($reservation['pwd']); ?>" maxlength="2">
+                                    </div>
+
                                         <div class="col-sm-12 col-md-4">
                                         <label for="reservationType" class="form-label">Type of Reservation:</label>
                                             <select id="reservationType" name="reservationType" class="form-control" required>
@@ -569,6 +599,8 @@
                                                 ?>
                                             </select>
                                         </div>
+                                        <input type="hidden" name="base_rate" value="">
+                                        <input type="hidden" name="extra_adult_rate" value="">
                                     </div>
                                 </div>
                                 <!-- Payment Information -->
@@ -576,19 +608,48 @@
                                     <h4>Payment Information</h4>
                                     <div class="row">
                                         <div class="col-sm-12 col-md-4">
-                                            <label class="form-label">Payment Method</label>
-                                            <input type="text" class="form-control" value="<?= htmlspecialchars($reservation['pay_mode']); ?>" readonly>
-                                        </div>
-                                        <div class="col-sm-12 col-md-4">
                                             <label class="form-label">Total Bill</label>
-                                            <input type="text" class="form-control" value="<?= htmlspecialchars($reservation['total_bill']); ?>" readonly>
+                                            <input type="text" id="total-bill-input" class="form-control" name="totalbill" value="<?= (int)$reservation['total_bill']; ?>" readonly>
+                                            <!-- Collapse button -->
+                                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#totalBillCollapse" aria-expanded="false" aria-controls="totalBillCollapse">
+                                                Adjust Total Bill
+                                            </button>
                                         </div>
+
                                         <div class="col-sm-12 col-md-4">
                                             <label class="form-label">Balance</label>
-                                            <input type="text" class="form-control" value="<?= htmlspecialchars($reservation['balance']); ?>" readonly>
+                                            <input type="text" id="balance-input" class="form-control" name="balance" value="<?= htmlspecialchars($reservation['balance']); ?>" readonly>
+                                        </div>
+
+                                        <div class="col-sm-12 col-md-4">
+                                            <label class="form-label">Payment Method</label>
+                                            <input type="text" class="form-control" name="paymode" value="<?= htmlspecialchars($reservation['pay_mode']); ?>" readonly>
+                                        </div>
+                                    </div>
+
+                                    <!-- Collapsible adjustment form -->
+                                    <div class="collapse" id="totalBillCollapse">
+                                        <div class="row mt-3">
+                                            <div class="col-sm-12 col-md-3">
+                                                <label class="form-label">Add to Total Bill</label>
+                                                <div class="input-group">
+                                                    <input type="number" id="add-total-bill" class="form-control" value="0" min="0">
+                                                    <!-- Add Button -->
+                                                    <button class="btn btn-success" type="button" id="add-button">Add</button>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-12 col-md-3">
+                                                <label class="form-label">Deduct from Total Bill</label>
+                                                <div class="input-group">
+                                                    <input type="number" id="deduct-total-bill" class="form-control" value="0" min="0">
+                                                    <!-- Deduct Button -->
+                                                    <button class="btn btn-danger" type="button" id="deduct-button">Deduct</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
                             <?php else: ?>
                                 <p class="text-danger">Reservation not found.</p>
                             <?php endif; 
@@ -599,7 +660,7 @@
                     } ?>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-success">Save Changes</button>
-                        <a href="pending_reservation.php" class="btn btn-secondary">Cancel</a>
+                        <a onclick="history.back()" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -638,52 +699,215 @@
         });
     });
 
-    document.getElementById('add-room-button').addEventListener('click', function() {
-        const dropdown = document.getElementById('room-dropdown');
-        const selectedRoomId = dropdown.value;
-        const selectedRoomText = dropdown.options[dropdown.selectedIndex].text;
+    $(document).ready(function() {
+        $('#add-button').on('click', function() {
+        let addAmount = parseInt($('#add-total-bill').val()) || 0;
+        let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
+
+        // Update total bill
+        let updatedTotalBill = currentTotalBill + addAmount;
+        $('#total-bill-input').val(updatedTotalBill);
+
+        // Recalculate balance
+        updateBalance(updatedTotalBill);
+    });
+
+    // Deduct from Total Bill functionality
+    $('#deduct-button').on('click', function() {
+        let deductAmount = parseInt($('#deduct-total-bill').val()) || 0;
+        let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
+
+        // Update total bill
+        let updatedTotalBill = currentTotalBill - deductAmount;
+        $('#total-bill-input').val(updatedTotalBill);
+
+        // Recalculate balance
+        updateBalance(updatedTotalBill);
+    });
+
+    const priceForBalance = <?= $priceForBalance; ?>;
+
+    $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
+        let value = $(this).val();
+        if (value.length > 2) {
+            $(this).val(value.slice(0, 2)); // Limit to 2 digits
+        }
+    });
+
+    function fetchBaseRate() {
+        let dateIn = $('#date-in').val();
+        let dateOut = $('#date-out').val();
+
+        if (dateIn && dateOut) {
+            $.ajax({
+                url: 'fetch_rate.php',
+                type: 'POST',
+                data: { dateIn: dateIn, dateOut: dateOut },
+                success: function(response) {
+                    let result = JSON.parse(response);
+                    let baseRate = result.baseRate;
+                    let extraAdultRate = result.extraAdultRate;
+
+                    $('input[name="base_rate"]').val(baseRate);
+                    $('input[name="extra_adult_rate"]').val(extraAdultRate);
+                    
+                    recomputeTotalBill(); // Recompute total bill with new rates
+                }
+            });
+        }
+    }
+
+    function recomputeTotalBill() {
+        let offeredCount = 0;
+        let baseRate = parseInt($('input[name="base_rate"]').val()) || 0;
+        let extraAdultRate = parseInt($('input[name="extra_adult_rate"]').val()) || 0;
+        let adults = parseInt($('input[name="adult"]').val()) || 0;
+        let children = parseInt($('input[name="child"]').val()) || 0;
+        let pwd = parseInt($('input[name="pwd"]').val()) || 0;
+
+        let totalPax = adults + children + pwd;
+        let extraAdults = Math.max(0, adults - 10);
+        let additionalCharge = extraAdults * extraAdultRate;
+
+        // Get the date-in and date-out values
+        let dateIn = $('input[name="dateIn"]').val();
+        let dateOut = $('input[name="dateOut"]').val();
+        let isOvernight = dateIn !== dateOut;
+
+        // Total room price calculation
+        let totalRoomPrice = 0;
+        let freeRoomApplied = false; // Track if free room discount has been applied
+
+        $('#selected-rooms .room-item').each(function() {
+            let roomPrice = parseInt($(this).data('price')) || 0;
+            const offered = parseInt($(this).data('offered')) || 0;
+
+            if (isOvernight && offered === 1 && !freeRoomApplied) {
+                freeRoomApplied = true; // Apply free room discount only once
+            } else {
+                totalRoomPrice += roomPrice;
+            }
+        });
+        console.log(baseRate, additionalCharge, totalRoomPrice);
+        // Total bill calculation including base rate and additional charges
+        let totalBill = baseRate + additionalCharge + totalRoomPrice;
+        
+
+        // Update the total bill input and balance
+        $('#total-bill-input').val(totalBill);
+        updateBalance();
+    }
+
+
+
+    function updateBalance() {
+        let totalBill = parseInt($('#total-bill-input').val()) || 0;
+        let balance = totalBill - priceForBalance;
+
+        $('#balance-input').val(balance);
+    }
+
+    function updateTotalPrice(amount, operation, offered) {
+        let totalBill = parseInt($('#total-bill-input').val()) || 0;
+        let countOffered = 0;
+        let dateIn = $('input[name="dateIn"]').val();
+        let dateOut = $('input[name="dateOut"]').val();
+        let isOvernight = dateIn !== dateOut;
+
+        // Count rooms with data-offered = 1
+        $('#selected-rooms .room-item').each(function() {
+            const roomOffered = parseInt($(this).data('offered')) || 0;
+            if (roomOffered === 1) {
+                countOffered++;
+            }
+        });
+
+        console.log(offered, countOffered, operation, isOvernight);
+
+        // Adjust the amount for the first offered room during an overnight stay
+        if (offered === 1 && (countOffered === 1 || countOffered === 0 ) && operation === 'add' && isOvernight) {
+            amount = 0; // Make the first offered room free for an overnight stay
+            console.log(amount);
+        }
+
+        // Apply the operation
+        if (operation === 'add') {
+            totalBill += amount;
+        } else if (operation === 'subtract') {
+            totalBill -= amount;
+        }
+
+        // Update the total bill input and balance
+        $('#total-bill-input').val(totalBill);
+        updateBalance();
+    }
+
+
+
+
+
+
+    $('#date-in, #date-out').on('change', function() {
+        fetchBaseRate();
+    });
+
+    $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
+        fetchBaseRate();
+        recomputeTotalBill();
+    });
+
+    $('#add-room-button').click(function() {
+        const selectedOption = $('#room-dropdown option:selected');
+        const selectedRoomId = selectedOption.val();
+        const selectedRoomText = selectedOption.text();
+        const roomPrice = parseInt(selectedOption.data('price')) || 0;
+        const offered = parseInt(selectedOption.data('offered')) || 0;
 
         if (selectedRoomId) {
-            // Create a new room item
-            const roomItem = document.createElement('div');
-            roomItem.classList.add('col-sm-12', 'col-md-3', 'room-item');
+            if ($(`[data-room-id="${selectedRoomId}"]`).length > 0) {
+                alert('This room has already been added.');
+                return;
+            }
 
-            roomItem.innerHTML = `
-                <label class="form-label">Room</label>
-                <div class="input-group">
-                    <input type="text" class="form-control" value="${selectedRoomText}" readonly>
-                    <button type="button" class="btn btn-danger remove-room" data-bill-id="${selectedRoomId}">Remove</button>
-                </div>
-            `;
-
-            // Add the new room item to the selected rooms container
-            document.getElementById('selected-rooms').appendChild(roomItem);
-
-            // Reset the dropdown
-            dropdown.value = "";
+            const roomItem = `
+                <div class="col-sm-12 col-md-3 room-item" data-room-id="${selectedRoomId}" data-price="${roomPrice}" data-offered="${offered}">
+                    <label class="form-label">Room</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="${selectedRoomText}" readonly>
+                        <button type="button" class="btn btn-danger remove-room" data-room-id="${selectedRoomId}">Remove</button>
+                    </div>
+                </div>`;
+            
+            $('#selected-rooms').append(roomItem);
+            $('#hidden-rooms').append(`<input type="hidden" name="rooms[]" value="${selectedRoomId}">`);
+            $('#no-rooms-message').hide();
+            $('#room-dropdown').val('');
+            updateTotalPrice(roomPrice, 'add', offered); // Pass the offered value
         } else {
             alert('Please select a room to add.');
         }
     });
 
 
-    document.addEventListener('click', function(e) {
-    if (e.target && e.target.classList.contains('remove-room')) {
-        const billId = e.target.getAttribute('data-bill-id');
-        if (confirm('Are you sure you want to remove this room?')) {
-            // Make an AJAX request to remove the room using billId
-            fetch(`remove-room.php?bill_id=${billId}`, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        e.target.closest('.col-md-4').remove(); // Remove the room from the UI
-                    } else {
-                        alert('Failed to remove room.');
-                    }
-                });
+    $('#selected-rooms').on('click', '.remove-room', function() {
+        const roomId = $(this).data('room-id');
+        const roomPrice = parseInt($(this).closest('.room-item').data('price')) || 0;
+        const offered = parseInt($(this).closest('.room-item').data('offered')) || 0;
+
+        $(this).closest('.room-item').remove();
+        $(`#hidden-rooms input[value="${roomId}"]`).remove();
+
+        if ($('#selected-rooms .room-item').length === 0) {
+            $('#no-rooms-message').show();
         }
-    }
+
+        updateTotalPrice(roomPrice, 'subtract', offered); // Pass the offered value
     });
+
+
+    // Initial balance computation
+    updateBalance();
+});
 
 let fp = '';
 let fp1 = '';
@@ -1189,7 +1413,7 @@ function initializeFlatpickr() {
     fp = flatpickr("#date-in", {
       enableTime: false,
       dateFormat: "Y-m-d",
-      minDate: new Date(),
+      minDate: formattedToday,
       showMonths: 1, 
       defaultDate: dateInValue,  
       onChange: function (selectedDates, dateStr, instance) {

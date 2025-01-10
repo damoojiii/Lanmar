@@ -341,7 +341,7 @@
                 <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link active text-white">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -350,7 +350,7 @@
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -429,7 +429,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>

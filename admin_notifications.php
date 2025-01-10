@@ -27,6 +27,11 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
         #sidebar span {
             font-family: 'nautigal';
             font-size: 30px !important;
@@ -463,7 +468,7 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link active text-white">Notifications</a>
             </li>
             <li>
                 <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
@@ -475,7 +480,7 @@
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>

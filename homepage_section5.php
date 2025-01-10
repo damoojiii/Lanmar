@@ -6,46 +6,7 @@ checkAccess('admin');
 
 include("connection.php");
 
-$success_message = "";
-$error_message = "";
-$gallery_success_message = "";
-$gallery_error_message = "";
 
-// Define the target directory for uploads
-$targetDir = "uploads/"; 
-
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// Handle gallery image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
-    $galleryImage = $_FILES['gallery_image'];
-    $galleryImageName = basename($galleryImage['name']);
-    $galleryTargetFilePath = $targetDir . $galleryImageName; // Use the same $targetDir
-    $galleryImageType = $galleryImage['type'];
-
-    if (move_uploaded_file($galleryImage['tmp_name'], $galleryTargetFilePath)) {
-        $galleryStmt = $conn->prepare("INSERT INTO gallery (image, image_type) VALUES ( ?, ?)");
-        $galleryStmt->bind_param("ss", $galleryTargetFilePath, $galleryImageType); 
-
-        if ($galleryStmt->execute()) {
-            $gallery_success_message = "Gallery image uploaded successfully.";
-        } else {
-            $gallery_error_message = "Error uploading gallery image in the database: " . $galleryStmt->error;
-        }
-
-        $galleryStmt->close();
-    } else {
-        $gallery_error_message = "Error uploading the gallery file.";
-    }
-}
-
-if (isset($_POST['delete_id'])) {
-    $delete_id = $_POST['delete_id'];
-    $conn->query("DELETE FROM gallery WHERE gallery_id = '$delete_id'");
-    exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -111,8 +72,8 @@ if (isset($_POST['delete_id'])) {
         #main-content {
             transition: margin-left 0.3s ease;
             margin-left: 250px; 
-            margin-top: 25px;
-            padding: 20px;
+            margin-top: 25px; /* Add top margin for header */
+            padding: 20px; /* Padding for content */
         }
 
         hr {
@@ -147,6 +108,7 @@ if (isset($_POST['delete_id'])) {
             display: inline-block;
             font-size: 20px;
         }
+
         .navcircle{
             font-size: 7px;
             text-align: justify;
@@ -443,7 +405,7 @@ if (isset($_POST['delete_id'])) {
         }
 
         .tab-container .tab.active {
-            background-color: #19315D;
+            background-color: #00968f;
         }
 
         .tab:hover {
@@ -486,45 +448,6 @@ if (isset($_POST['delete_id'])) {
                 flex: 1 1 calc(50% - 8px);
             }
         }
-
-        .gallery-container {
-            width: 100%;
-            padding: 20px 0;
-        }
-
-        .gallery-scroll {
-            display: flex;
-            overflow-x: auto;
-            gap: 20px;
-            padding: 10px 0;
-            scrollbar-width: thin;
-            scrollbar-color: #001A3E #f0f0f0;
-        }
-
-        .gallery-scroll::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .gallery-scroll::-webkit-scrollbar-track {
-            background: #f0f0f0;
-            border-radius: 4px;
-        }
-
-        .gallery-scroll::-webkit-scrollbar-thumb {
-            background: #001A3E;
-            border-radius: 4px;
-        }
-
-        .gallery-scroll .card {
-            min-width: 250px;
-            margin: 0;
-            flex: 0 0 auto;
-        }
-
-        .gallery-scroll .card img {
-            height: 200px;
-            object-fit: cover;
-        }
     </style>
 </head>
 <body>
@@ -554,8 +477,8 @@ if (isset($_POST['delete_id'])) {
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -610,17 +533,17 @@ if (isset($_POST['delete_id'])) {
                         </div>
                     </a>
                     <a href="homepage_section2.php">
-                        <div class="tab active" id="facilityInfoTab">
+                        <div class="tab" id="facilityInfoTab">
                             Gallery
                         </div>
                     </a>
                     <a href="homepage_section4.php">
-                        <div class="tab" id="facilityInfoTab">
+                        <div class="tab " id="facilityInfoTab">
                             Rooms
                         </div>
                     </a>
                     <a href="homepage_section5.php">
-                        <div class="tab " id="facilityInfoTab">
+                        <div class="tab active" id="facilityInfoTab">
                             Prices
                         </div>
                     </a>
@@ -660,82 +583,269 @@ if (isset($_POST['delete_id'])) {
                         color: white; /* Ensure hover font color is white */
                     }
                 </style>
-                <div class="flex-container">
-                    <!-- Sidebar -->
-                    <!-- Main Content -->
-                    <div class="main-content">
-                        <!-- Main content goes here -->
-                        <div class="settings-form-container">
-                        <h2 class="text-center mb-4">Upload Gallery Image</h2>
-                            <?php if ($gallery_success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $gallery_success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($gallery_error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $gallery_error_message; ?></div>
-                            <?php endif; ?>
 
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group text-center">
-                                    <label for="gallery_image" class="mb-2">Upload New Gallery Image:</label>
-                                    <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Gallery Image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Upload Gallery Image">Upload Gallery Image</button>
-                                </div>
-                            </form>
-                            <hr>
-                            <div class="gallery-container">
-                                <?php
-                                // Fetch gallery images from the database
-                                $result = $conn->query("SELECT * FROM gallery");
-                                if ($result->num_rows > 0) {
-                                    echo '<div class="gallery-scroll">';
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo '<div class="card" id="card-' . $row['gallery_id'] . '">';
-                                        echo '<img src="' . $row['image'] . '" class="card-img-top" alt="Gallery Image">';
-                                        echo '<div class="card-body">';
-                                        echo '<button class="btn btn-danger" onclick="deleteImage(' . $row['gallery_id'] . ')">Delete</button>';
-                                        echo '</div>';
-                                        echo '</div>';
-                                    }
-                                    echo '</div>';
-                                } else {
-                                    echo '<p>No images found in the gallery.</p>';
-                                }
-                                ?>
-                            </div>
-                        </div>
+                <div class="flex-container">
+                    <div class="main-content">
+                        <style>
+                            .review-card-container {
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 20px; /* Space between cards */
+                                margin-top: 20px; /* Space above the card container */
+                            }
+
+                            .review-card {
+                                background-color: #f8f9fa; /* Light background for cards */
+                                border: 1px solid #ddd; /* Light border */
+                                border-radius: 8px; /* Rounded corners */
+                                padding: 15px; /* Inner padding */
+                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+                                flex: 1 1 calc(30% - 20px); /* Responsive card width */
+                                min-width: 250px; /* Minimum width for cards */
+                                transition: transform 0.3s; /* Smooth hover effect */
+                            }
+
+                            .review-card:hover {
+                                transform: translateY(-5px); /* Lift effect on hover */
+                            }
+
+                            .review-card h3 {
+                                font-size: 1.2rem; /* Font size for payment name */
+                                margin: 0 0 10px; /* Margin below the title */
+                            }
+
+                            .review-card h2 {
+                                font-size: 1rem; /* Font size for price */
+                                color: #007bff; /* Color for price */
+                                margin: 0; /* No margin */
+                            }
+                        </style>
+
+<?php
+// Fetch reviews with status = 0
+$stmt = $conn->prepare("SELECT id, payment_name, price FROM prices_tbl");
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Check if there are any reviews
+if ($result->num_rows > 0) {
+    echo '<table class="table">';
+    echo '<thead>';
+    echo '<tr>';
+    echo '<th>Payment Name</th>';
+    echo '<th>Price</th>';
+    echo '<th>Action</th>';
+    echo '</tr>';
+    echo '</thead>';
+    echo '<tbody>';
+    // Output data of each row
+    while ($row = $result->fetch_assoc()) {
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($row['payment_name']) . '</td>';
+        echo '<td>' . htmlspecialchars($row['price']) . '</td>';
+        echo '<td><button class="update-btn" data-id="' . $row['id'] . '" data-name="' . htmlspecialchars($row['payment_name']) . '" data-price="' . htmlspecialchars($row['price']) . '">Update Price</button></td>';
+        echo '</tr>';
+    }
+    echo '</tbody>';
+    echo '</table>';
+} else {
+    echo 'No reviews found.';
+}
+$stmt->close();
+?>
+
+<!-- Modal for updating price -->
+<div id="updatePriceModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2>Update Price</h2>
+        <form id="updatePriceForm">
+            <input type="hidden" id="priceId" name="id" />
+            <label for="paymentName">Payment Name</label>
+            <input type="text" id="paymentName" name="payment_name" readonly />
+            <label for="newPrice">New Price</label>
+            <input type="number" id="newPrice" name="price" required />
+            <button type="submit">Update</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Styling -->
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+
+<!-- JavaScript for handling the modal and AJAX submission -->
+<script>
+    // Open modal when Update button is clicked
+    document.querySelectorAll('.update-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = this.getAttribute('data-id');
+            const paymentName = this.getAttribute('data-name');
+            const price = this.getAttribute('data-price');
+
+            document.getElementById('priceId').value = id;
+            document.getElementById('paymentName').value = paymentName;
+            document.getElementById('newPrice').value = price;
+
+            document.getElementById('updatePriceModal').style.display = 'block';
+        });
+    });
+
+    // Close modal
+    document.querySelector('.close-btn').addEventListener('click', function () {
+        document.getElementById('updatePriceModal').style.display = 'none';
+    });
+
+    // Submit form to update the price in the database via AJAX
+    document.getElementById('updatePriceForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('update_price.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Price updated successfully!');
+                window.location.reload();  // Optionally reload the page to see the updated price
+            } else {
+                alert('Failed to update the price');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
                     </div>
                 </div>
-
 
 
             </div>
         </div>
     </div>
 
+    <!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Update Price</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="updateRoomId">
+                <p>Payment Name: <span id="updatePaymentName"></span></p>
+                <div class="form-group">
+                    <label for="updatePrice">New Price</label>
+                    <input type="text" class="form-control" id="updatePrice" placeholder="Enter new price">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updatePrice()">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
 
-        sidebar.classList.toggle('show');
+<style>
+/* Add these styles */
+.modal-dialog {
+    max-width: 400px;
+    margin: 1rem auto;
+}
 
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
+.modal-content {
+    border-radius: 12px;
+}
+
+.modal-header {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.form-control-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Mobile specific styles */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: none;
     }
     
+    .modal-content {
+        border-radius: 8px;
+    }
+    
+    .modal-body {
+        padding: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+    }
+}
+</style>
+
+<script>
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {
             collapse.style.height = collapse.scrollHeight + 'px';
@@ -744,26 +854,45 @@ if (isset($_POST['delete_id'])) {
             collapse.style.height = '0px';
         });
     });
-</script>
 
-<script>
-        function deleteImage(imageId) {
-            if (confirm('Are you sure you want to delete this image?')) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "homepage_section2.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onload = function() {
-                    if (xhr.status == 200) {
-                        var card = document.getElementById('card-' + imageId);
-                        card.style.display = 'none'; // Hide the deleted image's card
-                    } else {
-                        alert('Error deleting image!');
-                    }
-                };
-                xhr.send("delete_id=" + imageId);
+    $(document).on('click', '.openModal', function() {
+        const roomId = $(this).data('id');
+        const roomName = $(this).data('name');
+        const description = $(this).data('capacity');
+        const price = $(this).data('price');
+        const maxpax = $(this).data('maxpax');
+        const minpax = $(this).data('minpax');
+
+        $('#room_id').val(roomId);
+        $('#room_name').val(roomName);
+        $('#description').val(description);
+        $('#price').val(price);
+        $('#maxpax').val(maxpax);
+        $('#minpax').val(minpax);
+
+        $('#editRoomModal').modal('show');
+    });
+
+    $('#editRoomForm').on('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        $.ajax({
+            type: 'POST',
+            url: 'update_room.php', // Create this file to handle the update
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                alert('Room updated successfully!');
+                location.reload(); // Reload the page to see changes
+            },
+            error: function() {
+                alert('Error updating room.');
             }
-        }
-    </script>
+        });
+    });
+</script>
 
 </body>
 <style>
@@ -798,5 +927,101 @@ if (isset($_POST['delete_id'])) {
         background-color: #0175FE;
         color: white;
     }
+
+    .flex-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .room-card {
+        display: flex;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .room-image {
+        flex: 0 0 40%;
+        max-width: 40%;
+    }
+
+    .room-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .room-details {
+        flex: 1;
+        padding: 15px;
+    }
+
+    .room-details h2 {
+        margin: 0 0 10px 0;
+        font-size: 1.5rem;
+    }
+
+    .description {
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+
+    .room-info p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        margin-top: 15px;
+        text-align: right;
+    }
+
+    .openModal {
+        padding: 8px 16px;
+        background-color: #19315D;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .room-card {
+            flex-direction: column;
+        }
+
+        .room-image {
+            max-width: 100%;
+            height: 200px;
+        }
+
+        .room-details {
+            padding: 15px;
+        }
+
+        .room-details h2 {
+            font-size: 1.2rem;
+        }
+
+        .room-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .action-buttons {
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+    
+    }
 </style>
 </html>
+

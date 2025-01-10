@@ -44,7 +44,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 10px 15px;
-        background-color: #001A3E;
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
         color: #fff;
         border-radius: 8px;
     }
@@ -90,7 +90,7 @@
     }
 
     .message.sent .message-content {
-        background-color: #001A3E;
+        background-color: rgb(29, 69, 104);
         color: #fff;
     }
     .message.received .message-content {
@@ -141,7 +141,7 @@
     }
 
     .chat-footer button {
-        background-color: #001A3E;
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
         color: #fff;
         border: none;
         border-radius: 8px;

@@ -3,7 +3,7 @@
     flex: 1;
     max-width: 600px;
     padding: 30px 20px;
-    background-color: #19315D;
+    background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
     border-radius: 10px;
 }
 

@@ -1,6 +1,8 @@
 <?php
 
 session_start();
+include "role_access.php";
+checkAccess('admin');
 
 include "connection.php";
 
@@ -521,7 +523,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -569,9 +571,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             Rooms
                         </div>
                     </a>
-                    <a href="section_5.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Section 5
+                    <a href="homepage_section5.php">
+                        <div class="tab " id="facilityInfoTab">
+                            Prices
                         </div>
                     </a>
                     <a href="section_6.php">

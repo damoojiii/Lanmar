@@ -321,7 +321,7 @@ $stmt->close();
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>

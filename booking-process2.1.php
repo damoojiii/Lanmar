@@ -39,7 +39,7 @@
         src: url(font/TheNautigal-Regular.ttf);
         }
         nav{
-            background-color: #00214b;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);;
             height: 80px;
             padding: 25px 100px;
         }
@@ -103,7 +103,7 @@
         }
 
         .step.completed .circle {
-            background-color: #00214b; /* Blue background for completed steps */
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);; /* Blue background for completed steps */
             border-color: #00214b; /* Blue border */
             color: white; 
         }
@@ -393,7 +393,7 @@
     $childs = $_SESSION['child'] ?? '';
     $pwd = $_SESSION['pwd'] ?? '';
     $totalPax = $_SESSION['totalpax'] ?? '';
-    $reservationType = $_SESSION['reservationType'] ?? '';
+    $reservationType = $_SESSION['reservationType'] ?? '' ;
     $origPrice = $_SESSION['rate'] ?? '';
     $grandTotal = $_SESSION['grandTotal']  ?? '';
     $roomTotal = $_SESSION['roomTotal'] ?? '';

@@ -11,7 +11,6 @@
     $userId = $_SESSION['user_id']; 
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +37,7 @@
         }
 
         thead.custom-header, thead.custom-header th {
-            background-color: #19315D !important;
+            background: linear-gradient(25deg,rgb(29, 69, 104),#19315D) !important;
             color: white !important;
         }
         .table-row {
@@ -90,6 +89,9 @@
         .active>.page-link, .page-link.active {
           background-color: #004080;
           border-color: #004080;
+        }
+        td.highlight {
+          background-color: rgba(var(--dt-row-hover), 0.052) !important;
         }
 
         @media (max-width: 768px) {
@@ -230,7 +232,7 @@
                               $class = "completed";
                               $textstatus = "Completed";
                               break;
-                          case "Cancellation1":
+                          case "Cancellation1"||"Cancellation2":
                               $class = "cancellation";
                               $textstatus = "For Cancellation";
                               break;
@@ -267,10 +269,10 @@
           <h6 class="fw-bold">Personal Information</h6>
           <div class="row g-2" >
             <div class="col-12 col-md-4">
-              <p><strong>Name:</strong> <?php echo $fullname ?></p>
+              <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
             <div class="col-12 col-md-4">
-              <p><strong>Contact No.:</strong> <?php echo $name['contact_number'] ?></p>
+              <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
             <div class="col-12 col-md-4">
               <p><strong>Gender:</strong> WRONG-TURN</p>
@@ -319,7 +321,7 @@
           <h6 class="fw-bold">Booking Details</h6>
           <div class="row g-2">
             <div class="col-12 col-md-4">
-              <p><strong>Additionals:</strong> <span id=""></p>
+              <p><strong>Additionals:</strong> <span id="modalAdds"></p>
             </div>
           </div>
         </div>
@@ -337,12 +339,16 @@
             <div class="col-sm-6 col-md-4">
               <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></p>
             </div>
+            <div class="col-12 col-md-4">
+              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+            </div>
+            <div id="modalProof"></div>
           </div>
         </div>
       </div>
       <div class="modal-footer d-flex justify-content-end">
         
-            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+            <button onclick="window.location.href='chats.php'" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
 
@@ -372,16 +378,7 @@
 </html>
 
 <script>
-document.getElementById('hamburger').addEventListener('click', function () {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('show');
-      
-      const navbar = document.querySelector('.navbar');
-      navbar.classList.toggle('shifted');
-      
-      const mainContent = document.getElementById('main-content');
-      mainContent.classList.toggle('shifted');
-  });
+
 document.addEventListener('DOMContentLoaded', () => {
   const tableIndex = new DataTable('#example', {
         columnDefs: [
@@ -391,53 +388,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 targets: 0
             }
         ],
-        order: [[1, 'asc']]
+        order: [],
+        paging: true,
+        scrollY: '100%'
     });
-
-    // Automatically update row numbering on order or search
-    table
-        .on('order.dt search.dt', function () {
-            let i = 1;
-            table
-                .cells(null, 0, { search: 'applied', order: 'applied' })
-                .every(function (cell) {
-                    this.data(i++);
-                });
-        })
-        .draw();
-
-  const tables = new DataTable('#example', {
-    paging: false,
-    scrollY: '100%'
-  });
  
-document.querySelectorAll('a.toggle-vis').forEach((el) => {
-    el.addEventListener('click', function (e) {
-        e.preventDefault();
- 
-        let columnIdx = e.target.getAttribute('data-column');
-        let column = tables.column(columnIdx);
- 
-        // Toggle the visibility
-        column.visible(!column.visible());
-    });
-});
-const table = new DataTable('#example');
- 
- table.on('mouseenter', 'td', function () {
-     let colIdx = table.cell(this).index().column;
+ tableIndex.on('mouseenter', 'td', function () {
+     let colIdx = tableIndex.cell(this).index().column;
   
-     table
+     tableIndex
          .cells()
          .nodes()
          .each((el) => el.classList.remove('highlight'));
   
-     table
+     tableIndex
          .column(colIdx)
          .nodes()
          .each((el) => el.classList.add('highlight'));
  });
-
+ document.getElementById('hamburger').addEventListener('click', function() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('show');
+    
+    const navbar = document.querySelector('.navbar');
+    navbar.classList.toggle('shifted');
+    
+    const mainContent = document.getElementById('main-content');
+    mainContent.classList.toggle('shifted');
+});
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -465,6 +443,8 @@ let bookingIds;
 
                     // Populate the modal with the fetched data
                     document.getElementById('modalBookingId').textContent = data.bookingId;
+                    document.getElementById('modalName').textContent = data.name;
+                    document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;
@@ -479,18 +459,22 @@ let bookingIds;
                     let ronum = 1;
                     data.roomName.forEach(room => {
                         const roomElement = document.createElement('div');
-                        roomElement.classList.add('room-detail','col-sm-3','col-md-3');
+                        roomElement.classList.add('room-detail','col-3','col-md-3');
                         roomElement.innerHTML = `
                             <strong>Room ${ronum}:</strong> ${room.roomName}<br>
                         `;
                         roomsContainer.appendChild(roomElement);
                         ronum++;
                     });
+                    document.getElementById('modalAdds').textContent = data.additional;
                     document.getElementById('modalPaymode').textContent = data.paymode;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
-
-                    
+                    document.getElementById('modalrefNum').textContent = data.refNumber;
+                    const modalBody = document.getElementById('modalProof');
+                    modalBody.innerHTML = `
+                    <a href="${data.imageProof}" target="_blank">View image</a>
+                    `
 
                     // Show the modal
                     $('#reservationModal').modal('show');

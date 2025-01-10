@@ -14,11 +14,14 @@ function getBookingDetailsById($bookingId) {
 
     // Query to fetch booking details
     $bookingQuery = "SELECT 
-        booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours,
+        booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout,
+        booking_tbl.hours, booking_tbl.additionals,
+        users.firstname, users.lastname, users.contact_number, 
         reservationType_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
-        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode
+        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, bill_tbl.ref_num, image
     FROM booking_tbl
+    LEFT JOIN users ON booking_tbl.user_id = users.user_id
     LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
     LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
@@ -87,6 +90,9 @@ if (isset($_GET['booking_id'])) {
         // Return booking details along with the rooms in JSON format
         echo json_encode([
             'bookingId' => $bookingDetails['booking_id'],
+            'refNumber' => $bookingDetails['ref_num'],
+            'name' => $bookingDetails['firstname'] . " " . $bookingDetails['lastname'],
+            'contact' => $bookingDetails['contact_number'],
             'dateRange' => $bookingDetails['dateRange'],
             'timeRange' => $bookingDetails['timeRange'],
             'hours' => $bookingDetails['hours'],
@@ -95,10 +101,12 @@ if (isset($_GET['booking_id'])) {
             'pwds' => $bookingDetails['pwd'],
             'totalPax' => $bookingDetails['adult'] + $bookingDetails['child'] + $bookingDetails['pwd'],
             'type' => $bookingDetails['reservation_type'],
+            'additional' => $bookingDetails['additionals'],
             'paymode' => $bookingDetails['pay_mode'] ?? null,
             'totalBill' => number_format($bookingDetails['total_bill']),
             'balance' => number_format($bookingDetails['balance']),
             'roomName' => $bookingDetails['rooms'], // Include the rooms in the response
+            'imageProof' => $bookingDetails['image'],
         ]);
     } else {
         echo json_encode(['error' => 'Booking not found']);

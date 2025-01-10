@@ -1,26 +1,31 @@
-<?php
-// Include the database connection
-include("connection.php");
+<?php 
+    try {
+        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations FROM booking_tbl WHERE status = 'Pending'");
+        $pending_stmt->execute();
+        $pending_data = $pending_stmt->fetch(PDO::FETCH_ASSOC);
+        $pending_reservations = $pending_data['pending_reservations'];
+    
+        $incoming_stmt = $pdo->prepare("SELECT COUNT(*) AS incoming_books FROM booking_tbl WHERE WEEK(dateIn) = WEEK(CURDATE()) AND YEAR(dateIn) = YEAR(CURDATE())");
+        $incoming_stmt->execute();
+        $incoming_data = $incoming_stmt->fetch(PDO::FETCH_ASSOC);
+        $incoming_books = $incoming_data['incoming_books'];
+    
+        $earnings_stmt = $pdo->prepare("SELECT SUM(bill_tbl.total_bill) AS weekly_earnings FROM booking_tbl LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id WHERE WEEK(booking_tbl.dateIn) = WEEK(CURDATE()) AND YEAR(booking_tbl.dateIn) = YEAR(CURDATE())");
+        $earnings_stmt->execute();
+        $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
+        $weekly_earnings = $earnings_data['weekly_earnings'];
+    
+    } catch (PDOException $e) {
+        echo "Connection failed: " . $e->getMessage();
+    }
 
-// Fetch report data from the database
-$query = "SELECT MONTH(booking_date) as month, COUNT(*) as bookings, SUM(total_amount) as revenue 
-          FROM bookings 
-          WHERE YEAR(booking_date) = YEAR(CURDATE()) 
-          GROUP BY MONTH(booking_date)";
-$result = $conn->query($query);
-
-$months = [];
-$bookings = [];
-$revenue = [];
-
-while ($row = $result->fetch_assoc()) {
-    $months[] = date("F", mktime(0, 0, 0, $row['month'], 10));
-    $bookings[] = $row['bookings'];
-    $revenue[] = $row['revenue'];
-}
-
-// Close the database connection
-$conn->close();
+    session_start();
+    include "role_access.php";
+    checkAccess('admin');
+    
 ?>
 
 <!DOCTYPE html>
@@ -28,87 +33,355 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Reports</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Lanmar Resort</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
+    <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    
+    <style>
+        @font-face {
+            font-family: 'nautigal';
+            src: url(font/TheNautigal-Regular.ttf);
+        }
+        body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        }
+
+        #sidebar span {
+            font-family: 'nautigal';
+            font-size: 50px !important;
+        }
+
+        #sidebar {
+            width: 250px;
+            position: fixed;
+            top: 0; 
+            height: 100vh;
+            overflow-y: auto; 
+            background: #001A3E;
+            transition: transform 0.3s ease;
+            z-index: 1000; /* Ensure sidebar is above other content */
+        }
+
+        header {
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            transition: margin-left 0.3s ease; /* Smooth transition for header */
+        }
+
+        #hamburger {
+            border: none;
+            background: none;
+            cursor: pointer;
+            margin-left: 15px; /* Space from the left edge */
+            display: none; /* Initially hide the hamburger button */
+        }
+
+        #main-content {
+            transition: margin-left 0.3s ease;
+            margin-left: 250px; 
+            max-width: 80%;
+        }
+
+        hr {
+            background-color: #ffff;
+            height: 1.5px;
+        }
+
+        #sidebar .nav-link {
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+            margin-bottom: 2px;
+        }
+
+        #sidebar .collapse {
+            transition: height 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        #sidebar .collapse.show {
+            height: auto !important;
+            opacity: 1;
+        }
+        #sidebar .collapse:not(.show) {
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #sidebar .drop{
+            height: 50px;
+        }
+        .caret-icon .fa-caret-down {
+            display: inline-block;
+            font-size: 20px;
+        }
+        .navcircle{
+            font-size: 7px;
+            text-align: justify;
+        }
+
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .dropdown-menu {
+            width: 100%;
+            background-color: #001A3E;
+        }
+
+        .dropdown-item {
+            color: #fff !important;
+            margin-bottom: 10px;
+        }
+
+        .dropdown-item:hover{
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .header {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 20px;
+        }
+
+        .stats-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%; /* Ensures full height within the flex parent */
+        }
+        .stats-card h5{
+            font-size: 1.2rem;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .container-fluid{
+            margin-inline: 10px ;
+        }
+    @media (max-width: 768px) {
+        #sidebar {
+            position: fixed;
+            transform: translateX(-100%); /* Hide sidebar off-screen */
+        }
+
+        #sidebar.show {
+            transform: translateX(0); /* Show sidebar */
+        }
+
+        #main-content {
+            margin-left: 0; /* Remove margin for smaller screens */
+            padding: 0;
+            max-width: 100%;
+        }
+
+        #hamburger {
+            display: block; /* Show hamburger button on smaller screens */
+        }
+        .container {
+            max-width: 100%;
+        }
+
+        .header {
+        padding: 15px;
+        }
+
+        .stats-card {
+            padding: 15px;
+        }
+
+        .chart-container {
+            padding: 15px;
+        }
+
+    }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h2>Booking and Revenue Reports</h2>
+    <!-- Header -->
+    <header id="header">
+        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+            ☰
+        </button>
+        <span class="text-white ms-3">Navbar</span>
+    </header>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
+        <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <span class="font-logo">Lanmar Resort</span>
+        </a>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="admin_dashboard.php" class="nav-link active text-white">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2 drop" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
+                    Manage Reservations
+                    <span class="caret-icon">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                </a>
+                <ul class="collapse list-unstyled ms-3" id="manageReservations">
+                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+            </li>
+            <li>
+                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+            </li>
+            <li>
+                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
+            </li>
+            <li>
+                <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
+            </li>
+            <li>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
+            </li>
+            <li>
+                <a href="account_lists.php" class="nav-link text-white">Account List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center drop" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
+                    Settings
+                    <span class="caret-icon">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </span>
+                </a>
+                <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
+                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                </ul>
+            </li>
+        </ul>
+        <hr>
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
+
+    <div id="main-content" class="container mt-1">
+        <div class="container-fluid">
+        <!-- Header Section -->
         <div class="row">
-            <div class="col-md-6">
-                <canvas id="bookingsChart"></canvas>
+            <div class="col-12 header">
+                <h2>Welcome, User!</h2>
+                <p>You have 24 new messages and 5 new notifications.</p>
             </div>
-            <div class="col-md-6">
-                <canvas id="revenueChart"></canvas>
+        </div>
+
+        <!-- Statistics Cards Section -->
+        <div class="row mt-4">
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+                <div class="stats-card">
+                    <h5>Pending Reservations</h5>
+                    <h2><?php echo number_format($pending_reservations); ?></h2>
+                    <p>-2.65% Less booking than usual</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+                <div class="stats-card">
+                    <h5>Incoming Books this Week</h5>
+                    <h3><?php echo number_format($incoming_books); ?></h3>
+                    <p>+8.35% More incoming books than usual</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+                <div class="stats-card">
+                    <h5>Weekly Earnings</h5>
+                    <h3>PHP <?php echo number_format($weekly_earnings); ?></h3>
+                    <p>+8.35% More earnings than usual</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+                <div class="stats-card">
+                    <h5>Visitors Today</h5>
+                    <h2>17,212</h2>
+                    <p>+5.50% More visitors than usual</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Widgets Section -->
+        <div class="row mt-4">
+            <div class="col-md-6 col-12 mb-4">
+                <div class="chart-container">
+                    <h5>Yearly Earnings</h5>
+                    <canvas id="movementChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12 mb-4">
+                <div class="chart-container">
+                    <h5>Monthly Earnings</h5>
+                    <!-- Insert chart here -->
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12 mb-4">
+                <div class="chart-container">
+                    <h5>Pax Chart</h5>
+                    <canvas id="browserUsageChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/all.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
-        // Bookings Chart
-        var ctxBookings = document.getElementById('bookingsChart').getContext('2d');
-        var bookingsChart = new Chart(ctxBookings, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($months); ?>,
-                datasets: [{
-                    label: 'Number of Bookings',
-                    data: <?php echo json_encode($bookings); ?>,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Monthly Bookings'
-                    }
-                }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const header = document.getElementById('header');
+
+            sidebar.classList.toggle('show');
+
+            if (sidebar.classList.contains('show')) {
+                mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
+                header.style.marginLeft = '250px'; // Move the header when sidebar is shown
+            } else {
+                mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
+                header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
             }
+        }
+
+        document.querySelectorAll('.collapse').forEach(collapse => {
+            collapse.addEventListener('show.bs.collapse', () => {
+                collapse.style.height = collapse.scrollHeight + 'px';
+            });
+            collapse.addEventListener('hidden.bs.collapse', () => {
+                collapse.style.height = '0px';
+            });
         });
 
-        // Revenue Chart
-        var ctxRevenue = document.getElementById('revenueChart').getContext('2d');
-        var revenueChart = new Chart(ctxRevenue, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode($months); ?>,
-                datasets: [{
-                    label: 'Revenue',
-                    data: <?php echo json_encode($revenue); ?>,
-                    backgroundColor: 'rgba(255, 159, 64, 0.6)',
-                    borderColor: 'rgba(255, 159, 64, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value, index, values) {
-                                return '$' + value;
-                            }
-                        }
-                    }
-                },
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Monthly Revenue'
-                    }
-                }
-            }
-        });
+
     </script>
 </body>
 </html>

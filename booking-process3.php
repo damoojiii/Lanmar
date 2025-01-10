@@ -77,7 +77,7 @@
         }
 
         .step.completed .circle {
-            background-color: #00214b; /* Blue background for completed steps */
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D); /* Blue background for completed steps */
             border-color: #00214b; /* Blue border */
             color: white; 
         }
@@ -262,6 +262,26 @@
             margin-left: 32px;
         }
         }
+        @media print {
+  /* Hide the main-content during printing */
+  #navbar {
+    display: none;
+  }
+  #sidebar{
+    display: none;
+  }
+  .progress-container{
+    display: none;
+  }
+  #makePDF{
+    display: none;
+  }
+
+  /* Ensure the content to print is visible */
+  .print-content {
+    display: block;
+  }
+}
     </style>
 </head>
 <body>
@@ -444,7 +464,7 @@
             <div class="summary">
                 <h2>Thank You For Choosing <br> Lanmar Resort</h2>
                 <p>If you want two elements with specific dimensions (30px by 70px) displayed side by side horizontally, you can define their width and height in CSS. Here's an example using Flexbox:</p><br><br>
-                <div><a href="">Download Receipt</a></div>
+                <div><a href="" onclick="printPage()" id="makePDF">Download Receipt</a></div>
             </div>
         </div>
     </div>
@@ -471,6 +491,18 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+function printPage() {
+    // Get the button by its ID
+    var button = document.getElementById("makePDF");
+
+    // Perform actions based on the button ID
+    if (button.id === "makePDF") {
+      // You can add more actions here if needed
+
+      // Trigger the print dialog
+      window.print();
+    }
+  }
 </script>
 </body>
 </html>

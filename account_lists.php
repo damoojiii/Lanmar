@@ -400,10 +400,10 @@ if (isset($_GET['unblockid'])) {
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
-                <a href="account_lists.php" class="nav-link text-white">Account List</a>
+                <a href="account_lists.php" class="nav-link active text-white">Account List</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white d-flex justify-content-between align-items-center drop" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">

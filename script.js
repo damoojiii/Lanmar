@@ -171,8 +171,8 @@ function isTimeAvailableForCheckIn(date, time) {
   }
 
   // Check if the time is available
-  console.log(date);
-  console.log(isTimeAvailableCheckIn(date, time));
+  //console.log(date, time);
+  //console.log(isTimeAvailableCheckIn(date, time));
   if (!isTimeAvailableCheckIn(date, time)) {
     return false;
   }
@@ -271,7 +271,7 @@ function updateDisabledDates(selectedCheckInDate) {
   if (maxCheckOutDate) {
     fp1.set('maxDate', maxCheckOutDate); // Limit checkout to the first fully booked date
   }
-
+  console.log(disabledDatesForCheckOut);
   fp1.set('disable', disabledDatesForCheckOut);
 }
 

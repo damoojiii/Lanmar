@@ -1,7 +1,8 @@
 <?php
 // Start the session at the very beginning of the file
 session_start();
-
+include "role_access.php";
+checkAccess('admin');
 include("connection.php");
 
 
@@ -475,8 +476,8 @@ include("connection.php");
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -492,7 +493,7 @@ include("connection.php");
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -540,9 +541,9 @@ include("connection.php");
                             Rooms
                         </div>
                     </a>
-                    <a href="section_5.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Section 5
+                    <a href="homepage_section5.php">
+                        <div class="tab " id="facilityInfoTab">
+                            Prices
                         </div>
                     </a>
                     <a href="section_6.php">
@@ -589,6 +590,9 @@ include("connection.php");
                         ?>
                         <div class="settings-form-container">
                             <h2 class="text-center mb-4">Featured Rooms</h2>
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                                Add Room
+                            </button>
                             <div class="flex-container">
                                 <?php if ($result->num_rows > 0): ?>
                                     <?php while($row = $result->fetch_assoc()): ?>
@@ -624,6 +628,7 @@ include("connection.php");
                                     <p>No rooms available.</p>
                                 <?php endif; ?>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -742,21 +747,6 @@ include("connection.php");
 </style>
 
 <script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
-        sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {
             collapse.style.height = collapse.scrollHeight + 'px';
@@ -800,6 +790,91 @@ include("connection.php");
             },
             error: function() {
                 alert('Error updating room.');
+            }
+        });
+    });
+</script>
+
+<!-- Modal for Adding Room -->
+<div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRoomModalLabel">Add New Room</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRoomForm" enctype="multipart/form-data">
+                    <div class="mb-2">
+                        <label for="room_name" class="form-label">Room Name</label>
+                        <input type="text" class="form-control" id="room_name" name="room_name" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="image_path" class="form-label">Upload Room Image</label>
+                        <input type="file" class="form-control" id="image_path" name="image_path" accept="image/*" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="minpax" class="form-label">Min Pax</label>
+                        <input type="number" class="form-control" id="minpax" name="minpax" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="maxpax" class="form-label">Max Pax</label>
+                        <input type="number" class="form-control" id="maxpax" name="maxpax" required>
+                    </div>
+                    <div class="mb-2">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="price" name="price" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Is Featured?</label>
+                        <div>
+                            <input type="radio" id="is_featured_yes" name="is_featured" value="1" required>
+                            <label for="is_featured_yes">Yes</label>
+                            <input type="radio" id="is_featured_no" name="is_featured" value="0" required>
+                            <label for="is_featured_no">No</label>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Is Offered?</label>
+                        <div>
+                            <input type="radio" id="is_offered_yes" name="is_offered" value="1" required>
+                            <label for="is_offered_yes">Yes</label>
+                            <input type="radio" id="is_offered_no" name="is_offered" value="0" required>
+                            <label for="is_offered_no">No</label>
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-sm btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Add Room</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#addRoomForm').on('submit', function(e) {
+        e.preventDefault(); // Prevent the default form submission
+
+        const formData = new FormData(this); // Create a FormData object
+
+        $.ajax({
+            type: 'POST',
+            url: 'add_room.php', // PHP script to handle the insertion
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                alert('Room added successfully!'); // Notify the user
+                location.reload(); // Reload the page to see changes
+            },
+            error: function() {
+                alert('Error adding room.'); // Notify the user of an error
             }
         });
     });

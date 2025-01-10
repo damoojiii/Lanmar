@@ -48,7 +48,7 @@ if (isset($_POST["register"])) {
         $mail->Password = 'zaye hbft pwdh bqwo';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        $mail->setFrom('your_email@gmail.com', 'Lanmar_Resort');
+        $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
         $mail->addAddress($email, $firstname);
 
         $mail->isHTML(true);
@@ -197,9 +197,9 @@ if (isset($_POST["register"])) {
             <input type="email" name="email" placeholder="Email" required>
             <select name="gender" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;" required>
                 <option value="" disabled selected>Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
             </select>
             <input type="password" id="password" name="password" placeholder="Password" required>
             <p id="message" style="display: none; font-size: 10px; margin-top: -5px; text-align: left;"><span id="strength"></span></p>

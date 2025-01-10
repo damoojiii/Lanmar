@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['role'] = $user['role'];
 
                     if ($user['role'] === 'admin') {
-                        header("Location: sidebar_admin.php");
+                        header("Location: admin_dashboard.php");
                         exit();
                     } elseif ($user['role'] === 'user') {
                         if ($user['email_verify'] === NULL) {
