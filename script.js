@@ -282,7 +282,7 @@ function formatDate(date) {
   const day = date.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
-initializeFlatpickr();
+
 // Fetch booked time slots from the server
 fetch(`fetch-booking.php?startDate=${formattedToday}`)
     .then(response => response.json())

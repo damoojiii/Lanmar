@@ -8,7 +8,11 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
-
+    //if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
+    //    echo '<script>
+    //               window.location="/lanmar/index1.php"; 
+    //    </script>';
+    //}
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
         echo '<script>
                     window.location="/lanmar/index1.php"; 
@@ -416,6 +420,7 @@
 
     // Capture the reference ID from the form
     $ref_id = $_POST['ref_id'];
+    $formamattedref_id = substr($ref_id, 0, 4). ' ' . substr($ref_id, 4, 3) . ' ' . substr($ref_id, 7);
 
     // Handle file upload
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -443,7 +448,7 @@
         $stmt = $pdo->prepare($bill_sql);
         $stmt->execute([
             ':uploadFile' => $uploadFile, 
-            ':ref_id' => $ref_id,
+            ':ref_id' => $formamattedref_id,
             ':balance' => $balance,
             ':grandTotal' => $grandTotal,
             ':paymode' => $paymode
@@ -569,21 +574,21 @@
                     <img src="<?php
                     $paymentMethod = strtolower($_SESSION['payment_method']); // Convert to lowercase for consistency
 
-    if ($paymentMethod === 'gcash') {
-        echo "uploads/G_image.jpg";
-        // Additional logic for GCash
-    } elseif ($paymentMethod === 'paymaya') {
-        echo "uploads/P_image.jpg";
-        // Additional logic for PayMaya
-    } else {
-        echo "Unknown payment method in the session.";
-    }
-?>" alt="QRCode"/>
+                    if ($paymentMethod === 'gcash') {
+                        echo "uploads/qr/G_image.jpg";
+                        // Additional logic for GCash
+                    } elseif ($paymentMethod === 'paymaya') {
+                        echo "uploads/qr/P_image.jpg";
+                        // Additional logic for PayMaya
+                    } else {
+                        echo "Unknown payment method in the session.";
+                    }
+                ?>" alt="QRCode"/>
                 </div>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
                     <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
-                    <input type="<?php echo ($paymentMethod === 'gcash') ? 'number' : 'text'; ?>" 
+                    <input type="text" 
                         name="ref_id" 
                         id="reference" 
                         placeholder="<?php 
@@ -596,7 +601,7 @@
                         maxlength="13"  
                         required oninput="validateInput(this,  '<?php echo $paymentMethod; ?>')">
                     <div class="submit-btn">
-                        <button type="submit" class="btn btn-primary mt-1 sabmit">Submit</button>
+                        <button type="submit" class="btn btn-primary mt-1 submit">Submit</button>
                     </div>
                 </form>
             </div>
@@ -642,6 +647,16 @@ function validateInput(input, paymentMethod) {
     if (input.value.length > maxLength) {
         input.value = input.value.slice(0, maxLength);
     }
+    let value = input.value.replace(/\D/g, '');  // Remove non-digit characters
+    if (value.length > 4 && value.length <= 7) {
+        // Insert a space between the 4th and 5th characters
+        value = value.slice(0, 4) + ' ' + value.slice(4);
+    }
+    if (value.length > 7 && value.length > 13) {
+        // Insert a space between the 4th and 5th characters
+        value = value.slice(0, 8) + ' ' + value.slice(8);
+    }
+    input.value = value;
 }
 </script>
 </body>

@@ -493,7 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                     </a>
                     <a href="homepage_section6.php">
                         <div class="tab" id="facilityInfoTab">
-                            Update QR codes
+                            Booking Processes
                         </div>
                     </a>
                 </div>

@@ -565,7 +565,7 @@ include("connection.php");
                     </a>
                     <a href="homepage_section6.php">
                         <div class="tab" id="facilityInfoTab">
-                            Update QR codes
+                            Booking Processes
                         </div>
                     </a>
                 </div>
