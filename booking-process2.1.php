@@ -587,12 +587,18 @@
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
                     <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
-                    <input type="text" name="ref_id" id="reference" placeholder="<?php if ($paymentMethod === 'gcash') {
-        echo "xxxx xxx xxxxxx";
-        // Additional logic for GCash
-    } else {
-        echo "xxxxxxxxxx";
-    }?> "required>
+                    <input type="<?php echo ($paymentMethod === 'gcash') ? 'number' : 'text'; ?>" 
+                        name="ref_id" 
+                        id="reference" 
+                        placeholder="<?php 
+                        if ($paymentMethod === 'gcash') {
+                            echo "xxxx xxx xxxxxx";
+                            // Additional logic for GCash
+                        } else {
+                            echo "xxxxxxxxxx";
+                        }?> " 
+                        maxlength="13"  
+                        required oninput="validateInput(this,  '<?php echo $paymentMethod; ?>')">
                     <div class="submit-btn">
                         <button type="submit" class="btn btn-primary mt-1 sabmit">Submit</button>
                     </div>
@@ -627,6 +633,20 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+function validateInput(input, paymentMethod) {
+    // Remove non-numeric characters
+    input.value = input.value.replace(/\D/g, '');
+    
+    let maxLength = 13; // Default maxLength for GCash
+    if (paymentMethod === 'paymaya') {
+        maxLength = 12; // Set maxLength to 12 for PayMaya
+    }
+
+    // Limit the length to 13 for GCash or 12 for PayMaya
+    if (input.value.length > maxLength) {
+        input.value = input.value.slice(0, maxLength);
+    }
+}
 </script>
 </body>
 </html>
