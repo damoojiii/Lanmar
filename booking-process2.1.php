@@ -144,11 +144,17 @@
             margin-left: 100px;
         }
         .qrcode {
-            padding: 5px 10px;
+            /*padding: 5px 10px;*/
             border: 1px solid black;
             width: 300px;
             height: 300px;
             margin-bottom: 10px;
+        }
+        .qrcode img {
+            width: 100%; /* Ensures the image fits the width of the container */
+            height: 100%; /* Ensures the image fits the height of the container */
+            /*object-fit: cover;  Adjusts how the image fits inside the container */
+            display: block; /* Prevents unwanted spaces under the image */
         }
         form p{
             margin-top: 5px;
@@ -425,7 +431,7 @@
         if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
             //echo "File uploaded successfully. Stored as: " . $uploadFile . "<br>";
         } else {
-            echo "File upload failed.<br>";
+            echo "<script> alert('File upload failed.');</script>";
         }
     } else {
         echo "<script>
@@ -563,7 +569,21 @@
         <div class="bill-message" >
             <div class="qr">
                 <h2 class="section-header">Scan Here</h2>
-                <div class="qrcode"></div>
+                <div class="qrcode">
+                    <img src="<?php
+                    $paymentMethod = strtolower($_SESSION['payment_method']); // Convert to lowercase for consistency
+
+    if ($paymentMethod === 'gcash') {
+        echo "uploads/G_image.jpg";
+        // Additional logic for GCash
+    } elseif ($paymentMethod === 'paymaya') {
+        echo "The session is for PayMaya.";
+        // Additional logic for PayMaya
+    } else {
+        echo "Unknown payment method in the session.";
+    }
+?>" alt="QRCode"/>
+                </div>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
                     <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
