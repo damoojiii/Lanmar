@@ -1026,7 +1026,7 @@ document.getElementById("secondForm").addEventListener("click", function(event) 
         const bookedRooms = document.getElementById("booked-rooms");
         const noRoomsMessage = document.getElementById("no-rooms-message");
         // Check if any room is selected
-        if(rateType === '2' || rateType === '1'){
+        
             if (totalpax == '' || totalpax == 0) {
                 alert("Enter number of guest.");
                 event.preventDefault();
@@ -1035,24 +1035,24 @@ document.getElementById("secondForm").addEventListener("click", function(event) 
                 alert("Enter a valid reservation type.");
                 event.preventDefault();
             }
-        if(rateType ==='1'){
-                // Gather the form data
-                const formData = new FormData(document.querySelector("form"));
+        if(rateType === '1'){
+        // Gather the form data
+    const formData = new FormData(document.querySelector("form"));
 
-                // Send data using Fetch API
-                fetch("booking-process.php", {
-                    method: "POST", // or "POST" depending on your PHP setup
-                    body: formData,
-                })
-                .then(response => response.text()) // Assuming you're returning text or HTML
-                /*.then(data => {
-                    console.log(data); // Handle the response from the server
-                    // Optionally, you can update part of the page with the response
-                    document.getElementById("response-container").innerHTML = data;
-                })*/
-                .catch(error => {
-                    console.error("Error:", error);
-                });
+    // Send data using Fetch API
+    fetch("booking-process.php", {
+        method: "POST", // or "POST" depending on your PHP setup
+        body: formData,
+    })
+    .then(response => response.text()) // Assuming you're returning text or HTML
+    /*.then(data => {
+        console.log(data); // Handle the response from the server
+        // Optionally, you can update part of the page with the response
+        document.getElementById("response-container").innerHTML = data;
+    })*/
+    .catch(error => {
+        console.error("Error:", error);
+    });
         } else if (rateType === '2' && bookedRooms.children.length === 1 && noRoomsMessage.style.display !== "none") {
             alert("Please select at least one room before continuing.");
             event.preventDefault();
