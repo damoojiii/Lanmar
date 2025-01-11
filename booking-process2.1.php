@@ -577,7 +577,7 @@
         echo "uploads/G_image.jpg";
         // Additional logic for GCash
     } elseif ($paymentMethod === 'paymaya') {
-        echo "The session is for PayMaya.";
+        echo "uploads/P_image.jpg";
         // Additional logic for PayMaya
     } else {
         echo "Unknown payment method in the session.";
@@ -587,7 +587,12 @@
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
                     <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
-                    <input type="text" name="ref_id" id="reference">
+                    <input type="text" name="ref_id" id="reference" placeholder="<?php if ($paymentMethod === 'gcash') {
+        echo "xxxx xxx xxxxxx";
+        // Additional logic for GCash
+    } else {
+        echo "xxxxxxxxxx";
+    }?> "required>
                     <div class="submit-btn">
                         <button type="submit" class="btn btn-primary mt-1 sabmit">Submit</button>
                     </div>
