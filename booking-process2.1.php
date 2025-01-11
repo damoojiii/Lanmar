@@ -140,11 +140,17 @@
             margin-left: 100px;
         }
         .qrcode {
-            padding: 5px 10px;
+            /*padding: 5px 10px;*/
             border: 1px solid black;
             width: 300px;
             height: 300px;
             margin-bottom: 10px;
+        }
+        .qrcode img {
+            width: 100%; /* Ensures the image fits the width of the container */
+            height: 100%; /* Ensures the image fits the height of the container */
+            /*object-fit: cover;  Adjusts how the image fits inside the container */
+            display: block; /* Prevents unwanted spaces under the image */
         }
         form p{
             margin-top: 5px;
@@ -421,7 +427,7 @@
         if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
             //echo "File uploaded successfully. Stored as: " . $uploadFile . "<br>";
         } else {
-            echo "File upload failed.<br>";
+            echo "<script> alert('File upload failed.');</script>";
         }
     } else {
         echo "<script>
@@ -559,11 +565,36 @@
         <div class="bill-message" >
             <div class="qr">
                 <h2 class="section-header">Scan Here</h2>
-                <div class="qrcode"></div>
+                <div class="qrcode">
+                    <img src="<?php
+                    $paymentMethod = strtolower($_SESSION['payment_method']); // Convert to lowercase for consistency
+
+    if ($paymentMethod === 'gcash') {
+        echo "uploads/G_image.jpg";
+        // Additional logic for GCash
+    } elseif ($paymentMethod === 'paymaya') {
+        echo "uploads/P_image.jpg";
+        // Additional logic for PayMaya
+    } else {
+        echo "Unknown payment method in the session.";
+    }
+?>" alt="QRCode"/>
+                </div>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
                     <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
-                    <input type="text" name="ref_id" id="reference">
+                    <input type="<?php echo ($paymentMethod === 'gcash') ? 'number' : 'text'; ?>" 
+                        name="ref_id" 
+                        id="reference" 
+                        placeholder="<?php 
+                        if ($paymentMethod === 'gcash') {
+                            echo "xxxx xxx xxxxxx";
+                            // Additional logic for GCash
+                        } else {
+                            echo "xxxxxxxxxx";
+                        }?> " 
+                        maxlength="13"  
+                        required oninput="validateInput(this,  '<?php echo $paymentMethod; ?>')">
                     <div class="submit-btn">
                         <button type="submit" class="btn btn-primary mt-1 sabmit">Submit</button>
                     </div>
@@ -598,6 +629,20 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+function validateInput(input, paymentMethod) {
+    // Remove non-numeric characters
+    input.value = input.value.replace(/\D/g, '');
+    
+    let maxLength = 13; // Default maxLength for GCash
+    if (paymentMethod === 'paymaya') {
+        maxLength = 12; // Set maxLength to 12 for PayMaya
+    }
+
+    // Limit the length to 13 for GCash or 12 for PayMaya
+    if (input.value.length > maxLength) {
+        input.value = input.value.slice(0, maxLength);
+    }
+}
 </script>
 </body>
 </html>

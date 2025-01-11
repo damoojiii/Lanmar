@@ -563,9 +563,9 @@ include("connection.php");
                             Prices
                         </div>
                     </a>
-                    <a href="section_6.php">
+                    <a href="homepage_section6.php">
                         <div class="tab" id="facilityInfoTab">
-                            Section 6
+                            Update QR codes
                         </div>
                     </a>
                 </div>
