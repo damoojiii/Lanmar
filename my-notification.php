@@ -1,4 +1,5 @@
 <?php 
+    date_default_timezone_set('Asia/Manila'); 
     try {
         $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -235,8 +236,11 @@
                         FROM notification_tbl n
                         JOIN booking_tbl b ON n.booking_id = b.booking_id
                         JOIN users u ON b.user_id = u.user_id
-                        WHERE n.is_read_user = 0 AND n.status = :status AND b.user_id = :userId
-                        ORDER BY n.timestamp DESC";
+                        WHERE n.is_read_user = 0 
+                        AND n.status = :status 
+                        AND b.user_id = :userId
+                        ORDER BY n.timestamp DESC
+                        LIMIT 1";
                 $query = $pdo->prepare($sql);
                 $query->execute(['status' => $status, 'userId' => $userId]);
                 $notifications = $query->fetchAll(PDO::FETCH_ASSOC);

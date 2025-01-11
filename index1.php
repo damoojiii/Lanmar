@@ -10,6 +10,21 @@
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
 
+    unset($_SESSION['dateIn']);
+    unset($_SESSION['dateOut']);
+    unset($_SESSION['checkin']);
+    unset($_SESSION['checkout']);
+    unset($_SESSION['numhours']);
+    unset($_SESSION['adult']);
+    unset($_SESSION['child']);
+    unset($_SESSION['pwd']);
+    unset($_SESSION['totalpax']);
+    unset($_SESSION['reservationType']);
+    unset($_SESSION['rate']);
+    unset($_SESSION['grandTotal']);
+    unset($_SESSION['roomTotal']);
+    unset($_SESSION['roomIds']);
+
     $sql = "SELECT dateIn, dateOut 
             FROM `booking_tbl` 
             WHERE user_id = :user_id 
@@ -573,6 +588,19 @@ function hasPreviousDaySpillover(date) {
   if (bookedTimeSlots[formattedPrevDate]) {
     return bookedTimeSlots[formattedPrevDate].some(slot => {
       const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      console.log(bookedTimeSlots[formattedPrevDate], slotEndHour > earliestTime, slotEndHour, earliestTime);
+      return slotEndHour < earliestTime; // Spillover to the next day if the checkout is before 6 AM
+    });
+  }
+  return false;
+}
+function hasNextDaySpillover(date) {
+  const prevDate = new Date(date);
+  const formattedPrevDate = prevDate.toISOString().split('T')[0];
+
+  if (bookedTimeSlots[formattedPrevDate]) {
+    return bookedTimeSlots[formattedPrevDate].some(slot => {
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
       return slotEndHour > earliestTime; // Spillover to the next day if the checkout is before 6 AM
     });
   }
@@ -587,7 +615,8 @@ function isTimeAvailable(date, time) {
       
       const slotStart = slotStartHour * 60 + slotStartMin;  
       const slotEnd = slotEndHour * 60 + slotEndMin;        
-      const currentTime = time * 60;                        
+      const currentTime = time * 60;          
+      
       // If the current time is within a blocked slot
       if (currentTime >= slotStart && currentTime <= slotEnd) {
         return false;  // Time is blocked
@@ -670,7 +699,7 @@ function isTimeAvailableForCheckIn(date, time) {
 
 function isTimeAvailableForCheckOut(date, time) {
   // Allow spillover times from previous bookings
-  return isTimeAvailable(date, time) || hasPreviousDaySpillover(date);
+  return isTimeAvailable(date, time) || (hasPreviousDaySpillover(date) || hasNextDaySpillover(date));
 }
 
 function isDateFullyBookedForCheckIn(dateStr) {
@@ -725,6 +754,7 @@ function updateDisabledDates(selectedCheckInDate) {
     disabledDates.checkIn = [];
     disabledDates.checkOut = [];
 
+    console.log(disabledDates.checkOut);
   for (const date in bookedTimeSlots) {
     if (isDateFullyBookedForCheckIn(date)) {
         disabledDates.checkIn.push(date); 
@@ -764,7 +794,7 @@ function formatDate(date) {
 }
 
 // Fetch booked time slots from the server
-fetch(`fetch-booking.php?startDate=${formattedToday}`)
+fetch(`fetch-booking-user.php`)
     .then(response => response.json())
     .then(bookings => {
       bookings.forEach(booking => {
@@ -775,7 +805,7 @@ fetch(`fetch-booking.php?startDate=${formattedToday}`)
         
         // Calculate the cleanup end time by adding 2 hours to the checkout time
         const endTime = new Date(`${dateOut} ${checkout}`);
-        const cleanupEndTime = new Date(endTime.getTime() + (2 * 60 * 60 * 1000) - (1 * 60 * 1000)); // Add 2 hours and subtract 1 minute
+        const cleanupEndTime = new Date(endTime.getTime() + (cleanupTime * 60 * 60 * 1000) - (1 * 60 * 1000)); // Add 2 hours and subtract 1 minute
     
         // If dateIn and dateOut are the same
         if (dateIn === dateOut) {
@@ -1069,9 +1099,6 @@ const months = [
 ];
 
 function renderCalendar() {
-    console.log("Entering renderCalendar function");
-    console.log(userBookings);
-
     today.setDate(1); // Set the date to the first of the month
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
@@ -1091,7 +1118,7 @@ function renderCalendar() {
     }
 
     for (let i = 1; i <= lastDayDate; i++) {
-        const today = new Date().fp_incr(1);
+        const today = new Date();
         const currentDate = new Date(currentYear, currentMonth, i);
         const currentDateString = currentDate.toISOString().split('T')[0];
 

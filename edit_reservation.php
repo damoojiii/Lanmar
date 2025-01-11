@@ -701,212 +701,212 @@
 
     $(document).ready(function() {
         $('#add-button').on('click', function() {
-        let addAmount = parseInt($('#add-total-bill').val()) || 0;
-        let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
+            let addAmount = parseInt($('#add-total-bill').val()) || 0;
+            let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
 
-        // Update total bill
-        let updatedTotalBill = currentTotalBill + addAmount;
-        $('#total-bill-input').val(updatedTotalBill);
+            // Update total bill
+            let updatedTotalBill = currentTotalBill + addAmount;
+            $('#total-bill-input').val(updatedTotalBill);
 
-        // Recalculate balance
-        updateBalance(updatedTotalBill);
-    });
+            // Recalculate balance
+            updateBalance(updatedTotalBill);
+        });
 
     // Deduct from Total Bill functionality
-    $('#deduct-button').on('click', function() {
-        let deductAmount = parseInt($('#deduct-total-bill').val()) || 0;
-        let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
+        $('#deduct-button').on('click', function() {
+            let deductAmount = parseInt($('#deduct-total-bill').val()) || 0;
+            let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
 
-        // Update total bill
-        let updatedTotalBill = currentTotalBill - deductAmount;
-        $('#total-bill-input').val(updatedTotalBill);
+            // Update total bill
+            let updatedTotalBill = currentTotalBill - deductAmount;
+            $('#total-bill-input').val(updatedTotalBill);
 
-        // Recalculate balance
-        updateBalance(updatedTotalBill);
-    });
+            // Recalculate balance
+            updateBalance(updatedTotalBill);
+        });
 
-    const priceForBalance = <?= $priceForBalance; ?>;
+        const priceForBalance = <?= $priceForBalance; ?>;
 
-    $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
-        let value = $(this).val();
-        if (value.length > 2) {
-            $(this).val(value.slice(0, 2)); // Limit to 2 digits
+        $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
+            let value = $(this).val();
+            if (value.length > 2) {
+                $(this).val(value.slice(0, 2)); // Limit to 2 digits
+            }
+        });
+
+        function fetchBaseRate() {
+            let dateIn = $('#date-in').val();
+            let dateOut = $('#date-out').val();
+
+            if (dateIn && dateOut) {
+                $.ajax({
+                    url: 'fetch_rate.php',
+                    type: 'POST',
+                    data: { dateIn: dateIn, dateOut: dateOut },
+                    success: function(response) {
+                        let result = JSON.parse(response);
+                        let baseRate = result.baseRate;
+                        let extraAdultRate = result.extraAdultRate;
+
+                        $('input[name="base_rate"]').val(baseRate);
+                        $('input[name="extra_adult_rate"]').val(extraAdultRate);
+                        
+                        recomputeTotalBill(); // Recompute total bill with new rates
+                    }
+                });
+            }
         }
-    });
 
-    function fetchBaseRate() {
-        let dateIn = $('#date-in').val();
-        let dateOut = $('#date-out').val();
+        function recomputeTotalBill() {
+            let offeredCount = 0;
+            let baseRate = parseInt($('input[name="base_rate"]').val()) || 0;
+            let extraAdultRate = parseInt($('input[name="extra_adult_rate"]').val()) || 0;
+            let adults = parseInt($('input[name="adult"]').val()) || 0;
+            let children = parseInt($('input[name="child"]').val()) || 0;
+            let pwd = parseInt($('input[name="pwd"]').val()) || 0;
 
-        if (dateIn && dateOut) {
-            $.ajax({
-                url: 'fetch_rate.php',
-                type: 'POST',
-                data: { dateIn: dateIn, dateOut: dateOut },
-                success: function(response) {
-                    let result = JSON.parse(response);
-                    let baseRate = result.baseRate;
-                    let extraAdultRate = result.extraAdultRate;
+            let totalPax = adults + children + pwd;
+            let extraAdults = Math.max(0, adults - 10);
+            let additionalCharge = extraAdults * extraAdultRate;
 
-                    $('input[name="base_rate"]').val(baseRate);
-                    $('input[name="extra_adult_rate"]').val(extraAdultRate);
-                    
-                    recomputeTotalBill(); // Recompute total bill with new rates
+            // Get the date-in and date-out values
+            let dateIn = $('input[name="dateIn"]').val();
+            let dateOut = $('input[name="dateOut"]').val();
+            let isOvernight = dateIn !== dateOut;
+
+            // Total room price calculation
+            let totalRoomPrice = 0;
+            let freeRoomApplied = false; // Track if free room discount has been applied
+
+            $('#selected-rooms .room-item').each(function() {
+                let roomPrice = parseInt($(this).data('price')) || 0;
+                const offered = parseInt($(this).data('offered')) || 0;
+
+                if (isOvernight && offered === 1 && !freeRoomApplied) {
+                    freeRoomApplied = true; // Apply free room discount only once
+                } else {
+                    totalRoomPrice += roomPrice;
                 }
             });
-        }
-    }
-
-    function recomputeTotalBill() {
-        let offeredCount = 0;
-        let baseRate = parseInt($('input[name="base_rate"]').val()) || 0;
-        let extraAdultRate = parseInt($('input[name="extra_adult_rate"]').val()) || 0;
-        let adults = parseInt($('input[name="adult"]').val()) || 0;
-        let children = parseInt($('input[name="child"]').val()) || 0;
-        let pwd = parseInt($('input[name="pwd"]').val()) || 0;
-
-        let totalPax = adults + children + pwd;
-        let extraAdults = Math.max(0, adults - 10);
-        let additionalCharge = extraAdults * extraAdultRate;
-
-        // Get the date-in and date-out values
-        let dateIn = $('input[name="dateIn"]').val();
-        let dateOut = $('input[name="dateOut"]').val();
-        let isOvernight = dateIn !== dateOut;
-
-        // Total room price calculation
-        let totalRoomPrice = 0;
-        let freeRoomApplied = false; // Track if free room discount has been applied
-
-        $('#selected-rooms .room-item').each(function() {
-            let roomPrice = parseInt($(this).data('price')) || 0;
-            const offered = parseInt($(this).data('offered')) || 0;
-
-            if (isOvernight && offered === 1 && !freeRoomApplied) {
-                freeRoomApplied = true; // Apply free room discount only once
-            } else {
-                totalRoomPrice += roomPrice;
-            }
-        });
-        console.log(baseRate, additionalCharge, totalRoomPrice);
-        // Total bill calculation including base rate and additional charges
-        let totalBill = baseRate + additionalCharge + totalRoomPrice;
-        
-
-        // Update the total bill input and balance
-        $('#total-bill-input').val(totalBill);
-        updateBalance();
-    }
-
-
-
-    function updateBalance() {
-        let totalBill = parseInt($('#total-bill-input').val()) || 0;
-        let balance = totalBill - priceForBalance;
-
-        $('#balance-input').val(balance);
-    }
-
-    function updateTotalPrice(amount, operation, offered) {
-        let totalBill = parseInt($('#total-bill-input').val()) || 0;
-        let countOffered = 0;
-        let dateIn = $('input[name="dateIn"]').val();
-        let dateOut = $('input[name="dateOut"]').val();
-        let isOvernight = dateIn !== dateOut;
-
-        // Count rooms with data-offered = 1
-        $('#selected-rooms .room-item').each(function() {
-            const roomOffered = parseInt($(this).data('offered')) || 0;
-            if (roomOffered === 1) {
-                countOffered++;
-            }
-        });
-
-        console.log(offered, countOffered, operation, isOvernight);
-
-        // Adjust the amount for the first offered room during an overnight stay
-        if (offered === 1 && (countOffered === 1 || countOffered === 0 ) && operation === 'add' && isOvernight) {
-            amount = 0; // Make the first offered room free for an overnight stay
-            console.log(amount);
-        }
-
-        // Apply the operation
-        if (operation === 'add') {
-            totalBill += amount;
-        } else if (operation === 'subtract') {
-            totalBill -= amount;
-        }
-
-        // Update the total bill input and balance
-        $('#total-bill-input').val(totalBill);
-        updateBalance();
-    }
-
-
-
-
-
-
-    $('#date-in, #date-out').on('change', function() {
-        fetchBaseRate();
-    });
-
-    $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
-        fetchBaseRate();
-        recomputeTotalBill();
-    });
-
-    $('#add-room-button').click(function() {
-        const selectedOption = $('#room-dropdown option:selected');
-        const selectedRoomId = selectedOption.val();
-        const selectedRoomText = selectedOption.text();
-        const roomPrice = parseInt(selectedOption.data('price')) || 0;
-        const offered = parseInt(selectedOption.data('offered')) || 0;
-
-        if (selectedRoomId) {
-            if ($(`[data-room-id="${selectedRoomId}"]`).length > 0) {
-                alert('This room has already been added.');
-                return;
-            }
-
-            const roomItem = `
-                <div class="col-sm-12 col-md-3 room-item" data-room-id="${selectedRoomId}" data-price="${roomPrice}" data-offered="${offered}">
-                    <label class="form-label">Room</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" value="${selectedRoomText}" readonly>
-                        <button type="button" class="btn btn-danger remove-room" data-room-id="${selectedRoomId}">Remove</button>
-                    </div>
-                </div>`;
+            console.log(baseRate, additionalCharge, totalRoomPrice);
+            // Total bill calculation including base rate and additional charges
+            let totalBill = baseRate + additionalCharge + totalRoomPrice;
             
-            $('#selected-rooms').append(roomItem);
-            $('#hidden-rooms').append(`<input type="hidden" name="rooms[]" value="${selectedRoomId}">`);
-            $('#no-rooms-message').hide();
-            $('#room-dropdown').val('');
-            updateTotalPrice(roomPrice, 'add', offered); // Pass the offered value
-        } else {
-            alert('Please select a room to add.');
-        }
-    });
 
-
-    $('#selected-rooms').on('click', '.remove-room', function() {
-        const roomId = $(this).data('room-id');
-        const roomPrice = parseInt($(this).closest('.room-item').data('price')) || 0;
-        const offered = parseInt($(this).closest('.room-item').data('offered')) || 0;
-
-        $(this).closest('.room-item').remove();
-        $(`#hidden-rooms input[value="${roomId}"]`).remove();
-
-        if ($('#selected-rooms .room-item').length === 0) {
-            $('#no-rooms-message').show();
+            // Update the total bill input and balance
+            $('#total-bill-input').val(totalBill);
+            updateBalance();
         }
 
-        updateTotalPrice(roomPrice, 'subtract', offered); // Pass the offered value
-    });
 
 
-    // Initial balance computation
-    updateBalance();
+        function updateBalance() {
+            let totalBill = parseInt($('#total-bill-input').val()) || 0;
+            let balance = totalBill - priceForBalance;
+
+            $('#balance-input').val(balance);
+        }
+
+        function updateTotalPrice(amount, operation, offered) {
+            let totalBill = parseInt($('#total-bill-input').val()) || 0;
+            let countOffered = 0;
+            let dateIn = $('input[name="dateIn"]').val();
+            let dateOut = $('input[name="dateOut"]').val();
+            let isOvernight = dateIn !== dateOut;
+
+            // Count rooms with data-offered = 1
+            $('#selected-rooms .room-item').each(function() {
+                const roomOffered = parseInt($(this).data('offered')) || 0;
+                if (roomOffered === 1) {
+                    countOffered++;
+                }
+            });
+
+            console.log(offered, countOffered, operation, isOvernight);
+
+            // Adjust the amount for the first offered room during an overnight stay
+            if (offered === 1 && (countOffered === 1 || countOffered === 0 ) && operation === 'add' && isOvernight) {
+                amount = 0; // Make the first offered room free for an overnight stay
+                console.log(amount);
+            }
+
+            // Apply the operation
+            if (operation === 'add') {
+                totalBill += amount;
+            } else if (operation === 'subtract') {
+                totalBill -= amount;
+            }
+
+            // Update the total bill input and balance
+            $('#total-bill-input').val(totalBill);
+            updateBalance();
+        }
+
+
+
+
+
+
+        $('#date-in, #date-out').on('change', function() {
+            fetchBaseRate();
+        });
+
+        $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
+            fetchBaseRate();
+            recomputeTotalBill();
+        });
+
+        $('#add-room-button').click(function() {
+            const selectedOption = $('#room-dropdown option:selected');
+            const selectedRoomId = selectedOption.val();
+            const selectedRoomText = selectedOption.text();
+            const roomPrice = parseInt(selectedOption.data('price')) || 0;
+            const offered = parseInt(selectedOption.data('offered')) || 0;
+
+            if (selectedRoomId) {
+                if ($(`[data-room-id="${selectedRoomId}"]`).length > 0) {
+                    alert('This room has already been added.');
+                    return;
+                }
+
+                const roomItem = `
+                    <div class="col-sm-12 col-md-3 room-item" data-room-id="${selectedRoomId}" data-price="${roomPrice}" data-offered="${offered}">
+                        <label class="form-label">Room</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="${selectedRoomText}" readonly>
+                            <button type="button" class="btn btn-danger remove-room" data-room-id="${selectedRoomId}">Remove</button>
+                        </div>
+                    </div>`;
+                
+                $('#selected-rooms').append(roomItem);
+                $('#hidden-rooms').append(`<input type="hidden" name="rooms[]" value="${selectedRoomId}">`);
+                $('#no-rooms-message').hide();
+                $('#room-dropdown').val('');
+                updateTotalPrice(roomPrice, 'add', offered); // Pass the offered value
+            } else {
+                alert('Please select a room to add.');
+            }
+        });
+
+
+        $('#selected-rooms').on('click', '.remove-room', function() {
+            const roomId = $(this).data('room-id');
+            const roomPrice = parseInt($(this).closest('.room-item').data('price')) || 0;
+            const offered = parseInt($(this).closest('.room-item').data('offered')) || 0;
+
+            $(this).closest('.room-item').remove();
+            $(`#hidden-rooms input[value="${roomId}"]`).remove();
+
+            if ($('#selected-rooms .room-item').length === 0) {
+                $('#no-rooms-message').show();
+            }
+
+            updateTotalPrice(roomPrice, 'subtract', offered); // Pass the offered value
+        });
+
+
+        // Initial balance computation
+        updateBalance();
 });
 
 let fp = '';
@@ -1113,6 +1113,19 @@ function hasPreviousDaySpillover(date) {
   if (bookedTimeSlots[formattedPrevDate]) {
     return bookedTimeSlots[formattedPrevDate].some(slot => {
       const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      console.log(bookedTimeSlots[formattedPrevDate], slotEndHour > earliestTime, slotEndHour, earliestTime);
+      return slotEndHour < earliestTime; // Spillover to the next day if the checkout is before 6 AM
+    });
+  }
+  return false;
+}
+function hasNextDaySpillover(date) {
+  const prevDate = new Date(date);
+  const formattedPrevDate = prevDate.toISOString().split('T')[0];
+
+  if (bookedTimeSlots[formattedPrevDate]) {
+    return bookedTimeSlots[formattedPrevDate].some(slot => {
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
       return slotEndHour > earliestTime; // Spillover to the next day if the checkout is before 6 AM
     });
   }
@@ -1210,7 +1223,7 @@ function isTimeAvailableForCheckIn(date, time) {
 
 function isTimeAvailableForCheckOut(date, time) {
   // Allow spillover times from previous bookings
-  return isTimeAvailable(date, time) || hasPreviousDaySpillover(date);
+  return isTimeAvailable(date, time) || (hasPreviousDaySpillover(date) || hasNextDaySpillover(date));
 }
 
 function isDateFullyBookedForCheckIn(dateStr) {

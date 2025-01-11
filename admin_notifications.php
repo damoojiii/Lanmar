@@ -1,4 +1,5 @@
 <?php
+    date_default_timezone_set('Asia/Manila'); 
     try {
         $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

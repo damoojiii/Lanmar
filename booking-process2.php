@@ -127,7 +127,7 @@
         .summary {
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             color: #fff;
-            width: 25%;
+            width: 28%;
             height: 100%;
         }
         .collapse:not(.show){
@@ -164,7 +164,7 @@
         }
 
         .summary table {
-            margin-top: 20px;
+            margin-top: 10px;
             font-size: 1rem;
         }
 
@@ -186,7 +186,7 @@
             margin-bottom: 10px;
         }
         .container{
-            max-width: 75%;
+            max-width: 80%;
         }
         .mb-3 {
             margin-bottom: 1rem;
@@ -400,17 +400,19 @@
 </div>
 <!-- phpsyntax for temp storage to process 3-->
 <?php
-    if (isset($_GET['roomIds']) && !empty($_GET['roomIds'])) {
-        $roomIds = $_GET['roomIds'];  // Get the array of room IDs
+    if (isset($_POST['roomIds']) && !empty($_POST['roomIds'])) {
+        $roomIds = $_POST['roomIds']; 
         $_SESSION['roomIds'] = $roomIds;
     }
 
     if (isset($_GET['Continue'])) {
         $_SESSION['origPrice'] = $_GET['origPrice'] ?? '';
     }
-    if (isset($_GET['grandTotal'])&& isset($_GET['roomTotal'])) {
-        $_SESSION['grandTotal'] = (int)$_GET['grandTotal'];
-        $_SESSION['roomTotal'] = (int)$_GET['roomTotal'];
+    if (isset($_POST['grandTotal'])&& isset($_POST['roomTotal'])) {
+        $_SESSION['grandTotal'] = (int)$_POST['grandTotal'];
+        $_SESSION['roomTotal'] = (int)$_POST['roomTotal'];
+        $_SESSION['paxcharges'] = (int)$_POST['paxcharges'];
+        $_SESSION['additional_rate'] = (int)$_POST['additional_rate'];
     }
 
     $dateIn = $_SESSION['dateIn'] ?? '';
@@ -422,12 +424,12 @@
     $childs = $_SESSION['child'];
     $pwd = $_SESSION['pwd'];
     $totalPax = $_SESSION['totalpax'] ?? '';
-    $origPrice = $_SESSION['rate'] ?? '';
-    $grandTotal = $_SESSION['grandTotal']  ?? '';
-    if($grandTotal == 0){
-        $grandTotal = $origPrice;
-        $_SESSION['grandTotal'] = $origPrice;
-    }
+    $origPrice = $_SESSION['original'] ?? '';
+    $paxCharges = $_SESSION['paxcharges'] ?? '';
+    $additionalCharges = $_SESSION['additional_rate'] ?? '';
+    $grandTotal = $origPrice + $paxCharges + $additionalCharges;
+    $_SESSION['grandTotal'] = $grandTotal;
+
     $roomTotal = $_SESSION['roomTotal'] ?? '';
 
     $dateInDisplay = date("F j, Y" , strtotime($dateIn));
@@ -460,26 +462,21 @@
 <div id="main-content" class="container mt-4 pt-3">
     <div class="container1">
         <div class="row " style="justify-content:space-between;">
-        <div class="guest col-md-6" style="width: 75%;">
+        <div class="guest col-md-6" style="width: 70%;">
                 <div class="section-header">Personal Information</div>
                 <form method="get" action="<?php echo $_SERVER['PHP_SELF']; ?>">
                     <div class="row mb-2">
                         <div class="col-md-3">
                             <label for="firstname" class="form-label">First Name</label>
-                            <input type="text" id="firstname" name="firstname" class="form-control" value="<?php echo $user["firstname"];?>" readonly>
+                            <input type="text" id="firstname" name="firstname" class="form-control" value="<?php echo ucwords($user["firstname"]);?>" readonly>
                         </div>
                         <div class="col-md-3">
                             <label for="lastname" class="form-label">Last Name</label>
-                            <input type="text" id="lastname" name="lastname" class="form-control" value="<?php echo $user["lastname"];?>" readonly>
+                            <input type="text" id="lastname" name="lastname" class="form-control" value="<?php echo ucwords($user["lastname"]);?>" readonly>
                         </div>
                         <div class="col-md-3">
                             <label for="gender" class="form-label">Gender</label>
-                            <select id="gender" name="gender" class="form-control" require>
-                                <option selected hidden>Choose...</option>
-                                <option value="M">Male</option>
-                                <option value="F">Female</option>
-                                <option value="O">Other</option>
-                            </select>
+                            <input type="text" id="gender" name="gender" class="form-control" value="<?php echo ucwords($user["gender"]);?>" readonly>
                         </div>
                         <div class="col-md-3">
                             <label for="phonenum" class="form-label">Contact No.</label>
@@ -509,10 +506,10 @@
                 <div class="bg-light p-2 rounded mb-3">
                     <div class="d-flex justify-content-between">
                         <div>                        
-                            <p>Date: <span id="date-input"><?php echo "$dateInDisplay to $dateOutDisplay";?></span></p>
-                            <p>Time: <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
-                            <p>Total No. of Pax: <span id="total-pax"><?php echo "$totalPax";?></span></p>
-                            <p>Reservation Type: <span id="reservation-type"><?php 
+                            <p><strong>Date:</strong> <span id="date-input"><?php echo "$dateInDisplay to $dateOutDisplay";?></span></p>
+                            <p><strong>Time:</strong> <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
+                            <p><strong>Total No. of Pax:</strong> <span id="total-pax"><?php echo "$totalPax";?></span></p>
+                            <p><strong>Reservation Type:</strong> <span id="reservation-type"><?php 
                                         $reservationTypeId = $_SESSION['reservationType'] ?? null;
                                         $reservationType = ""; 
 
@@ -533,15 +530,26 @@
                 <!-- Booked Rooms Section -->
                 <div class="row align-items-center">
                     <div class="col">
-                        <h5 class="mb-0">Charges</h5>
+                        <h5 class="mb-0"><strong>Charges Summary</strong></h5>
                     </div>
                 </div>
 
                 <!-- Total Calculation Section -->
                 <table class="w-100 text-light">
                     <tr>
-                        <td>Original Price:</td>
+                        <td>Original Rate:</td>
                         <td class="text-end"><?php echo number_format($origPrice ?? 0); ?></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>Additional Rate</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Pax: </td>
+                        <td class="text-end"><?php echo $paxCharges ?? 0; ?></td>
+                    </tr>
+                    <tr>
+                        <td>Time Rate: </td>
+                        <td class="text-end"><?php echo $additionalCharges ?? 0; ?></td>
                     </tr>
                     <tr>
                         <td>
