@@ -10,6 +10,29 @@
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
 
+    function timeAgo($timestamp) {
+        $timeAgo = '';
+        $currentTime = new DateTime();
+        $notificationTime = new DateTime($timestamp);
+        $interval = $currentTime->diff($notificationTime);
+        
+        if ($interval->y > 0) {
+            $timeAgo = $interval->y . ' year' . ($interval->y > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->m > 0) {
+            $timeAgo = $interval->m . ' month' . ($interval->m > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->d > 0) {
+            $timeAgo = $interval->d . ' day' . ($interval->d > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->h > 0) {
+            $timeAgo = $interval->h . ' hour' . ($interval->h > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->i > 0) {
+            $timeAgo = $interval->i . ' minute' . ($interval->i > 1 ? 's' : '') . ' ago';
+        } else {
+            $timeAgo = 'Just now';
+        }
+        
+        return $timeAgo;
+    }
+
 ?>
 
 <!DOCTYPE html>
@@ -75,7 +98,7 @@
     }
 
     .badge-new,
-    .badge-cancel {
+    .badge-cancelled {
         position: absolute;
         top: 10px;
         left: 10px;
@@ -87,7 +110,7 @@
         z-index: 1; /* Ensure the badge is above the card */
     }
 
-    .badge-cancel {
+    .badge-cancelled {
         background-color: #dc3545; /* Cancelled */
     }
 
@@ -200,137 +223,64 @@
         <h2><strong>New Notification(s) from Lanmar</strong></h2>
         <div class="notification-container">
         <?php 
-                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
-                        b.booking_id
+            $statuses = [
+                1 => ['badge' => 'New', 'message' => 'Your Reservation #%s has been approved.', 'class' => 'new'],
+                2 => ['badge' => 'Rejected', 'message' => 'Your Reservation #%s has been rejected.', 'class' => 'cancel'],
+                3 => ['badge' => 'Cancelled', 'message' => 'Your Reservation #%s has been cancelled.', 'class' => 'cancel'],
+                4 => ['badge' => 'Cancellation Rejected', 'message' => 'Your Cancellation for Reservation #%s has been rejected.', 'class' => 'cancel']
+            ];
 
-                    FROM 
-                        notification_tbl n
-                    JOIN 
-                        booking_tbl b ON n.booking_id = b.booking_id
-                    WHERE 
-                        n.is_read_user = 0 AND n.status = 1
-                    ORDER BY 
-                        n.timestamp DESC
-                    ";
-                    $query = $pdo->prepare($sql);
-                    $query->execute();
-                    $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
-                    
-                    foreach ($notifications as $notification) {
-                        $timestamp = $notification['timestamp'];
-                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
-                        $timeAgo = '3h ago';
-            ?>
-            <!-- Notification Card -->
-            <div class="notification-card new">
-                <span class="badge-new">New</span>
-                <div class="notification-content">
-                    <p>Your Reservation #<?php echo $notification['booking_id']; ?> has been approved.</p>
-                </div>
-                <div class="notification-footer">
-                    <div class="time-container">
-                        <p class="time">3h ago</p>
-                    </div>
-                    <div class="buttons-container">
-                        <button class="btn btn-primary btn-sm">View</button>
-                        <button class="btn btn-secondary btn-sm">Mark as Read</button>
-                    </div>
-                </div>
-                <span class="dot-indicator"></span>
+            foreach ($statuses as $status => $details) {
+                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp, b.booking_id, b.user_id
+                        FROM notification_tbl n
+                        JOIN booking_tbl b ON n.booking_id = b.booking_id
+                        JOIN users u ON b.user_id = u.user_id
+                        WHERE n.is_read_user = 0 AND n.status = :status AND b.user_id = :userId
+                        ORDER BY n.timestamp DESC";
+                $query = $pdo->prepare($sql);
+                $query->execute(['status' => $status, 'userId' => $userId]);
+                $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
+                
+                foreach ($notifications as $notification) {
+                    $bookingId = $notification['booking_id'];
+                    $notificationId = $notification['notification_id'];
+                    $timeAgo = timeAgo($notification['timestamp']);
+                    $message = sprintf($details['message'], $bookingId);
+        ?>
+        <!-- Notification Card -->
+        <div class="notification-card <?php echo $details['class']; ?>" data-notification-id="<?php echo $notificationId; ?>">
+            <span class="badge-<?php echo strtolower($details['badge']); ?>"><?php echo $details['badge']; ?></span>
+            <div class="notification-content">
+                <p><?php echo $message; ?></p>
             </div>
-            <!-- Add more cards as needed -->
-             <?php } ?>
-             <?php 
-                $sql = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
-                        b.booking_id
-
-                    FROM 
-                        notification_tbl n
-                    JOIN 
-                        booking_tbl b ON n.booking_id = b.booking_id
-                    WHERE 
-                        n.is_read_user = 0 AND n.status = 3
-                    ORDER BY 
-                        n.timestamp DESC
-                    ";
-                    $query = $pdo->prepare($sql);
-                    $query->execute();
-                    $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
-                    
-                    foreach ($notifications as $notification) {
-                        $timestamp = $notification['timestamp'];
-                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
-                        $timeAgo = '3h ago';
-            ?>
-            <!-- Cancellation Card -->
-            <div class="notification-card cancel">
-                <span class="badge-cancel">Cancelled</span>
-                <div class="notification-content">
-                    <p>Your Reservation #<?php echo $notification['booking_id']; ?> has been cancelled.</p>
+            <div class="notification-footer">
+                <div class="time-container">
+                    <p class="time"><?php echo $timeAgo; ?></p>
                 </div>
-                <div class="notification-footer">
-                    <div class="time-container">
-                        <p class="time">5h ago</p>
-                    </div>
-                    <div class="buttons-container">
-                        <button class="btn btn-primary btn-sm">View</button>
-                        <button class="btn btn-secondary btn-sm">Mark as Read</button>
-                    </div>
+                <div class="buttons-container">
+                    <button class="btn btn-primary btn-sm view-button" data-booking-id="<?php echo htmlspecialchars($bookingId); ?>">View</button>
+                    <button class="btn btn-secondary btn-sm" onclick="markAsRead(<?php echo $notificationId; ?>, 'admin')">Mark as Read</button>
                 </div>
-                <span class="dot-indicator"></span>
             </div>
-            <?php } ?>
+            <span class="dot-indicator"></span>
         </div>
+        <?php
+                }
+            }
+        ?>
+    </div>
 
-        <hr />
+    <hr />
 
-        <h2>Read Notification(s)</h2>
-        <div class="notification-container">
-        <?php 
-                $sql1 = "SELECT n.notification_id, n.status, n.is_read_user, n.timestamp,
-                        b.booking_id
-
-                    FROM 
-                        notification_tbl n
-                    JOIN 
-                        booking_tbl b ON n.booking_id = b.booking_id
-                    JOIN 
-                        users u ON b.user_id = u.user_id
-                    WHERE 
-                        n.is_read_user = 1
-                    ORDER BY 
-                        n.timestamp DESC
-                    ";
-                    $query1 = $pdo->prepare($sql1);
-                    $query1->execute();
-                    $notifications1 = $query1->fetchAll(PDO::FETCH_ASSOC);
-                    
-                    foreach ($notifications1 as $notification) {
-                        $timestamp = $notification['timestamp'];
-                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
-                        $timeAgo = '3h ago';
-            ?>
-            <!-- Notification Card -->
-            <div class="notification-card read">
-                <div class="notification-content">
-                    <p>Your Reservation #<?php echo $notification['booking_id']; ?> has been approved.</p>
-                </div>
-                <div class="notification-footer">
-                    <p class="time">1d ago</p>
-                    <button class="btn btn-primary btn-sm">View</button>
-                </div>
-            </div>
-            <!-- Add more cards as needed -->
-             <?php } ?>
-        </div>
+    <h2><strong>Read Notification(s)</strong></h2>
+    <div class="notification-container read">
+    
     </div>
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -346,6 +296,57 @@
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
     });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchNotifications();
+
+        document.querySelector('.notification-container').addEventListener('click', function (event) {
+            if (event.target && event.target.classList.contains('view-button')) {
+                const bookingId = event.target.dataset.bookingId;
+                window.location.href = `my-reservation.php?booking_id=${bookingId}`;
+            }
+        });
+
+        document.querySelector('.notification-container.read').addEventListener('click', function (event) {
+            if (event.target && event.target.classList.contains('view-button')) {
+                const bookingId = event.target.dataset.bookingId;
+                window.location.href = `my-reservation.php?booking_id=${bookingId}`;                
+            }
+        });
+    });
+
+    function markAsRead(notificationId, role) {
+        $.ajax({
+            type: "POST",
+            url: "update_notification.php",
+            data: { 
+                notification_id: notificationId,
+                role: role
+            },
+            success: function(response) {
+                $(`[data-notification-id='${notificationId}']`).remove();
+                fetchNotifications();
+            },
+            error: function() {
+                console.error('Failed to mark as read');
+            }
+        });
+    }
+
+    function fetchNotifications() {
+        $.ajax({
+            url: "fetch_notifications.php", // Server-side script to fetch notifications
+            method: "GET",
+            success: function(data) {
+                $('.notification-container.read').html(data); // Corrected selector
+            },
+            error: function() {
+                console.error('Failed to fetch notifications');
+            }
+        });
+    }
+
+
 
 </script>
 </body>
