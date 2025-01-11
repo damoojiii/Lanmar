@@ -63,43 +63,80 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
     <style>
+        @font-face {
+            font-family: 'nautigal';
+            src: url(font/TheNautigal-Regular.ttf);
+        }
+        h2{
+            font-family: 'nautigal';
+            font-size: 3rem;
+        }
         body {
-            background: linear-gradient(to bottom right, #006994, #00FFFF);
+            background: linear-gradient(190deg, #6592F3, #3B558D);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .btn{
+            background: #19315D;
+            border-color: #3B558D;
         }
         .login-container {
-            background-color: white;
+            color: white;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: auto;
+        }
+
+        .container {
+            background-color: white;
+            margin-top: 10px;
+            padding: 0 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: auto;
+        }
+        .main{
+            display: flex;
+            flex-direction: column;
+        }
+        .forgot{
+            margin-bottom: 5px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2 class="text-center mb-4">Login</h2>
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
-        <form method="POST" action="">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <div class="mb-3">
-                <p class="mt-3 text-center"><a href="forgot_password.php">Forgot Password</a></p>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-        </form>
-        <p class="mt-3 text-center">Don't have an account? <a href="register_user.php">Register here</a></p>
+    <div class="main">
+        <div class="login-container">
+            <h2 class="text-center mb-4">Lanmar Resort</h2>
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+            <form method="POST" action="">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="password" class="form-label">Password</label>
+                        <p class="text-center list-unstyle forgot"><a href="forgot_password.php">Forgot Password</a></p>
+                    </div>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+
+        <div class="container">
+            <p class="mt-3 text-center">Don't have an account? <a href="register_user.php">Sign up here</a></p>
+        </div>
     </div>
 </body>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

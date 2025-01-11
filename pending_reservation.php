@@ -23,7 +23,7 @@
             if ($stmt->execute()) {
                 // Insert into notification_tbl
                     $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
-                            VALUES (:booking_id, 1, 0, 0, NOW())";
+                            VALUES (:booking_id, 1, 0, 2, NOW())";
                     $stmt_notification = $pdo->prepare($notification_sql);
                     $stmt_notification->execute([
                     ':booking_id' => $bookingId
@@ -49,7 +49,7 @@
             // Execute the query
             if ($stmt->execute()) {
                 $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
-                        VALUES (:booking_id, 1, 0, 0, NOW())";
+                        VALUES (:booking_id, 1, 0, 2, NOW())";
                 $stmt_notification = $pdo->prepare($notification_sql);
                 $stmt_notification->execute([
                 ':booking_id' => $bookingId
@@ -520,7 +520,7 @@
             LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
             LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
             LEFT JOIN users ON booking_tbl.user_Id = users.user_id
-            WHERE booking_tbl.status = 'Pending' ORDER BY booking_id DESC
+            WHERE booking_tbl.status = 'Pending' OR booking_tbl.status = 'Cancellation1' ORDER BY booking_id DESC
         ";
         $stmt_solo = $pdo->prepare($sql_solo);
         $stmt_solo->execute();
@@ -569,7 +569,7 @@
                                         $class = "approved";
                                         break;
                                     case "Pending":
-                                        $class = "pending";
+                                        $class = "Pending";
                                         break;
                                     case "Cancel":
                                         $class = "cancel";
@@ -577,9 +577,12 @@
                                     case "Completed":
                                         $class = "completed";
                                         break;
+                                    case "Cancellation1";
+                                        $class = "For Cancellation";
+                                        break;
                                     }
                                     ?>
-                                    <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
+                                    <td><span class="status-badge"><?php echo htmlspecialchars($class); ?></span></td>
                             <?php endforeach; ?>
                             <?php elseif(empty($results)):?>
                                 <td colspan="7" style="text-align: center;">No Approved Reservations</td>
@@ -745,6 +748,58 @@
             header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
         }
     }
+    document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('booking_id');
+
+    if (bookingId) {
+        fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Booking not found');
+                    return;
+                }
+
+                // Populate the modal with the fetched data
+                document.getElementById('modalBookingId').textContent = data.bookingId;
+                document.getElementById('modalName').textContent = data.name;
+                document.getElementById('modalContact').textContent = data.contact;
+                document.getElementById('modalDateRange').textContent = data.dateRange;
+                document.getElementById('modalTimeRange').textContent = data.timeRange;
+                document.getElementById('modalHours').textContent = data.hours;
+                document.getElementById('modalAdults').textContent = data.adult;
+                document.getElementById('modalChild').textContent = data.child;
+                document.getElementById('modalPwd').textContent = data.pwds;
+                document.getElementById('modalTotalPax').textContent = data.totalPax;
+                document.getElementById('modalRoomType').textContent = data.type;
+
+                // Populate rooms
+                const roomsContainer = document.getElementById('modalRooms');
+                roomsContainer.innerHTML = '';
+                let ronum = 1;
+                data.roomName.forEach(room => {
+                    const roomElement = document.createElement('div');
+                    roomElement.classList.add('room-detail', 'col-3', 'col-md-3');
+                    roomElement.innerHTML = `<strong>Room ${ronum}:</strong> ${room.roomName}<br>`;
+                    roomsContainer.appendChild(roomElement);
+                    ronum++;
+                });
+
+                document.getElementById('modalAdds').textContent = data.additional;
+                document.getElementById('modalPaymode').textContent = data.paymode;
+                document.getElementById('modalTotalBill').textContent = data.totalBill;
+                document.getElementById('modalBalance').textContent = data.balance;
+                document.getElementById('modalrefNum').textContent = data.refNumber;
+                const modalBody = document.getElementById('modalProof');
+                modalBody.innerHTML = `<a href="${data.imageProof}" target="_blank">View image</a>`;
+
+                // Show the modal
+                $('#reservationModal').modal('show');
+            })
+            .catch(error => console.error('Error fetching data:', error));
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
         const tableIndex = new DataTable('#example', {
@@ -785,10 +840,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (row) {
         const userId = row.dataset.userId;
         userID = userId;
-          const bookingId = row.dataset.bookingId; // Get the booking ID
+        const bookingId = row.dataset.bookingId; // Get the booking ID
         bookingIds = bookingId;
-
-          //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
           
           // Fetch the booking details from the server
           fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
@@ -828,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   document.getElementById('modalPaymode').textContent = data.paymode;
                   document.getElementById('modalTotalBill').textContent = data.totalBill;
                   document.getElementById('modalBalance').textContent = data.balance;
-document.getElementById('modalrefNum').textContent = data.refNumber;
+                  document.getElementById('modalrefNum').textContent = data.refNumber;
                   const modalBody = document.getElementById('modalProof');
                     modalBody.innerHTML = `
                     <a href="${data.imageProof}" target="_blank">View image</a>
@@ -842,6 +895,7 @@ document.getElementById('modalrefNum').textContent = data.refNumber;
               .catch(error => console.error('Error fetching data:', error));
       }
   });
+
   function editBooking() {
         if (bookingIds) { // Make sure bookingId is set
             // Navigate to the cancellation page with the bookingId

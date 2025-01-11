@@ -9,6 +9,30 @@
     session_start();
     include "role_access.php";
     checkAccess('admin');
+
+    function timeAgo($timestamp) {
+        $timeAgo = '';
+        $currentTime = new DateTime();
+        $notificationTime = new DateTime($timestamp);
+        $interval = $currentTime->diff($notificationTime);
+        
+        if ($interval->y > 0) {
+            $timeAgo = $interval->y . ' year' . ($interval->y > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->m > 0) {
+            $timeAgo = $interval->m . ' month' . ($interval->m > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->d > 0) {
+            $timeAgo = $interval->d . ' day' . ($interval->d > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->h > 0) {
+            $timeAgo = $interval->h . ' hour' . ($interval->h > 1 ? 's' : '') . ' ago';
+        } elseif ($interval->i > 0) {
+            $timeAgo = $interval->i . ' minute' . ($interval->i > 1 ? 's' : '') . ' ago';
+        } else {
+            $timeAgo = 'Just now';
+        }
+        
+        return $timeAgo;
+    }
+    
 ?>
 
 <!DOCTYPE html>
@@ -535,7 +559,7 @@
             <h2><strong>New Reservation(s)</strong></h2>
             <div class="notification-container">
             <?php 
-                $sql = "SELECT n.notification_id, n.status, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, 
+                $sql = "SELECT n.notification_id, n.booking_id, n.status, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, b.status, 
                         u.user_id, 
                         u.firstname, 
                         u.lastname
@@ -546,7 +570,7 @@
                     JOIN 
                         users u ON b.user_id = u.user_id
                     WHERE 
-                        n.is_read_admin = 0
+                        n.is_read_admin = 0 AND b.status = 'Pending'
                     ORDER BY 
                         n.timestamp DESC
                     ";
@@ -563,13 +587,12 @@
 
                         $checkinTime = date('h:i A', strtotime($notification['checkin']));
                         $checkoutTime = date('h:i A', strtotime($notification['checkout']));
-                        $timestamp = $notification['timestamp'];
-                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
-                        $timeAgo = '3h ago';
+                        $timeAgo = timeAgo($notification['timestamp']);
+
             ?>
 
                 <!-- Notification Card -->
-                <div class="notification-card new">
+                <div class="notification-card new " data-notification-id="<?php echo $notification['notification_id']; ?>">
                     <span class="badge-new">New</span>
                     <div class="notification-content">
                         <p><strong>From <?php echo  htmlspecialchars($fullName); ?></strong></p>
@@ -580,8 +603,8 @@
                             <p class="time"><?php echo  htmlspecialchars($timeAgo); ?></p>
                         </div>
                         <div class="buttons-container">
-                            <button class="btn btn-primary btn-sm">View</button>
-                            <button class="btn btn-secondary btn-sm">Mark as Read</button>
+                            <button class="btn btn-primary btn-sm view-button" data-booking-id="<?php echo $notification['booking_id']; ?>">View</button>
+                            <button class="btn btn-secondary btn-sm" onclick="markAsRead(<?php echo $notification['notification_id']; ?>, 'admin')">Mark as Read</button>
                         </div>
                     </div>
                     <span class="dot-indicator"></span>
@@ -593,55 +616,32 @@
             <hr />
 
             <!-- Cancellation Form Section -->
-            <h2>Cancellation Forms</h2>
+            <h2><strong>Cancellation Form(s)</strong></h2>
             <div class="notification-container">
                 <!-- Cancellation Card -->
-                <div class="notification-card cancel">
-                    <span class="badge-cancel">For Cancellation</span>
-                    <div class="notification-content">
-                        <p><strong>Submitted by John Doe</strong></p>
-                        <p>Reservation # 1234 is requested to be cancel.</p>
-                    </div>
-                    <div class="notification-footer">
-                        <div class="time-container">
-                            <p class="time">5h ago</p>
-                        </div>
-                        <div class="buttons-container">
-                            <button class="btn btn-primary btn-sm">View</button>
-                            <button class="btn btn-secondary btn-sm">Mark as Read</button>
-                        </div>
-                    </div>
-                    <span class="dot-indicator"></span>
-                </div>
-                <!-- Add more cancellation cards as needed -->
-            </div>
-
-            <hr />
-
-            <h2>Read Reservation(s)</h2>
-            <div class="notification-container">
-            <?php 
-                $sql1 = "SELECT n.notification_id, n.status, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, 
+                <?php 
+                $sql2 = "SELECT c.cancel_id,c.booking_id, c.is_read, c.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout,
                         u.user_id, 
                         u.firstname, 
                         u.lastname
                     FROM 
-                        notification_tbl n
-                    JOIN 
-                        booking_tbl b ON n.booking_id = b.booking_id
-                    JOIN 
+                        cancel_tbl c
+                    LEFT JOIN 
+                        booking_tbl b ON c.booking_id = b.booking_id
+                    LEFT JOIN 
                         users u ON b.user_id = u.user_id
                     WHERE 
-                        n.is_read_admin = 1
+                        c.is_read = 0
                     ORDER BY 
-                        n.timestamp DESC
+                        c.timestamp DESC
                     ";
-                    $query1 = $pdo->prepare($sql1);
-                    $query1->execute();
-                    $notifications1 = $query1->fetchAll(PDO::FETCH_ASSOC);
+                    $query2 = $pdo->prepare($sql2);
+                    $query2->execute();
+                    $notifications2 = $query2->fetchAll(PDO::FETCH_ASSOC);
                     
-                    foreach ($notifications1 as $notification) {
+                    foreach ($notifications2 as $notification) {
                         $fullName = ucwords($notification['firstname']) . ' ' . ucwords($notification['lastname']);
+                        $bookingId = $notification['booking_id'];
                         $dateIn = date('F j, Y', strtotime($notification['dateIn']));
                         $dateOut = date('F j, Y', strtotime($notification['dateOut']));
 
@@ -649,23 +649,35 @@
 
                         $checkinTime = date('h:i A', strtotime($notification['checkin']));
                         $checkoutTime = date('h:i A', strtotime($notification['checkout']));
-                        $timestamp = $notification['timestamp'];
-                        // You can calculate the 'time ago' here or use a library like moment.js for dynamic updates in the frontend.
-                        $timeAgo = '1d ago';
+                        $timeAgo = timeAgo($notification['timestamp']);
+
             ?>
-                <!-- Notification Card -->
-                <div class="notification-card read">
+                <div class="notification-card cancel" data-cancel-id="<?php echo $notification['cancel_id'];?>">
+                    <span class="badge-cancel">For Cancellation</span>
                     <div class="notification-content">
-                        <p><strong>From <?php echo  htmlspecialchars($fullName); ?></strong></p>
+                        <p><strong>From <?php echo $fullName; ?></strong></p>
                         <p>Date & Time: <br><?php echo  $dateDisplay . ' ' . $checkinTime.'-'.$checkoutTime; ?></p>
                     </div>
                     <div class="notification-footer">
-                        <p class="time"><?php echo  htmlspecialchars($timeAgo); ?></p>
-                        <button class="btn btn-primary btn-sm">View</button>
+                        <div class="time-container">
+                            <p class="time">5h ago</p>
+                        </div>
+                        <div class="buttons-container">
+                        <button class="btn btn-primary btn-sm view-button" data-booking-id="<?php echo $notification['booking_id']; ?>">View</button>
+                            <button class="btn btn-secondary btn-sm" onclick="markAsRead1(<?php echo $notification['cancel_id']; ?>)">Mark as Read</button>
+                        </div>
                     </div>
+                    <span class="dot-indicator"></span>
                 </div>
-            <?php } ?>
-                <!-- Add more cards as needed -->
+                <?php } ?>
+                <!-- Add more cancellation cards as needed -->
+            </div>
+
+            <hr />
+
+            <h2><strong>Read Reservation(s)</strong></h2>
+            <div class="notification-container read">
+            
             </div>
         </div>
     </div>
@@ -701,6 +713,78 @@
             collapse.style.height = '0px';
         });
     });
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchNotifications();
+
+        document.querySelector('.notification-container').addEventListener('click', function (event) {
+            if (event.target && event.target.classList.contains('view-button')) {
+                const bookingId = event.target.dataset.bookingId;
+                window.location.href = `pending_reservation.php?booking_id=${bookingId}`;
+            }
+        });
+
+        document.querySelector('.notification-container.read').addEventListener('click', function (event) {
+            if (event.target && event.target.classList.contains('view-button')) {
+                const bookingId = event.target.dataset.bookingId;
+                const status = event.target.dataset.status;
+                if(status == 'Pending'|| status == 'Cancellation1'){
+                    window.location.href = `pending_reservation.php?booking_id=${bookingId}`;
+                }else if(status == 'Approved' || status == 'Cancellation2'){
+                    window.location.href = `approved_reservation.php?booking_id=${bookingId}`;
+                }else{
+                    window.location.href = `reservation_history.php?booking_id=${bookingId}`;
+                }
+                
+            }
+        });
+    });
+
+    function markAsRead(notificationId, role) {
+        $.ajax({
+            type: "POST",
+            url: "update_notification.php",
+            data: { 
+                notification_id: notificationId,
+                role: role
+            },
+            success: function(response) {
+                $(`[data-notification-id='${notificationId}']`).remove();
+                fetchNotifications();
+            },
+            error: function() {
+                console.error('Failed to mark as read');
+            }
+        });
+    }
+    function markAsRead1(cancelId) {
+        $.ajax({
+            type: "POST",
+            url: "update_cancelform.php",
+            data: { 
+                cancel_id: cancelId
+            },
+            success: function(response) {
+                $(`[data-cancel-id='${cancelId}']`).remove();
+                fetchNotifications();
+            },
+            error: function() {
+                console.error('Failed to mark as read');
+            }
+        });
+    }
+
+    function fetchNotifications() {
+        $.ajax({
+            url: "fetch_admin_notifications.php", // Server-side script to fetch notifications
+            method: "GET",
+            success: function(data) {
+                $('.notification-container.read').html(data); // Corrected selector
+            },
+            error: function() {
+                console.error('Failed to fetch notifications');
+            }
+        });
+    }
 </script>
 </body>
 </html>

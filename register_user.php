@@ -114,8 +114,12 @@ if (isset($_POST["register"])) {
     <title>Registration Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        @font-face {
+            font-family: 'nautigal';
+            src: url(font/TheNautigal-Regular.ttf);
+        }
         body {
-            background: linear-gradient(to bottom right, #006994, #00FFFF);
+            background: linear-gradient(190deg, #6592F3, #3B558D);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -125,7 +129,8 @@ if (isset($_POST["register"])) {
             color: #333333;
         }
         .register-container {
-            background-color: white;
+            color: white;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             padding: 1.5rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -134,7 +139,9 @@ if (isset($_POST["register"])) {
         }
         h2 {
             text-align: center;
-            color: #333;
+            font-family: 'nautigal';
+            font-size: 3rem;
+            margin: 0;
         }
         form {
             display: flex;
@@ -150,7 +157,8 @@ if (isset($_POST["register"])) {
             box-sizing: border-box;
         }
         button {
-            background-color: #007bff;
+            background: #19315D;
+            border-color: #3B558D;
             color: white;
             border: none;
             padding: 10px;
@@ -196,7 +204,7 @@ if (isset($_POST["register"])) {
             <input type="tel" name="contact_number" placeholder="Contact Number" required>
             <input type="email" name="email" placeholder="Email" required>
             <select name="gender" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;" required>
-                <option value="" disabled selected>Select Gender</option>
+                <option value="" disabled hidden selected>Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
