@@ -100,6 +100,16 @@
         .modal-mobile-add{
           background-color: transparent;
         }
+        #proofpicture {
+          max-width: 419px;
+          max-height: 900px;
+          overflow: hidden;
+        }
+        #proofpicture img{
+          width: 100%; /* Make the image responsive to the container's width */
+          height: auto; /* Maintain the aspect ratio */
+          object-fit: contain;
+        }
 
         @media (max-width: 768px) {
             #main-content {
@@ -117,6 +127,9 @@
                 font-size: 0.8rem;
                 padding: 0.5rem;
             }
+            .modal-dialog {
+              max-width: 90vw;
+            }
             .modal-mobile, .modal-mobile-remove{
               padding-block: 2px;
             }
@@ -126,7 +139,7 @@
             .modal-mobile-add{
               background-color: #d6d6d6;
             }
-        }
+      }
     </style>
 </head>
 
@@ -213,7 +226,9 @@
                 <tbody>
                 <?php if(!empty($results)): ?>
                 <?php foreach ($results as $row): ?>
-                  <tr class="table-row" id="triggerElement" data-bs-toggle="modal" data-bs-target="#reservationModal" data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
+                    <tr class="table-row" id="triggerElement" data-bs-toggle="modal" data-bs-target="#reservationModal" 
+                    data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
+
                         <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                         
                         <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
@@ -243,9 +258,9 @@
                               $textstatus = "Cancelled";
                               break;
                           case "Rejected":
-                              $class = "cancel";
-                              $textstatus = "Rejected";
-                              break;
+                            $class = "cancel";
+                            $textstatus = "Rejected";
+                            break;
                           case "Completed":
                               $class = "completed";
                               $textstatus = "Completed";
@@ -359,30 +374,48 @@
             </div>
           </div>
           <div class="row g-2">
-            <div class="col-6 col-md-4 modal-mobile-add">
-              <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-            </div>
-            <div class="col-6 col-md-4 modal-mobile-add">
-                <div id="modalProof"></div>
-            </div>  
+                <div class="col-6 col-md-4">
+                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
+                </div>
+                <div class="col-6 col-md-4">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
+                    View Proof
+                </button>
+                </div>  
           </div>     
         </div>
       </div>
       <div class="modal-footer d-flex justify-content-end">
-            <!-- Chat Button -->
+        
             <button onclick="window.location.href='chats.php'" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
+
             <!-- Edit Button -->
             <button id="editButton" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
             </button>
 
             <!-- Cancel Button -->
-            <button  id="cancelButton" type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
+            <button id="cancelButton" type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
                 <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
             </button>
         </div>
+
+    </div>
+  </div>
+</div>
+<!-- Modal for Viewing GCash Receipt (Nested Modal) -->
+<div class="modal" id="gcashReceiptModal" tabindex="-1" aria-labelledby="gcashReceiptModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg " id="proofpicture">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="gcashReceiptModalLabel">Proof of Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-IMAGE">
+        <!-- Image will be dynamically inserted here -->
+      </div>
     </div>
   </div>
 </div>
@@ -458,8 +491,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modalTotalBill').textContent = data.totalBill;
                 document.getElementById('modalBalance').textContent = data.balance;
                 document.getElementById('modalrefNum').textContent = data.refNumber;
-                const modalBody = document.getElementById('modalProof');
-                modalBody.innerHTML = `<a href="${data.imageProof}" target="_blank">View image</a>`;
+                const modalBody = document.getElementById('modal-IMAGE');
+                modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
 
                 const chatButton = document.querySelector('.modal-footer .btn:nth-child(1)');
                 const editButton = document.querySelector('.modal-footer .btn:nth-child(2)');
@@ -510,6 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error('Error fetching data:', error));
         }
     });
+
 document.addEventListener('DOMContentLoaded', () => {
   const tableIndex = new DataTable('#example', {
         columnDefs: [
@@ -637,11 +671,10 @@ let bookingIds;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
                     document.getElementById('modalrefNum').textContent = data.refNumber;
-                    const modalBody = document.getElementById('modalProof');
-                    modalBody.innerHTML = `
-                    <a href="${data.imageProof}" target="_blank">View image</a>
-                    `
+                    const modalBody = document.getElementById('modal-IMAGE');
+                    modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
                     const chatButton = document.querySelector('.modal-footer .btn:nth-child(1)');
+
                 const editButton = document.querySelector('#editButton');
                 const cancelButton = document.querySelector('#cancelButton');
 
@@ -690,6 +723,23 @@ let bookingIds;
                 .catch(error => console.error('Error fetching data:', error));
         }
     });
+    const viewReceiptButton = document.getElementById('modalProof');
+    if (viewReceiptButton) {
+        viewReceiptButton.addEventListener('click', function () {
+            // Check if the modal exists before opening
+            const gcashModal = document.getElementById('gcashReceiptModal');
+            const modal = new bootstrap.Modal(gcashModal);
+            modal.show();
+        });
+    }
+    // Add event listener for closing the GCash Receipt modal and show Reservation modal
+  const gcashModal = document.getElementById('gcashReceiptModal');
+  if (gcashModal) {
+      gcashModal.addEventListener('hidden.bs.modal', function () {
+          const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+          reservationModal.show();
+      });
+  }
 
     function cancelBooking() {
     if (bookingIds) { // Make sure bookingId is set
@@ -707,7 +757,7 @@ let bookingIds;
         }
     }
     document.getElementById('editButton').addEventListener('click', editBooking);
-    document.getElementById('cancelButton').addEventListener('click', cancelBooking);
+document.getElementById('cancelButton').addEventListener('click', cancelBooking);
 
 });
 

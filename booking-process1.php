@@ -1040,7 +1040,6 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
     roomSummary.appendChild(removeButton);
     bookedRoomsContainer.appendChild(roomSummary);
 
-    updateRemoveButtons();
     addRoomIdToForm(roomId);
 
     if (rateType === '2') {
@@ -1083,26 +1082,33 @@ function removeRoomIdFromForm(roomId) {
 
 function updateRemoveButtons() {
     const bookedRoomsContainer = document.getElementById('booked-rooms');
-    const allRooms = Array.from(bookedRoomsContainer.children);
+    const allRooms = Array.from(bookedRoomsContainer.querySelectorAll('.room-item'));
     const offeredRooms = allRooms.filter(room => room.dataset.isOffered === '1');
+    let countOffered = 0;
+
+    allRooms.forEach(room => {
+        const isOffered = parseInt(room.dataset.isOffered) || 0;
+        if (isOffered === 1) {
+            countOffered++;
+        }
+    });
 
 
     if (rateType === '2') {
         allRooms.forEach(room => {
             const removeButton = room.querySelector('button');
+            const offered = parseInt(room.dataset.offered) || 0;
 
             // Check if the removeButton exists
             if (!removeButton) {
                 console.warn(`No remove button found for room: ${room.id}`);
                 return;
             }
-
-            const isOffered = room.dataset.isOffered === '1';
-
-            console.log(offeredRooms.length, offeredRooms);
-            if (offeredRooms.length === 1 && offeredRooms) {
+            console.log((countOffered === 1 || countOffered === 0) && allRooms.length === 1, countOffered, allRooms.length);
+            if ((countOffered === 1 || countOffered === 0) && allRooms.length === 1) {
                 removeButton.onclick = () => alert("You need at least one of the offered room for overnight stays.");
             } else {
+                console.log('pumasok');
                 removeButton.onclick = () => removeRoom(room.id.replace('room-', ''), parseFloat(room.querySelector('p').textContent.match(/PHP (\d+)/)?.[1] || 0));
             }
         });
@@ -1111,12 +1117,27 @@ function updateRemoveButtons() {
 
 // Function to remove room from the summary
 function removeRoom(roomId, price) {
-    const roomElement = document.getElementById(`room-${roomId}`);
     const bookedRoomsContainer = document.getElementById('booked-rooms');
     const noRoomsMessage = document.getElementById('no-rooms-message');
+    const allRooms = Array.from(bookedRoomsContainer.querySelectorAll('.room-item')); // Move this line up
+    const roomElement = document.getElementById(`room-${roomId}`);
+    let countOffered = 0;
 
-    if (roomElement) {
-        roomElement.remove();    
+    allRooms.forEach(room => {
+        const isOffered = parseInt(room.dataset.isOffered) || 0;
+        if (isOffered === 1) {
+            countOffered++;
+        }
+    });
+
+    const dateIn = document.getElementById('date-in').value;
+    const dateOut = document.getElementById('date-out').value;
+    const isOvernight = dateIn !== dateOut;
+
+    if (allRooms.length === 1 && (countOffered === 1 || countOffered === 0) && isOvernight) {
+        alert("You need at least one of the offered room for overnight stays.");
+    } else {
+        roomElement.remove();
         updateTotal(-price);
         removeRoomIdFromForm(roomId);
     }
@@ -1126,10 +1147,11 @@ function removeRoom(roomId, price) {
     }
 
     if (bookedRoomsContainer.childElementCount === 1 && rateType === '2') {
-        //showOfferedRoomsOnly();
+        // showOfferedRoomsOnly();
         offeredRoomAdded = false;
     }
 }
+
 
 // Function to update total
 function updateTotal(priceChange) {
