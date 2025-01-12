@@ -2,9 +2,10 @@
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    session_start();
 
     $senderId = $_POST['user_id'];
-    $adminId = 9;
+    $adminId = $_SESSION['user_id'];
     $message = $_POST['message'];
     $read = 0;
 

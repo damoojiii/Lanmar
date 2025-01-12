@@ -38,6 +38,9 @@
         font-family: 'nautigal';
         src: url(font/TheNautigal-Regular.ttf);
         }
+        body{
+            font-family: Arial, sans-serif;
+        }
         nav{
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);;
             height: 80px;
@@ -569,7 +572,7 @@
         <div class="row" style="justify-content:space-between;">
         <div class="bill-message" >
             <div class="qr">
-                <h2 class="section-header">Scan Here</h2>
+                <h2 class="section-header"><strong>Scan Here</strong></h2>
                 <div class="qrcode">
                     <img src="<?php
                     $paymentMethod = strtolower($_SESSION['payment_method']); // Convert to lowercase for consistency
@@ -594,7 +597,6 @@
                         placeholder="<?php 
                         if ($paymentMethod === 'gcash') {
                             echo "xxxx xxx xxxxxx";
-                            // Additional logic for GCash
                         } else {
                             echo "xxxxxxxxxx";
                         }?> " 
@@ -606,7 +608,7 @@
                 </form>
             </div>
             <div class="summary">
-                <h2>Instructions</h2>
+                <h2><strong>Instructions</strong></h2>
                 <li>1.</li>
                 <li>2.</li>
                 <li>3.</li>

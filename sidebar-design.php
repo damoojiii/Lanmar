@@ -15,7 +15,7 @@
     body{
         font-family: Arial, sans-serif;
     }
-    #sidebar span{
+    #sidebar span .logo{
         font-family: 'nautigal';
         font-size: 50px !important;
     }
@@ -58,10 +58,18 @@
         transition: background-color 0.3s, color 0.3s;
         margin-bottom: 2px;
     }
+    
 
     #sidebar .nav-link:hover, #sidebar .nav-link.active {
         background-color: #FFFDEC !important;
         color: #000 !important;
+    }
+
+    #sidebar .badge-notif{
+        border-radius: 15px;
+        text-align: center;
+        align-items: center;
+        background-color: red !important;
     }
     @media (max-width: 768px) {
             #sidebar {

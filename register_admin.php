@@ -32,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $insert_stmt->bind_param("ssssss", $firstname, $lastname, $contact_number, $email, $hashed_password, $role);
             
             if ($insert_stmt->execute()) {
-                $_SESSION['registration_success'] = "Registration successful. You can now login.";
                 header("Location: login.php");
                 exit();
             } else {

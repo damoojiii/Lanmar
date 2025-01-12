@@ -16,7 +16,7 @@ function getBookingDetailsById($bookingId) {
     $bookingQuery = "SELECT 
         booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout,
         booking_tbl.hours, booking_tbl.additionals,booking_tbl.status,
-        users.firstname, users.lastname, users.contact_number, 
+        users.firstname, users.lastname, users.contact_number, users.gender,
         reservationType_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
         bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, bill_tbl.ref_num, image
@@ -95,6 +95,7 @@ if (isset($_GET['booking_id'])) {
             'refNumber' => $bookingDetails['ref_num'],
             'name' => $bookingDetails['fullname'],
             'contact' => $bookingDetails['contact_number'],
+            'gender' => $bookingDetails['gender'],
             'dateRange' => $bookingDetails['dateRange'],
             'timeRange' => $bookingDetails['timeRange'],
             'status' => $bookingDetails['status'],
