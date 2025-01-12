@@ -15,7 +15,7 @@
     body{
         font-family: Arial, sans-serif;
     }
-    #sidebar span .logo{
+    #sidebar .logo{
         font-family: 'nautigal';
         font-size: 50px !important;
     }
@@ -65,11 +65,25 @@
         color: #000 !important;
     }
 
-    #sidebar .badge-notif{
-        border-radius: 15px;
+    #sidebar .badge-notif, .badge-chat{
+        border-radius: 20px;
+        width: auto;
+        
+        background-color: #fff !important;
+    }
+    #sidebar .badge-chat, #sidebar .badge-notif {
+        display: inline-block; 
+        width: 15px; 
+        height: 5px; 
+        border-radius: 5px; 
         text-align: center;
-        align-items: center;
-        background-color: red !important;
+        align-content: center;
+        background-color: #fff !important;
+        margin-left: 5px;
+    }
+
+    #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
     }
     @media (max-width: 768px) {
             #sidebar {

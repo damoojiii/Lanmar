@@ -132,7 +132,7 @@
 
 
             $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
-                    VALUES (:booking_id, 5, 1, 0, NOW())";
+                    VALUES (:booking_id, 5, 2, 0, NOW())";
             $stmt_notification = $pdo->prepare($notification_sql);
             $stmt_notification->execute([
             ':booking_id' => $bookingId

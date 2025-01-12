@@ -347,7 +347,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+      <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -355,8 +355,8 @@
             <a href="index1.php" class="nav-link text-white active">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
-        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
-        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white target">Notification </a></li>
+        <li><a href="chats.php" class="nav-link text-white chat">Chat with Lanmar</a></li>
         <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
@@ -485,10 +485,12 @@
                     </div>
                 </form>
                 <div class="section-header">Additionals</div>
-                <form action="">
-                    <label for="" class="form-label">Is there any special request?</label>
-                    <textarea class="message-box" name="additional" id="additional" placeholder="Type your message here..." rows="4" cols="50"></textarea>
-                </form>
+                    <div class="row mb-2">
+                        <div class="col-md-10">
+                            <label for="" class="form-label">Is there any special request?</label>
+                            <textarea class="message-box p-3" name="additional" id="additional" placeholder="Type your message here..." rows="4" cols="50"></textarea>
+                        </div>
+                    </div>
                 <div class="section-header">Payment Method</div>
                 <form action="booking-process2.1.php" method="get" id="paymentForm">
                     <input type="radio" name="choice" value="Gcash" id="gcash" class="form-label" required>
@@ -633,7 +635,49 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
-
+$(document).ready(function() {
+        function updateNotificationCount() {
+            $.ajax({
+                url: 'notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        function updateChatPopup() {
+            $.ajax({
+                url: 'chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+          
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
+    });
 
 function toggleSummary() {
     const summarySection = document.getElementById('bookingSummary');

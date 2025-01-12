@@ -135,7 +135,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+      <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -143,8 +143,8 @@
             <a href="index1.php" class="nav-link text-white">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white active">My Reservations</a></li>
-        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
-        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white target">Notification </a></li>
+        <li><a href="chats.php" class="nav-link text-white chat">Chat with Lanmar</a></li>
         <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
@@ -467,12 +467,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 console.log(data.status);
                 switch (data.status) {
-                    case 'Pending' || 'Cancellation1' || 'Cancellation2':
+                    case 'Pending':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'block';
                       break;
-                    case 'Rejected' || 'Cancelled' || 'Completed' :
+                    case 'Cancellation1':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Cancellation2':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Rejected':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Cancelled':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Completed':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'none';
@@ -517,17 +537,51 @@ document.addEventListener('DOMContentLoaded', () => {
          .nodes()
          .each((el) => el.classList.add('highlight'));
  });
- document.getElementById('hamburger').addEventListener('click', function() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('show');
-    
-    const navbar = document.querySelector('.navbar');
-    navbar.classList.toggle('shifted');
-    
-    const mainContent = document.getElementById('main-content');
-    mainContent.classList.toggle('shifted');
 });
-});
+
+$(document).ready(function() {
+        function updateNotificationCount() {
+            $.ajax({
+                url: 'notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        function updateChatPopup() {
+            $.ajax({
+                url: 'chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+          
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
+    });
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -588,17 +642,37 @@ let bookingIds;
                     <a href="${data.imageProof}" target="_blank">View image</a>
                     `
                     const chatButton = document.querySelector('.modal-footer .btn:nth-child(1)');
-                const editButton = document.querySelector('.modal-footer .btn:nth-child(2)');
+                const editButton = document.querySelector('#editButton');
                 const cancelButton = document.querySelector('#cancelButton');
 
                 console.log(data.status);
                 switch (data.status) {
-                    case 'Pending' || 'Cancellation1' || 'Cancellation2':
+                    case 'Pending':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'block';
                       break;
-                    case 'Rejected' || 'Cancelled' || 'Completed' :
+                    case 'Cancellation1':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Cancellation2':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Rejected':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Cancelled':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Completed':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'none';

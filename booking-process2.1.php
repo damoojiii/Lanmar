@@ -201,7 +201,7 @@
 
 .modal-content {
     background: white;
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 20px;
     width: 50%;
     border-radius: 8px;
@@ -336,10 +336,9 @@
             width: 100%;
         }
         .modal-content {
-        width: 85%;
-        margin: 15% auto;
-        padding: 10px;
-        font-size: 14px;
+            width: 90%;
+            margin: 40% auto;
+            font-size: 12px;
         }
         .modal-content h2 {
         font-size: 20px;
@@ -353,9 +352,6 @@
             font-size: 13px;
         }
 
-        #policy-check {
-            margin-top: 10px;
-        }
 
         #proceed-button {
             margin-top: 15px;
@@ -400,9 +396,6 @@
             margin-top: 10px;
         }
         .modal-content {
-        width: 90%;
-        margin: 20% auto;
-        font-size: 12px;
         }
 
         .modal-content h2 {
@@ -645,20 +638,33 @@
     }
 
 ?>
-<div id="policy-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 9999;">
-    <div class="modal-content" style="background: white; margin: 10% auto; padding: 20px; width: 50%; border-radius: 8px;">
-        <h2>Policy Agreement</h2>
+<div id="policy-modal" class="modal" style="display: none; position: fixed; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 9999;">
+    <div class="modal-content">
+        <h2><strong>Resort Policy and Regulations</strong></h2>
         <p>Please read and agree to the terms and conditions before proceeding.</p>
         <ul>
-            <li>1. Ensure the uploaded image is clear and legible.</li>
-            <li>2. The reference ID must match the payment details.</li>
-            <li>3. Only valid payment methods are accepted.</li>
-            <li>4. Any discrepancies may lead to delays.</li>
+            <li>1. Videoke use should be minimized after 10:00 PM.</li>
+            <li>2. Guests must shower before swimming and rinse off after swimming in the sea to avoid bringing sand into the pool.</li>
+            <li>3. Smoking is strictly prohibited in all rooms.</li>
+            <li>4. Slippers are not allowed in the pool area.</li>
+            <li>5. Eating or drinking is not permitted in the pool.</li>
+            <li>6. If the number of guests exceeds the expected maximum, a fine will be charged.</li>
+            <li>7. Any additional requests or services must be discussed with the administration to determine the prices.</li>
         </ul>
-        <div style="margin-top: 20px; text-align: right;">
-            <input type="checkbox" id="policy-check"> I agree to the terms and conditions.
-            <br><br>
-            <button id="proceed-button" class="btn btn-primary" disabled>Proceed</button>
+        <hr>
+        <h3><strong>Cancellation/Rebook/Refund Policy</strong></h3>
+        <ul>
+            <li>1. Payments for the chosen date are non-refundable. Choose your dates wisely.</li>
+            <li>2. Rebookings are one-time only</li>
+            <li>3. Rebookings are allowed only if requested before the day of the booking.</li>
+        </ul>
+        <div style="margin-top: 20px;">
+            <div class="d-flex justify-content-start">
+                <input type="checkbox" id="policy-check" class="me-1"> I agree to the terms and conditions. </input>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button id="proceed-button" class="btn btn-primary" disabled>I Agree</button>
+            </div>
         </div>
     </div>
 </div>
@@ -706,10 +712,10 @@
             </div>
             <div class="summary">
                 <h2><strong>Instructions</strong></h2>
-                <li>1.</li>
-                <li>2.</li>
-                <li>3.</li>
-                <li>4.</li>
+                <li>1. Ensure the uploaded image is clear and legible.</li>
+                <li>2. The reference ID must match the payment details.</li>
+                <li>3. Only valid payment methods are accepted.</li>
+                <li>4. Any discrepancies may lead to delays.</li>
             </div>
         </div>
     </div>
