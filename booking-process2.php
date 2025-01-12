@@ -487,7 +487,7 @@
                 <div class="section-header">Additionals</div>
                 <form action="">
                     <label for="" class="form-label">Is there any special request?</label>
-                    <input type="text" class="message-box" name="additional" placeholder="Type your message here...">
+                    <input type="text" class="message-box" name="additional" id="additional" placeholder="Type your message here...">
                 </form>
                 <div class="section-header">Payment Method</div>
                 <form action="booking-process2.1.php" method="get" id="paymentForm">
@@ -496,6 +496,8 @@
         
                     <input type="radio" name="choice" value="PayMaya" id="paymaya" class="form-label" required>
                     <label for="paymaya" class="form-label">Pay Maya</label>
+
+                    <input type="hidden" name="additional" id="hiddenAdditional">
                 </form>
                 </div>
 
@@ -680,6 +682,9 @@ function submitFormAndRedirect() {
             } else{
                 form.choice.value;
             }
+
+            var additional = document.getElementById('additional').value;
+            document.getElementById('hiddenAdditional').value = additional;
             // Submit the form
             form.submit();
             //window.location.href = 'booking-process2.1.php';

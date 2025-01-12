@@ -385,6 +385,7 @@
         if (isset($_GET['choice']) && !empty($_GET['choice'])) {
             // Store the selected choice in the session
             $_SESSION['payment_method'] = $_GET['choice'];
+            $_SESSION['additionals'] = $_GET['additional'];
         } else {
             // If no choice is selected, display an error message
             $error_message = "No payment method selected. Please choose one.";
@@ -423,10 +424,19 @@
     $formamattedref_id = substr($ref_id, 0, 4). ' ' . substr($ref_id, 4, 3) . ' ' . substr($ref_id, 7);
 
     // Handle file upload
-    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+    if ( $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        
+        $fileMimeType = mime_content_type($_FILES['image']['tmp_name']);
+        if (!in_array($fileMimeType, $allowedTypes)) {
+            echo "<script> alert('Invalid file type. Only JPG, PNG, and GIF are allowed.'); </script>";
+            exit;
+        }
         // Define the upload directory and file path
         $uploadDir = 'uploads/ref_proof/';
+        $filename = uniqid() . "_" . basename($_FILES['image']['name']);
         $uploadFile = $uploadDir . basename($_FILES['image']['name']);
+        
 
         // Move the uploaded file to the desired directory
         if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
@@ -436,7 +446,7 @@
         }
     } else {
         echo "<script>
-            alert('No file uploaded or error occurred.');
+            alert('No file uploaded!.');
             window.location.href = window.location.href; // This forces a page reload and starts from the beginning
             </script>";
     }
@@ -507,7 +517,7 @@
     
         // Insert into booking_tbl last
         $booking_sql = "INSERT INTO booking_tbl (user_id, dateIn, dateOut, checkin, checkout, hours, reservation_id, pax_id, bill_id, additionals, status) 
-                        VALUES (:userId, :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, 'None', :status)";
+                        VALUES (:userId, :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, :adds, :status)";
         $stmt = $pdo->prepare($booking_sql);
         $stmt->execute([
             'userId' => $userId,
@@ -519,6 +529,7 @@
             ':res_type' => $reservationType,
             ':pax_id' => $pax_id, 
             ':bill_id' => $bill_id,
+            ':adds' => $_SESSION['additionals'],
             ':status' => $status
         ]);
 
@@ -547,6 +558,7 @@
         unset($_SESSION['roomTotal']);
         unset($_SESSION['roomIds']);
         unset($_SESSION['payment_method']);
+        unset($_SESSION['additionals']);
         $ref_id = '';
         $balance = '';
         
