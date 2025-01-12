@@ -8,11 +8,7 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
-    //if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
-    //    echo '<script>
-    //               window.location="/lanmar/index1.php"; 
-    //    </script>';
-    //}
+
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
         echo '<script>
                     window.location="/lanmar/index1.php"; 
@@ -37,6 +33,9 @@
         @font-face {
         font-family: 'nautigal';
         src: url(font/TheNautigal-Regular.ttf);
+        }
+        body{
+            font-family: Arial, sans-serif;
         }
         nav{
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);;
@@ -185,6 +184,25 @@
         .sabmit{
             width: 50%;
         }
+        .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
     </style>
 <style>
         /* responsive */
@@ -228,6 +246,11 @@
     }
     .sabmit{
         width: 100%;
+    }
+    .modal-content {
+        width: 70%;
+        padding: 15px;
+        font-size: 16px;
     }
 }
 
@@ -308,6 +331,28 @@
             justify-content: flex-start;
             width: 100%;
         }
+        .modal-content {
+            width: 90%;
+            margin: 40% auto;
+            font-size: 12px;
+        }
+        .modal-content h2 {
+        font-size: 20px;
+        }
+
+        .modal-content p {
+            font-size: 14px;
+        }
+
+        .modal-content ul li {
+            font-size: 13px;
+        }
+
+
+        #proceed-button {
+            margin-top: 15px;
+            font-size: 14px;
+        }
     }
 
     /* Phone (Small screen) - 430px and below */
@@ -346,6 +391,19 @@
         button {
             margin-top: 10px;
         }
+
+        .modal-content h2 {
+            font-size: 18px;
+        }
+
+        .modal-content ul li {
+            font-size: 12px;
+        }
+
+        #proceed-button {
+            font-size: 12px;
+            padding: 8px 15px;
+        }   
     }
     </style>
 </head>
@@ -385,6 +443,7 @@
         if (isset($_GET['choice']) && !empty($_GET['choice'])) {
             // Store the selected choice in the session
             $_SESSION['payment_method'] = $_GET['choice'];
+            $_SESSION['additionals'] = $_GET['additional'];
         } else {
             // If no choice is selected, display an error message
             $error_message = "No payment method selected. Please choose one.";
@@ -417,16 +476,24 @@
     // Check if the form is submitted
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && basename($_SERVER['PHP_SELF']) == 'booking-process2.1.php') {
     
-
     // Capture the reference ID from the form
     $ref_id = $_POST['ref_id'];
     $formamattedref_id = substr($ref_id, 0, 4). ' ' . substr($ref_id, 4, 3) . ' ' . substr($ref_id, 7);
 
     // Handle file upload
-    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+    if ( $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        
+        $fileMimeType = mime_content_type($_FILES['image']['tmp_name']);
+        if (!in_array($fileMimeType, $allowedTypes)) {
+            echo "<script> alert('Invalid file type. Only JPG, PNG, and GIF are allowed.'); </script>";
+            exit;
+        }
         // Define the upload directory and file path
         $uploadDir = 'uploads/ref_proof/';
+        $filename = uniqid() . "_" . basename($_FILES['image']['name']);
         $uploadFile = $uploadDir . basename($_FILES['image']['name']);
+        
 
         // Move the uploaded file to the desired directory
         if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
@@ -436,7 +503,7 @@
         }
     } else {
         echo "<script>
-            alert('No file uploaded or error occurred.');
+            alert('No file uploaded!.');
             window.location.href = window.location.href; // This forces a page reload and starts from the beginning
             </script>";
     }
@@ -507,7 +574,7 @@
     
         // Insert into booking_tbl last
         $booking_sql = "INSERT INTO booking_tbl (user_id, dateIn, dateOut, checkin, checkout, hours, reservation_id, pax_id, bill_id, additionals, status) 
-                        VALUES (:userId, :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, 'None', :status)";
+                        VALUES (:userId, :dateIn, :dateOut, :checkin, :checkout, :hours, :res_type, :pax_id, :bill_id, :adds, :status)";
         $stmt = $pdo->prepare($booking_sql);
         $stmt->execute([
             'userId' => $userId,
@@ -519,6 +586,7 @@
             ':res_type' => $reservationType,
             ':pax_id' => $pax_id, 
             ':bill_id' => $bill_id,
+            ':adds' => $_SESSION['additionals'],
             ':status' => $status
         ]);
 
@@ -547,6 +615,7 @@
         unset($_SESSION['roomTotal']);
         unset($_SESSION['roomIds']);
         unset($_SESSION['payment_method']);
+        unset($_SESSION['additionals']);
         $ref_id = '';
         $balance = '';
         
@@ -562,6 +631,36 @@
     }
 
 ?>
+<div id="policy-modal" class="modal" style="display: none; position: fixed; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 9999;">
+    <div class="modal-content">
+        <h2><strong>Resort Policy and Regulations</strong></h2>
+        <p>Please read and agree to the terms and conditions before proceeding.</p>
+        <ul>
+            <li>1. Videoke use should be minimized after 10:00 PM.</li>
+            <li>2. Guests must shower before swimming and rinse off after swimming in the sea to avoid bringing sand into the pool.</li>
+            <li>3. Smoking is strictly prohibited in all rooms.</li>
+            <li>4. Slippers are not allowed in the pool area.</li>
+            <li>5. Eating or drinking is not permitted in the pool.</li>
+            <li>6. If the number of guests exceeds the expected maximum, a fine will be charged.</li>
+            <li>7. Any additional requests or services must be discussed with the administration to determine the prices.</li>
+        </ul>
+        <hr>
+        <h3><strong>Cancellation/Rebook/Refund Policy</strong></h3>
+        <ul>
+            <li>1. Payments for the chosen date are non-refundable. Choose your dates wisely.</li>
+            <li>2. Rebookings are one-time only</li>
+            <li>3. Rebookings are allowed only if requested before the day of the booking.</li>
+        </ul>
+        <div style="margin-top: 20px;">
+            <div class="d-flex justify-content-start">
+                <input type="checkbox" id="policy-check" class="me-1"> I agree to the terms and conditions. </input>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button id="proceed-button" class="btn btn-primary" disabled>I Agree</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
@@ -569,21 +668,21 @@
         <div class="row" style="justify-content:space-between;">
         <div class="bill-message" >
             <div class="qr">
-                <h2 class="section-header">Scan Here</h2>
+                <h2 class="section-header"><strong>Scan Here</strong></h2>
                 <div class="qrcode">
                     <img src="<?php
                     $paymentMethod = strtolower($_SESSION['payment_method']); // Convert to lowercase for consistency
 
-    if ($paymentMethod === 'gcash') {
-        echo "uploads/G_image.jpg";
-        // Additional logic for GCash
-    } elseif ($paymentMethod === 'paymaya') {
-        echo "uploads/P_image.jpg";
-        // Additional logic for PayMaya
-    } else {
-        echo "Unknown payment method in the session.";
-    }
-?>" alt="QRCode"/>
+                    if ($paymentMethod === 'gcash') {
+                        echo "uploads/qr/G_image.jpg";
+                        // Additional logic for GCash
+                    } elseif ($paymentMethod === 'paymaya') {
+                        echo "uploads/qr/P_image.jpg";
+                        // Additional logic for PayMaya
+                    } else {
+                        echo "Unknown payment method in the session.";
+                    }
+                ?>" alt="QRCode"/>
                 </div>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
                     <input type="file" name="image" accept="image/*">
@@ -594,7 +693,6 @@
                         placeholder="<?php 
                         if ($paymentMethod === 'gcash') {
                             echo "xxxx xxx xxxxxx";
-                            // Additional logic for GCash
                         } else {
                             echo "xxxxxxxxxx";
                         }?> " 
@@ -606,11 +704,11 @@
                 </form>
             </div>
             <div class="summary">
-                <h2>Instructions</h2>
-                <li>1.</li>
-                <li>2.</li>
-                <li>3.</li>
-                <li>4.</li>
+                <h2><strong>Instructions</strong></h2>
+                <li>1. Ensure the uploaded image is clear and legible.</li>
+                <li>2. The reference ID must match the payment details.</li>
+                <li>3. Only valid payment methods are accepted.</li>
+                <li>4. Any discrepancies may lead to delays.</li>
             </div>
         </div>
     </div>
@@ -624,6 +722,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+     // Display the modal on page load
+     window.onload = function() {
+        document.getElementById('policy-modal').style.display = 'block';
+    };
+
+    // Enable the proceed button when checkbox is checked
+    document.getElementById('policy-check').addEventListener('change', function() {
+        const proceedButton = document.getElementById('proceed-button');
+        proceedButton.disabled = !this.checked;
+    });
+
+    // Hide the modal and show main content when Proceed is clicked
+    document.getElementById('proceed-button').addEventListener('click', function() {
+        document.getElementById('policy-modal').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    });
 document.getElementById('hamburger').addEventListener('click', function() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('show');

@@ -43,12 +43,27 @@ if (isset($_POST["verify_email"])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(to bottom right, #006994, #00FFFF);
+            background: linear-gradient(190deg, #6592F3, #3B558D);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
         }
         .modal-content {
+            color: white;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: auto;
+        }
+        .btn{
+            background: #19315D;
+            border-color: #3B558D;
+        }
+        h6{
+            font-size: smaller;
         }
     </style>
 </head>
@@ -57,15 +72,16 @@ if (isset($_POST["verify_email"])) {
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
+                    <h3 class="modal-title" id="verificationModalLabel"><strong>Email Verification</strong></h3>
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="">
                         <div class="mb-3">
                             <input type="hidden" class="form-control" name="email" value="<?php echo $_GET['email']; ?>" required>
                         </div>
+                        <h6>If not found, check your <strong>All mail</strong> or <strong>Spam</strong></h6>
                         <div class="mb-3">
-                            <label for="verification_code" class="form-label">Verification Code</label>
+                            <label for="verification_code" class="form-label"><strong>Verification Code</strong></label>
                             <input type="text" class="form-control" id="verification_code" name="verification_code" placeholder="Enter verification code" required />
                         </div>
                         <input type="submit" class="btn btn-primary w-100" name="verify_email" value="Verify Email">

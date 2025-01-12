@@ -93,6 +93,23 @@
         td.highlight {
           background-color: rgba(var(--dt-row-hover), 0.052) !important;
         }
+        .modal-mobile, .modal-mobile-remove{
+          background-color: #d6d6d6;
+          padding-block: 5px;
+        }
+        .modal-mobile-add{
+          background-color: transparent;
+        }
+        #proofpicture {
+          max-width: 419px;
+          max-height: 900px;
+          overflow: hidden;
+        }
+        #proofpicture img{
+          width: 100%; /* Make the image responsive to the container's width */
+          height: auto; /* Maintain the aspect ratio */
+          object-fit: contain;
+        }
 
         @media (max-width: 768px) {
             #main-content {
@@ -110,7 +127,19 @@
                 font-size: 0.8rem;
                 padding: 0.5rem;
             }
-        }
+            .modal-dialog {
+              max-width: 90vw;
+            }
+            .modal-mobile, .modal-mobile-remove{
+              padding-block: 2px;
+            }
+            .modal-mobile-remove{
+              background-color: transparent;
+            }
+            .modal-mobile-add{
+              background-color: #d6d6d6;
+            }
+      }
     </style>
 </head>
 
@@ -119,7 +148,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+      <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -127,8 +156,8 @@
             <a href="index1.php" class="nav-link text-white">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white active">My Reservations</a></li>
-        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
-        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white target">Notification </a></li>
+        <li><a href="chats.php" class="nav-link text-white chat">Chat with Lanmar</a></li>
         <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
@@ -197,7 +226,7 @@
                 <tbody>
                 <?php if(!empty($results)): ?>
                 <?php foreach ($results as $row): ?>
-                    <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" 
+                    <tr class="table-row" id="triggerElement" data-bs-toggle="modal" data-bs-target="#reservationModal" 
                     data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
 
                         <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
@@ -228,6 +257,10 @@
                               $class = "cancel";
                               $textstatus = "Cancelled";
                               break;
+                          case "Rejected":
+                            $class = "cancel";
+                            $textstatus = "Rejected";
+                            break;
                           case "Completed":
                               $class = "completed";
                               $textstatus = "Completed";
@@ -265,17 +298,17 @@
         </div>
 
         <!-- Personal Information Section -->
-        <div class="mb-4">
+        <div class="mb-2">
           <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
+          <div class="row g-2">
+            <div class="col-12 col-md-4 modal-mobile">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 modal-mobile-remove">
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Gender:</strong> Female</p>
+            <div class="col-12 col-md-4 modal-mobile">
+              <p><strong>Gender:</strong> <span id="modalGender"></span></p>
             </div>
           </div>
         </div>
@@ -283,14 +316,14 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-5">
+          <div class="row g-2 mb-2" >
+            <div class="col-12 col-md-5 modal-mobile">
               <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 modal-mobile-remove">
               <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-3 modal-mobile">
               <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
             </div>
           </div>
@@ -304,11 +337,11 @@
             <div class="col-4 col-md-3">
               <p><strong>PWD:</strong> <span id="modalPwd"></span></p>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-3 modal-mobile-add">
               <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
+          <div class="row g-2 mb-2 modal-mobile-remove">
             <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
@@ -329,14 +362,14 @@
         <!-- Payment Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
+          <div class="row g-2 mb-2">
+            <div class="col-12 col-md-4 modal-mobile">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-6 col-md-4 modal-mobile-remove">
               <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></span></p>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-6 col-md-4 modal-mobile-remove">
               <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></span></p>
             </div>
           </div>
@@ -345,9 +378,11 @@
                 <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
                 </div>
                 <div class="col-6 col-md-4">
-                    <div id="modalProof"></div>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
+                    View Proof
+                </button>
                 </div>  
-            </div>     
+          </div>     
         </div>
       </div>
       <div class="modal-footer d-flex justify-content-end">
@@ -356,7 +391,8 @@
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
 
-            <button type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+            <!-- Edit Button -->
+            <button id="editButton" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
             </button>
 
@@ -366,6 +402,20 @@
             </button>
         </div>
 
+    </div>
+  </div>
+</div>
+<!-- Modal for Viewing GCash Receipt (Nested Modal) -->
+<div class="modal" id="gcashReceiptModal" tabindex="-1" aria-labelledby="gcashReceiptModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg " id="proofpicture">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="gcashReceiptModalLabel">Proof of Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-IMAGE">
+        <!-- Image will be dynamically inserted here -->
+      </div>
     </div>
   </div>
 </div>
@@ -392,6 +442,11 @@ document.getElementById('hamburger').addEventListener('click', function() {
   const mainContent = document.getElementById('main-content');
   mainContent.classList.toggle('shifted');
   });
+
+  document.getElementById('reservationModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById('modalBookingId').focus();
+  });
+
 document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('booking_id');
@@ -409,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modalBookingId').textContent = data.bookingId;
                 document.getElementById('modalName').textContent = data.name;
                 document.getElementById('modalContact').textContent = data.contact;
+                document.getElementById('modalGender').textContent = data.gender;
                 document.getElementById('modalDateRange').textContent = data.dateRange;
                 document.getElementById('modalTimeRange').textContent = data.timeRange;
                 document.getElementById('modalHours').textContent = data.hours;
@@ -435,8 +491,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modalTotalBill').textContent = data.totalBill;
                 document.getElementById('modalBalance').textContent = data.balance;
                 document.getElementById('modalrefNum').textContent = data.refNumber;
-                const modalBody = document.getElementById('modalProof');
-                modalBody.innerHTML = `<a href="${data.imageProof}" target="_blank">View image</a>`;
+                const modalBody = document.getElementById('modal-IMAGE');
+                modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
+
+                const chatButton = document.querySelector('.modal-footer .btn:nth-child(1)');
+                const editButton = document.querySelector('.modal-footer .btn:nth-child(2)');
+                const cancelButton = document.querySelector('#cancelButton');
+
+                console.log(data.status);
+                switch (data.status) {
+                    case 'Pending':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Cancellation1':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Cancellation2':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Rejected':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Cancelled':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Completed':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Approved':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'block';
+                      cancelButton.style.display = 'block';
+                      break; // All buttons remain visible
+                }
 
                 // Show the modal
                 $('#reservationModal').modal('show');
@@ -444,6 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => console.error('Error fetching data:', error));
         }
     });
+
 document.addEventListener('DOMContentLoaded', () => {
   const tableIndex = new DataTable('#example', {
         columnDefs: [
@@ -471,17 +571,51 @@ document.addEventListener('DOMContentLoaded', () => {
          .nodes()
          .each((el) => el.classList.add('highlight'));
  });
- document.getElementById('hamburger').addEventListener('click', function() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('show');
-    
-    const navbar = document.querySelector('.navbar');
-    navbar.classList.toggle('shifted');
-    
-    const mainContent = document.getElementById('main-content');
-    mainContent.classList.toggle('shifted');
 });
-});
+
+$(document).ready(function() {
+        function updateNotificationCount() {
+            $.ajax({
+                url: 'notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        function updateChatPopup() {
+            $.ajax({
+                url: 'chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+          
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
+    });
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -510,6 +644,7 @@ let bookingIds;
                     document.getElementById('modalBookingId').textContent = data.bookingId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
+                    document.getElementById('modalGender').textContent = data.gender;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;
@@ -536,10 +671,51 @@ let bookingIds;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
                     document.getElementById('modalrefNum').textContent = data.refNumber;
-                    const modalBody = document.getElementById('modalProof');
-                    modalBody.innerHTML = `
-                    <a href="${data.imageProof}" target="_blank">View image</a>
-                    `
+                    const modalBody = document.getElementById('modal-IMAGE');
+                    modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
+                    const chatButton = document.querySelector('.modal-footer .btn:nth-child(1)');
+
+                const editButton = document.querySelector('#editButton');
+                const cancelButton = document.querySelector('#cancelButton');
+
+                console.log(data.status);
+                switch (data.status) {
+                    case 'Pending':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Cancellation1':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Cancellation2':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'block';
+                      break;
+                    case 'Rejected':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Cancelled':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Completed':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'none';
+                      cancelButton.style.display = 'none';
+                      break;
+                    case 'Approved':
+                      chatButton.style.display = 'block';
+                      editButton.style.display = 'block';
+                      cancelButton.style.display = 'block';
+                      break; // All buttons remain visible
+                }
 
                     // Show the modal
                     $('#reservationModal').modal('show');
@@ -547,6 +723,23 @@ let bookingIds;
                 .catch(error => console.error('Error fetching data:', error));
         }
     });
+    const viewReceiptButton = document.getElementById('modalProof');
+    if (viewReceiptButton) {
+        viewReceiptButton.addEventListener('click', function () {
+            // Check if the modal exists before opening
+            const gcashModal = document.getElementById('gcashReceiptModal');
+            const modal = new bootstrap.Modal(gcashModal);
+            modal.show();
+        });
+    }
+    // Add event listener for closing the GCash Receipt modal and show Reservation modal
+  const gcashModal = document.getElementById('gcashReceiptModal');
+  if (gcashModal) {
+      gcashModal.addEventListener('hidden.bs.modal', function () {
+          const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+          reservationModal.show();
+      });
+  }
 
     function cancelBooking() {
     if (bookingIds) { // Make sure bookingId is set
@@ -555,7 +748,15 @@ let bookingIds;
     } else {
         console.log("No bookingId found!");
     }
-}
+    }
+    function editBooking() {
+        if (bookingIds) { // Make sure bookingId is set
+            window.location.href = `my-edit-reservation.php?id=${bookingIds}`;
+        } else {
+            console.log("No bookingId found!");
+        }
+    }
+    document.getElementById('editButton').addEventListener('click', editBooking);
 document.getElementById('cancelButton').addEventListener('click', cancelBooking);
 
 });

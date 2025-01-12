@@ -1,4 +1,5 @@
 <?php 
+    date_default_timezone_set('Asia/Manila'); 
     try {
         $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -41,9 +42,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -165,6 +164,9 @@
         background-color: #dc3545;
         border-radius: 50%;
     }
+    #sidebar .badge-notif, #sidebar {
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+    }
 
     @media (max-width: 768px) {
         #main-content{
@@ -174,7 +176,7 @@
             max-width: 100%;
         }
         .notification-card {
-                width: calc(50% - 20px);
+            width: calc(50% - 20px);
         }
         
     }
@@ -191,7 +193,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+      <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -199,8 +201,8 @@
             <a href="index1.php" class="nav-link text-white">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
-        <li><a href="my-notification.php" class="nav-link text-white active">Notification</a></li>
-        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white target active">Notification </a></li>
+        <li><a href="chats.php" class="nav-link text-white chat">Chat with Lanmar</a></li>
         <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
@@ -235,8 +237,11 @@
                         FROM notification_tbl n
                         JOIN booking_tbl b ON n.booking_id = b.booking_id
                         JOIN users u ON b.user_id = u.user_id
-                        WHERE n.is_read_user = 0 AND n.status = :status AND b.user_id = :userId
-                        ORDER BY n.timestamp DESC";
+                        WHERE n.is_read_user = 0 
+                        AND n.status = :status 
+                        AND b.user_id = :userId
+                        ORDER BY n.timestamp DESC
+                        ";
                 $query = $pdo->prepare($sql);
                 $query->execute(['status' => $status, 'userId' => $userId]);
                 $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -259,7 +264,7 @@
                 </div>
                 <div class="buttons-container">
                     <button class="btn btn-primary btn-sm view-button" data-booking-id="<?php echo htmlspecialchars($bookingId); ?>">View</button>
-                    <button class="btn btn-secondary btn-sm" onclick="markAsRead(<?php echo $notificationId; ?>, 'admin')">Mark as Read</button>
+                    <button class="btn btn-secondary btn-sm" onclick="markAsRead(<?php echo $notificationId; ?>, 'user')">Mark as Read</button>
                 </div>
             </div>
             <span class="dot-indicator"></span>
@@ -303,16 +308,60 @@
         document.querySelector('.notification-container').addEventListener('click', function (event) {
             if (event.target && event.target.classList.contains('view-button')) {
                 const bookingId = event.target.dataset.bookingId;
-                window.location.href = `my-reservation.php?booking_id=${bookingId}`;
+                window.location.href = `my-reservation.php`;
             }
         });
 
         document.querySelector('.notification-container.read').addEventListener('click', function (event) {
             if (event.target && event.target.classList.contains('view-button')) {
                 const bookingId = event.target.dataset.bookingId;
-                window.location.href = `my-reservation.php?booking_id=${bookingId}`;                
+                window.location.href = `my-reservation.php`;                
             }
         });
+    });
+
+    $(document).ready(function() {
+        function updateNotificationCount() {
+            $.ajax({
+                url: 'notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        function updateChatPopup() {
+            $.ajax({
+                url: 'chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+          
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
     });
 
     function markAsRead(notificationId, role) {

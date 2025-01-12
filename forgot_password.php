@@ -67,30 +67,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(to bottom right, #006994, #00FFFF);
+            background: linear-gradient(190deg, #6592F3, #3B558D);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: Arial, sans-serif;
         }
         .login-container {
-            background-color: white;
+            color: white;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: auto;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h2 class="text-center mb-4">Enter Email to Reset the Password</h2>
+        <h4 class="text-center mb-4">Enter Email to Reset the Password</h4>
         <form method="POST" action="">
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
             </div>
-            <input type="submit" class="btn btn-primary w-100" name="submit" value="submit">
+            <input type="submit" class="btn btn-primary w-100" name="submit" value="Submit">
         </form>
     </div>
 </body>

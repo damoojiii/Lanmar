@@ -12,7 +12,7 @@ $gallery_success_message = "";
 $gallery_error_message = "";
 
 // Define the target directory for uploads
-$targetDir = "uploads/"; 
+$targetDir = "uploads/qr/"; 
 
 // Error reporting for debugging
 error_reporting(E_ALL);
@@ -21,7 +21,7 @@ ini_set('display_errors', 1);
 // Handle background image upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage'])) {
     $image = $_FILES['QRimage'];
-    $targetDir = "uploads/"; // Set your target directory here
+    $targetDir = "uploads/qr/"; // Set your target directory here
     $imageName = "G_image.jpg"; // Fixed identifier name for the uploaded file
     $targetFilePath = $targetDir . $imageName;
 
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage'])) {
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
     $image = $_FILES['QRimage1'];
-    $targetDir = "uploads/"; // Set your target directory here
+    $targetDir = "uploads/qr/"; // Set your target directory here
     $imageName = "P_image.jpg"; // Fixed identifier name for the uploaded file
     $targetFilePath = $targetDir . $imageName;
 
@@ -501,7 +501,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
                     </a>
                     <a href="homepage_section6.php">
                         <div class="tab" id="facilityInfoTab">
-                            Update QR codes
+                            Booking Processes
                         </div>
                     </a>
                 </div>

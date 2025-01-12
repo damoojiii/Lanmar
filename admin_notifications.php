@@ -1,4 +1,5 @@
 <?php
+    date_default_timezone_set('Asia/Manila'); 
     try {
         $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -559,7 +560,7 @@
             <h2><strong>New Reservation(s)</strong></h2>
             <div class="notification-container">
             <?php 
-                $sql = "SELECT n.notification_id, n.booking_id, n.status, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, b.status, 
+                $sql = "SELECT n.notification_id, n.booking_id, n.is_read_admin, n.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout, b.status, 
                         u.user_id, 
                         u.firstname, 
                         u.lastname
@@ -570,7 +571,7 @@
                     JOIN 
                         users u ON b.user_id = u.user_id
                     WHERE 
-                        n.is_read_admin = 0 AND b.status = 'Pending'
+                        n.is_read_admin = 0 AND (b.status = 'Pending' OR (n.status = 5 AND b.status = 'Approved'))
                     ORDER BY 
                         n.timestamp DESC
                     ";
@@ -584,6 +585,11 @@
                         $dateOut = date('F j, Y', strtotime($notification['dateOut']));
 
                         $dateDisplay = ($dateIn === $dateOut) ? $dateIn : "$dateIn - $dateOut";
+                        if($notification['status'] === 'Pending'){
+                            $display = 'New';
+                        }else{
+                            $display = 'Rebooked';
+                        }
 
                         $checkinTime = date('h:i A', strtotime($notification['checkin']));
                         $checkoutTime = date('h:i A', strtotime($notification['checkout']));
@@ -593,7 +599,7 @@
 
                 <!-- Notification Card -->
                 <div class="notification-card new " data-notification-id="<?php echo $notification['notification_id']; ?>">
-                    <span class="badge-new">New</span>
+                    <span class="badge-new"><?php echo $display; ?></span>
                     <div class="notification-content">
                         <p><strong>From <?php echo  htmlspecialchars($fullName); ?></strong></p>
                         <p>Date & Time: <br><?php echo  $dateDisplay . ' ' . $checkinTime.'-'.$checkoutTime; ?></p>

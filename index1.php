@@ -8,7 +8,37 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
-    $userId = $_SESSION['user_id']; 
+    $userId = $_SESSION['user_id'];
+    $preDateIn = $_SESSION['preDateIn'] ?? ''; 
+    $preDateOut = $_SESSION['preDateOut'] ?? ''; 
+
+    unset($_SESSION['dateIn']);
+    unset($_SESSION['dateOut']);
+    unset($_SESSION['checkin']);
+    unset($_SESSION['checkout']);
+    unset($_SESSION['numhours']);
+    unset($_SESSION['adult']);
+    unset($_SESSION['child']);
+    unset($_SESSION['pwd']);
+    unset($_SESSION['totalpax']);
+    unset($_SESSION['reservationType']);
+    unset($_SESSION['rate']);
+    unset($_SESSION['grandTotal']);
+    unset($_SESSION['roomTotal']);
+    unset($_SESSION['roomIds']);
+
+    $query = "SELECT COUNT(*) as completed_count FROM booking_tbl WHERE user_id = :user_id AND status = 'Completed'";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $completedCount = $row['completed_count'];
+
+    if ($completedCount === 1) {
+        echo "<script>var showModal = true;</script>";
+    } else {
+        echo "<script>var showModal = false;</script>";
+    }
 
     $sql = "SELECT dateIn, dateOut 
             FROM `booking_tbl` 
@@ -218,6 +248,9 @@
             background-color: #00214b;
             color: white;
         }
+        .modal-dialog{
+          margin: 15% auto;
+        }
 
         @media (max-width: 768px) {
             #sidebar {
@@ -280,6 +313,10 @@
             .calendar{
                 margin-inline: 5px;
             }
+            .modal-dialog{
+              margin-top: 300px;
+              margin-inline: 5%;
+            }
 
         }
         @media (max-width: 430px) {
@@ -296,6 +333,10 @@
                 flex-direction: row;
                 gap: 1rem;
             }
+            .modal-dialog{
+              margin-top: 250px;
+              margin-inline: 6%;
+            }
 
         }
     </style>
@@ -307,7 +348,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+      <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -315,8 +356,8 @@
             <a href="index1.php" class="nav-link text-white active">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
-        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
-        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white target">Notification </a></li>
+        <li><a href="chats.php" class="nav-link text-white chat">Chat with Lanmar</a></li>
         <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
@@ -364,12 +405,12 @@
             <!-- Check-in Date -->
             <div class="col-md-3 mb-3">
                 <label for="date-in" class="form-label">Check-in Date:</label>
-                <input id="date-in" class="form-control" type="text" placeholder="Select a date" name="dateIn" readonly required>
+                <input id="date-in" class="form-control" type="text" placeholder="Select a date" value="<?php echo $preDateIn;?>" name="dateIn" readonly required>
             </div>
             <!-- Check-out Date -->
             <div class="col-md-3 mb-3">
                 <label for="date-out" class="form-label">Check-out Date:</label>
-                <input id="date-out" class="form-control" type="text" placeholder="Select check-out date" name="dateOut" readonly required>
+                <input id="date-out" class="form-control" type="text" placeholder="Select check-out date" value="<?php echo $preDateOut;?>" name="dateOut" readonly required>
             </div>
             <!-- Check-In Time -->
             <div class="col-md-2 mb-3">
@@ -439,6 +480,26 @@
     </form>
 </div>
 
+
+<!-- Modal Structure -->
+<div id="thankYouModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thank You!</h5>
+      </div>
+      <div class="modal-body">
+        <p>Thank you for visiting our resort! <br><br>
+        We hope you had a great experience. You can submit a feedback to tell your experience about our resort.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="rateUs()">Rate Us</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -465,9 +526,63 @@
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (showModal) {
+        $('#thankYouModal').modal('show');
+    }
+});
+
+function rateUs() {
+    window.location.href = 'my-feedback.php';
+}
+
+$(document).ready(function() {
+        function updateNotificationCount() {
+            $.ajax({
+                url: 'notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        function updateChatPopup() {
+            $.ajax({
+                url: 'chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+          
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
+    });
 </script>
 <script>
-    console.log('Script loaded');
+
 
 let fp = '';
 let fp1 = '';
@@ -573,6 +688,18 @@ function hasPreviousDaySpillover(date) {
   if (bookedTimeSlots[formattedPrevDate]) {
     return bookedTimeSlots[formattedPrevDate].some(slot => {
       const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      return slotEndHour < earliestTime; // Spillover to the next day if the checkout is before 6 AM
+    });
+  }
+  return false;
+}
+function hasNextDaySpillover(date) {
+  const prevDate = new Date(date);
+  const formattedPrevDate = prevDate.toISOString().split('T')[0];
+
+  if (bookedTimeSlots[formattedPrevDate]) {
+    return bookedTimeSlots[formattedPrevDate].some(slot => {
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
       return slotEndHour > earliestTime; // Spillover to the next day if the checkout is before 6 AM
     });
   }
@@ -587,7 +714,8 @@ function isTimeAvailable(date, time) {
       
       const slotStart = slotStartHour * 60 + slotStartMin;  
       const slotEnd = slotEndHour * 60 + slotEndMin;        
-      const currentTime = time * 60;                        
+      const currentTime = time * 60;          
+      
       // If the current time is within a blocked slot
       if (currentTime >= slotStart && currentTime <= slotEnd) {
         return false;  // Time is blocked
@@ -670,7 +798,7 @@ function isTimeAvailableForCheckIn(date, time) {
 
 function isTimeAvailableForCheckOut(date, time) {
   // Allow spillover times from previous bookings
-  return isTimeAvailable(date, time) || hasPreviousDaySpillover(date);
+  return isTimeAvailable(date, time) || (hasPreviousDaySpillover(date) || hasNextDaySpillover(date));
 }
 
 function isDateFullyBookedForCheckIn(dateStr) {
@@ -737,7 +865,6 @@ function updateDisabledDates(selectedCheckInDate) {
 
   // Find the maximum check-out date
   const maxCheckOutDate = findFirstFullyBookedDate(selectedCheckInDate);
-  console.log(maxCheckOutDate);
 
   // Update flatpickr options for both #date-in and #date-out
   fp.set('disable', disabledDates.checkIn);
@@ -764,7 +891,7 @@ function formatDate(date) {
 }
 
 // Fetch booked time slots from the server
-fetch(`fetch-booking.php?startDate=${formattedToday}`)
+fetch(`fetch-booking-user.php`)
     .then(response => response.json())
     .then(bookings => {
       bookings.forEach(booking => {
@@ -775,7 +902,7 @@ fetch(`fetch-booking.php?startDate=${formattedToday}`)
         
         // Calculate the cleanup end time by adding 2 hours to the checkout time
         const endTime = new Date(`${dateOut} ${checkout}`);
-        const cleanupEndTime = new Date(endTime.getTime() + (2 * 60 * 60 * 1000) - (1 * 60 * 1000)); // Add 2 hours and subtract 1 minute
+        const cleanupEndTime = new Date(endTime.getTime() + (cleanupTime * 60 * 60 * 1000) - (1 * 60 * 1000)); // Add 2 hours and subtract 1 minute
     
         // If dateIn and dateOut are the same
         if (dateIn === dateOut) {
@@ -832,7 +959,6 @@ fetch(`fetch-booking.php?startDate=${formattedToday}`)
         }
     });
         
-        console.log(bookedTimeSlots);
         // Initialize flatpickr after booking data is fetched
         initializeFlatpickr();
         // Disable Dates
@@ -875,8 +1001,6 @@ function populateCheckInTimes(checkInDate, checkOutDate) {
   if(checkInDate !== checkOutDate){
     maxCheckInTime = isNextDayBookingAffectingCheckIn();
   }
-  
-  console.log(maxCheckInTime);
 
   checkInTimeSelect.innerHTML = `<option value="" hidden selected>Select check-in time</option>`;
 
@@ -972,8 +1096,6 @@ function calculateTotalHours() {
 
   const checkInDateTime = new Date(checkInDate);
   checkInDateTime.setHours(checkInHours, checkInMinutes, 0, 0); // Set hours and minutes for check-in
-  
-  console.log(checkInDateTime);
 
   const checkOutDateTime = new Date(checkOutDate);
   checkOutDateTime.setHours(checkOutHours, checkOutMinutes, 0, 0); // Set hours and minutes for check-out
@@ -1069,9 +1191,6 @@ const months = [
 ];
 
 function renderCalendar() {
-    console.log("Entering renderCalendar function");
-    console.log(userBookings);
-
     today.setDate(1); // Set the date to the first of the month
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
@@ -1091,7 +1210,7 @@ function renderCalendar() {
     }
 
     for (let i = 1; i <= lastDayDate; i++) {
-        const today = new Date().fp_incr(1);
+        const today = new Date();
         const currentDate = new Date(currentYear, currentMonth, i);
         const currentDateString = currentDate.toISOString().split('T')[0];
 

@@ -9,6 +9,8 @@
     include "role_access.php";
     checkAccess('user');
     $userId = $_SESSION['user_id'];
+    unset($_SESSION['preDateIn']);
+    unset($_SESSION['preDateOut']);
 
     if (isset($_GET['continue'])) {
         $_SESSION['dateIn'] = $_GET['dateIn'];
@@ -22,7 +24,7 @@
         echo '<script>
                     window.location="/lanmar/index1.php"; 
          </script>';
-    }
+    } 
 ?>
 
 <!DOCTYPE html>
@@ -391,7 +393,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+      <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -399,8 +401,8 @@
             <a href="index1.php" class="nav-link text-white active">Book Here</a>
         </li>
         <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
-        <li><a href="my-notification.php" class="nav-link text-white">Notification</a></li>
-        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white target">Notification </a></li>
+        <li><a href="chats.php" class="nav-link text-white chat">Chat with Lanmar</a></li>
         <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
@@ -463,6 +465,7 @@
     $rate = $rateQuery->fetchColumn();
 
     $_SESSION['rate'] = $rate;
+    $_SESSION['original'] = $rate;
     
     $dateInDisplay = date("F j, Y" , strtotime($dateIn));
     $dateOutDisplay = date("F j, Y" , strtotime($dateOut));
@@ -477,6 +480,7 @@
         $_SESSION['reservationType'] = $_GET['reservationType'];
 
         $totalpax = (int)$_SESSION['adult'] + (int)$_SESSION['child'] + (int)$_SESSION['pwd'];
+        //if($totalpax >= 10 && $totalpax <= 15 && )
         $_SESSION['totalpax'] = $totalpax;
 
         $adult = $_SESSION['adult'] ?? 0;
@@ -492,7 +496,7 @@
             $extraRateQuery->execute();
             $additionalCharge = $extraRateQuery->fetchColumn() * $extraAdultCount;
         }
-
+        $_SESSION['additionalCharge'] = $additionalCharge;
         $_SESSION['rate'] = $rate + $additionalCharge;
 
         // Load rooms based on pax capacity
@@ -610,16 +614,20 @@
                     
             <div class="col-md-6 p-3 summary collapse" id="bookingSummary">
                 <button class="btn btn-link expand-summary" type="button" onclick="toggleSummary()">View Booking Summary</button>
-                <form action="booking-process2.php" method="$_GET" id="secondForm">
+                <form action="booking-process2.php" method="POST" id="secondForm">
                     <div class="section-header">Booking Summary</div>
 
                     <div class="bg-light p-3 rounded mb-3">
                         <div class="d-flex justify-content-between">
                             <div>
                                 <p><strong>Date:</strong> <span id="date-input"><?php echo "$dateInDisplay to $dateOutDisplay";?></span></p>
+                                <input type="hidden" id="date-in" value="<?php echo $dateIn;?>">
+                                <input type="hidden" id="date-out" value="<?php echo $dateOut;?>">
+                                <input type="hidden" id="check-in" value="<?php echo $checkin;?>">
+                                <input type="hidden" id="check-out" value="<?php echo $checkout;?>">
                                 <p><strong>Time:</strong> <span id="time-input"><?php echo "$checkinDisplay to $checkoutDisplay";?></span></p>
                                 <p><strong>Total of Hours:</strong> <span id="hour-input"><?php echo $numhours;?></span></p>
-                                <p><strong>No. of Pax:</strong> <span id="total-pax"><?php echo $totalpax; ?></span></p>
+                                <p><strong>No. of Pax:</strong> <span id="total-pax">0</span></p>
                                 <p><strong>Reservation Type:</strong> <span id="reservation-type">
                                     <?php 
                                         $reservationTypeId = $_SESSION['reservationType'] ?? null;
@@ -657,7 +665,7 @@
                     <table class="w-100 text-light table-summary">
                         <tr>
                             <td>Rate:</td>
-                            <td class="text-end" id="rate">PHP <?php echo number_format($_SESSION['rate'] ?? 0); ?></td>
+                            <td class="text-end" id="rate"></td>
                         </tr>
                         <tr>
                             <td>Room:</td>
@@ -665,13 +673,16 @@
                         </tr>
                         <tr>
                             <td><strong>Total:</strong></td>
-                            <td class="text-end"><strong id="grand-total">PHP <?php echo number_format($_SESSION['rate'] ?? 0);?></strong></td>
+                            <td class="text-end"><strong id="grand-total"></strong></td>
                         </tr>
                     </table>
-
+                    <input type="hidden" name="base_rate" value="">
+                    <input type="hidden" name="extra_adult_rate" value="">
+                    <input type="hidden" name="additional_rate" value="">
                     <input type="hidden" name="reservationType" value="<?php echo htmlspecialchars($reservationType); ?>">
                     <input type="hidden" name="grandTotal" id="grandTotal">
                     <input type="hidden" name="roomTotal" id="roomTotal">
+                    <input type="hidden" name="paxcharges" id="paxcharges" value="">
                     <div id="response-container"></div>
 
                     <button id="Continue" name="continue" type="submit" class="btn btn-primary w-100 mt-3" >Continue</button>
@@ -719,13 +730,137 @@ function toggleSummary() {
         expandButton.textContent = 'View Booking Summary';
     }
 }
-
-$('input[name="adults"], input[name="children"], input[name="pwd"]').on('input', function() {
-        let value = $(this).val();
-        if (value.length > 2) {
-            $(this).val(value.slice(0, 2)); // Limit to 2 digits
+$(document).ready(function() {
+        function updateNotificationCount() {
+            $.ajax({
+                url: 'notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
         }
-});
+        function updateChatPopup() {
+            $.ajax({
+                url: 'chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+          
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
+    });
+
+    $(document).ready(function() {
+        $('input[name="adults"], input[name="children"], input[name="pwd"]').on('input', function() {
+            let value = $(this).val();
+            if (value.length > 2) {
+                $(this).val(value.slice(0, 2)); // Limit to 2 digits
+            }
+        });
+
+        function fetchBaseRate() {
+            const dateIn = $('#date-in').val();
+            const dateOut = $('#date-out').val();
+            const checkOut = $('#check-out').val();
+            let adults = parseInt($('input[name="adults"]').val()) || 0;
+            let totalPax = adults;
+
+            if (dateIn && dateOut) {
+                $.ajax({
+                    url: 'fetch_rate_user.php',
+                    type: 'POST',
+                    data: { dateIn: dateIn, dateOut: dateOut, checkOut: checkOut, totalPax: totalPax },
+                    success: function(response) {
+                        let result = JSON.parse(response);
+                        let baseRate = result.baseRate;
+                        let extraAdultRate = result.extraAdultRate;
+                        let additional = result.additional;
+
+                        $('input[name="base_rate"]').val(baseRate);
+                        $('input[name="extra_adult_rate"]').val(extraAdultRate);
+                        $('input[name="additional_rate"]').val(additional);
+                        
+                        recomputeTotalBill(); // Recompute total bill with new rates
+                    }
+                });
+            }
+        }
+
+        function recomputeTotalBill() {
+            let offeredCount = 0;
+            let baseRate = parseInt($('input[name="base_rate"]').val()) || 0;
+            let extraAdultRate = parseInt($('input[name="extra_adult_rate"]').val()) || 0;
+            let adults = parseInt($('input[name="adults"]').val()) || 0;
+            let children = parseInt($('input[name="children"]').val()) || 0;
+            let pwd = parseInt($('input[name="pwd"]').val()) || 0;
+
+            let totalPax = adults + children + pwd;
+            let extraAdults = Math.max(0, adults - 10);
+            let additionalCharge = extraAdults * extraAdultRate;
+
+            // Get the date-in and date-out values
+            let dateIn = $('#date-in').val();
+            let dateOut = $('#date-out').val();
+            let isOvernight = dateIn !== dateOut;
+
+            // Total room price calculation
+            let totalRoomPrice = 0;
+            let freeRoomApplied = false; // Track if free room discount has been applied
+
+            $('.room-item').each(function() {
+                let roomPrice = parseInt($(this).data('price')) || 0;
+                const offered = parseInt($(this).data('isOffered')) || 0;
+
+                if (isOvernight && offered === 1 && !freeRoomApplied) {
+                    freeRoomApplied = true; // Apply free room discount only once
+                } else {
+                    totalRoomPrice += roomPrice;
+                }
+            });
+    
+            // Total bill calculation including base rate and additional charges
+            console.log(baseRate, additionalCharge, totalRoomPrice);
+            let totalBill = baseRate + additionalCharge + totalRoomPrice;
+            let original = baseRate + additionalCharge;
+            
+            $('#grand-total').val(totalBill);
+            $('#grand-total').text('PHP ' + totalBill.toLocaleString());
+            $('#rate').text('PHP ' + original.toLocaleString());
+            $('#total-pax').text(totalPax);
+            $('#paxcharges').val(additionalCharge);
+        }
+
+        $('input[name="adults"], input[name="children"], input[name="pwd"]').on('input', function() {
+            fetchBaseRate();
+            recomputeTotalBill();
+        });
+
+        fetchBaseRate();
+    });
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -878,7 +1013,7 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
 
     // Create the room summary 
     const roomSummary = document.createElement('div');
-    roomSummary.classList.add('p-3', 'mb-2', 'bg-light', 'text-dark', 'd-flex', 'justify-content-between', 'align-items-start', 'rounded');
+    roomSummary.classList.add('p-3', 'mb-2', 'bg-light', 'text-dark', 'd-flex', 'justify-content-between', 'align-items-start', 'rounded', 'room-item');
     roomSummary.id = `room-${roomId}`;
     
     // Create the remove button
@@ -891,6 +1026,10 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
 
     if (isOffered === 1) {
         roomSummary.dataset.isOffered = '1';
+        roomSummary.dataset.price = price;
+    }else if(isOffered === 0){
+        roomSummary.dataset.isOffered = '0';
+        roomSummary.dataset.price = price;
     }
     
     // Add content to room summary
@@ -903,7 +1042,6 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
     roomSummary.appendChild(removeButton);
     bookedRoomsContainer.appendChild(roomSummary);
 
-    updateRemoveButtons();
     addRoomIdToForm(roomId);
 
     if (rateType === '2') {
@@ -946,27 +1084,33 @@ function removeRoomIdFromForm(roomId) {
 
 function updateRemoveButtons() {
     const bookedRoomsContainer = document.getElementById('booked-rooms');
-    const allRooms = Array.from(bookedRoomsContainer.children);
+    const allRooms = Array.from(bookedRoomsContainer.querySelectorAll('.room-item'));
     const offeredRooms = allRooms.filter(room => room.dataset.isOffered === '1');
+    let countOffered = 0;
 
-    console.log("Total rooms:", allRooms.length);
-    console.log("Total is_offered rooms:", offeredRooms.length);
+    allRooms.forEach(room => {
+        const isOffered = parseInt(room.dataset.isOffered) || 0;
+        if (isOffered === 1) {
+            countOffered++;
+        }
+    });
+
 
     if (rateType === '2') {
         allRooms.forEach(room => {
             const removeButton = room.querySelector('button');
+            const offered = parseInt(room.dataset.offered) || 0;
 
             // Check if the removeButton exists
             if (!removeButton) {
                 console.warn(`No remove button found for room: ${room.id}`);
                 return;
             }
-
-            const isOffered = room.dataset.isOffered === '1';
-
-            if (offeredRooms.length === 1 && isOffered) {
+            console.log((countOffered === 1 || countOffered === 0) && allRooms.length === 1, countOffered, allRooms.length);
+            if ((countOffered === 1 || countOffered === 0) && allRooms.length === 1) {
                 removeButton.onclick = () => alert("You need at least one of the offered room for overnight stays.");
             } else {
+                console.log('pumasok');
                 removeButton.onclick = () => removeRoom(room.id.replace('room-', ''), parseFloat(room.querySelector('p').textContent.match(/PHP (\d+)/)?.[1] || 0));
             }
         });
@@ -975,12 +1119,27 @@ function updateRemoveButtons() {
 
 // Function to remove room from the summary
 function removeRoom(roomId, price) {
-    const roomElement = document.getElementById(`room-${roomId}`);
     const bookedRoomsContainer = document.getElementById('booked-rooms');
     const noRoomsMessage = document.getElementById('no-rooms-message');
+    const allRooms = Array.from(bookedRoomsContainer.querySelectorAll('.room-item')); // Move this line up
+    const roomElement = document.getElementById(`room-${roomId}`);
+    let countOffered = 0;
 
-    if (roomElement) {
-        roomElement.remove();    
+    allRooms.forEach(room => {
+        const isOffered = parseInt(room.dataset.isOffered) || 0;
+        if (isOffered === 1) {
+            countOffered++;
+        }
+    });
+
+    const dateIn = document.getElementById('date-in').value;
+    const dateOut = document.getElementById('date-out').value;
+    const isOvernight = dateIn !== dateOut;
+
+    if (allRooms.length === 1 && (countOffered === 1 || countOffered === 0) && isOvernight) {
+        alert("You need at least one of the offered room for overnight stays.");
+    } else {
+        roomElement.remove();
         updateTotal(-price);
         removeRoomIdFromForm(roomId);
     }
@@ -990,10 +1149,11 @@ function removeRoom(roomId, price) {
     }
 
     if (bookedRoomsContainer.childElementCount === 1 && rateType === '2') {
-        //showOfferedRoomsOnly();
+        // showOfferedRoomsOnly();
         offeredRoomAdded = false;
     }
 }
+
 
 // Function to update total
 function updateTotal(priceChange) {
@@ -1041,7 +1201,7 @@ document.getElementById("secondForm").addEventListener("click", function(event) 
 
     // Send data using Fetch API
     fetch("booking-process.php", {
-        method: "POST", // or "POST" depending on your PHP setup
+        method: "POST",
         body: formData,
     })
     .then(response => response.text()) // Assuming you're returning text or HTML

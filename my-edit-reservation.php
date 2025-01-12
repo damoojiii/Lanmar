@@ -8,7 +8,8 @@
 
     session_start();
     include "role_access.php";
-    checkAccess('admin');
+    checkAccess('user');
+    $userId = $_SESSION['user_id'];
 
 ?>
 
@@ -22,6 +23,7 @@
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    <?php include "sidebar-design.php"; ?>
 
     <style>
         @font-face {
@@ -39,92 +41,6 @@
             font-size: 30px !important;
         }
 
-        #sidebar {
-            width: 250px;
-            position: fixed;
-            top: 0; 
-            height: 100vh;
-            overflow-y: auto; 
-            background: #001A3E;
-            transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
-        }
-
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background-color: #001A3E;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
-        }
-
-        #hamburger {
-            border: none;
-            background: none;
-            cursor: pointer;
-            margin-left: 15px; /* Space from the left edge */
-            display: none; /* Initially hide the hamburger button */
-        }
-
-        #main-content {
-            transition: margin-left 0.3s ease;
-            margin-left: 250px; 
-            margin-top: 25px; /* Add top margin for header */
-            padding: 20px; /* Padding for content */
-        }
-
-        hr {
-            background-color: #ffff;
-            height: 1.5px;
-        }
-
-        #sidebar .nav-link {
-            color: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            transition: background-color 0.3s, color 0.3s;
-            margin-bottom: 2px;
-        }
-
-        #sidebar .collapse {
-            transition: height 0.3s ease-out, opacity 0.3s ease-out;
-        }
-        #sidebar .collapse.show {
-            height: auto !important;
-            opacity: 1;
-        }
-        #sidebar .collapse:not(.show) {
-            height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-        #sidebar .drop{
-            height: 50px;
-        }
-        .caret-icon .fa-caret-down {
-            display: inline-block;
-            font-size: 20px;
-        }
-        .navcircle{
-            font-size: 7px;
-            text-align: justify;
-        }
-
-        #sidebar .nav-link:hover, #sidebar .nav-link.active {
-            background-color: #fff !important;
-            color: #000 !important;
-        }
-
-        .dropdown-menu {
-            width: 100%;
-            background-color: #001A3E;
-        }
 
         .dropdown-item {
             color: #fff !important;
@@ -136,102 +52,10 @@
             color: #000 !important;
         }
 
-        @media (max-width: 768px) {
-            #sidebar {
-                position: fixed;
-                transform: translateX(-100%); /* Hide sidebar off-screen */
-            }
-
-            #sidebar.show {
-                transform: translateX(0); /* Show sidebar */
-            }
-
-            #main-content {
-                margin-left: 0; /* Remove margin for smaller screens */
-            }
-
-            #hamburger {
-                display: block; /* Show hamburger button on smaller screens */
-            }
-        }
-
         .flex-container {
             display: flex;
             gap: 20px;
         }
-        .settings-form-container {
-            margin-bottom: 20px;
-        }
-        .alert {
-            padding: 10px;
-            margin: 10px 0;
-        }
-        .alert-success {
-            color: green;
-        }
-        .alert-danger {
-            color: red;
-        }
-        .button-container {
-            display: flex;
-            justify-content: end;
-        }
-        button {
-            border-radius: 50px;
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
-        .flex-container {
-        display: flex;
-        gap: 20px;
-    }
-
-    .sidebar-settings {
-        display: flex;
-        flex-direction: column;
-        width: 230px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 35px 15px 15px 15px;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .settings-links {
-        width: 100%
-    }
-
-    .settings-links ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .settings-links li {
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .settings-links a {
-        text-decoration: none;
-        color: #333;
-        padding: 10px 15px;
-        border-radius: 2px;
-        transition: 0.3s;
-    }
-
-    .settings-links a:hover {
-        background-color: #ddd;
-    }
-
-    .settings-links .links {
-        margin-bottom: 30px;
-    }
 
     .main-content {
         flex: 1;
@@ -245,20 +69,6 @@
         margin-bottom: 10px;
     }
 
-    .settings-form .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: bold;
-        font-size: 17px;
-    }
-
-    .settings-form .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 0px;
-    }
-
     .breadcrumb {
         display: flex;
         align-items: center;
@@ -269,13 +79,6 @@
         margin-bottom: 15px;
     }
 
-    .four-box-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        margin: 5px 0 0 0;
-    }
-
     .links {
         border-bottom: 1px solid #ccc;
     }
@@ -284,40 +87,9 @@
         border-bottom: none;
     }
 
-    .links i {
-        font-size: 12px;
-    }
-
-    .links li a {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        font-size: 15px;
-        font-weight: 600;
-        padding: 15px 20px;
-        transition: all 0.3s;
-        justify-content: space-between;
-    }
-
-    .links .active a {
-        background-color: #1c2531;
-        color: white;
-        border-radius: 10px 10px 10px 10px;
-    }
-
     .button-container {
         display: flex;
         justify-content: end;
-    }
-
-    .settings-form button, 
-    .save-btn {
-        border-radius: 10px !important;  
-        padding: 13px 30px;
-        background-color: #03045e;
-        border: none;
-        cursor: pointer;
-        color: white;
     }
 
     .form-section {
@@ -332,6 +104,9 @@
         text-align: center;
         margin-top: 20px;
     }
+    .btn-primary{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+    }
 
         
 
@@ -343,123 +118,92 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header id="header">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
-            ☰
-        </button>
-        <span class="text-white ms-3">Navbar</span>
-    </header>
-
     <!-- Sidebar -->
-    <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
-        <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
-        </a>
-        <hr>
-        <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item">
-                <a href="admin_dashboard.php" class="nav-link text-white">Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center p-2 drop" href="#manageReservations" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="manageReservations">
-                    Manage Reservations
-                    <span class="caret-icon">
-                        <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                </a>
-                <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
-            </li>
-            <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
-            </li>
-            <li>
-                <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
-            </li>
-            <li>
-                <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
-            </li>
-            <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
-            </li>
-            <li>
-                <a href="account_lists.php" class="nav-link text-white">Account List</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white d-flex justify-content-between align-items-center drop" href="#settingsCollapse" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="settingsCollapse">
-                    Settings
-                    <span class="caret-icon">
-                        <i class="fa-solid fa-caret-down"></i>
-                    </span>
-                </a>
-                <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
-                </ul>
-            </li>
-        </ul>
-        <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+<div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
+    <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <span class="fs-4 logo">Lanmar Resort</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="index1.php" class="nav-link text-white">Book Here</a>
+        </li>
+        <li><a href="my-reservation.php" class="nav-link text-white">My Reservations</a></li>
+        <li><a href="my-notification.php" class="nav-link text-white active d-flex justify-content-between">Notification <span class="badge badge-notif bg-secondary">0</span></a></li>
+        <li><a href="chats.php" class="nav-link text-white">Chat with Lanmar</a></li>
+        <li><a href="my-feedback.php" class="nav-link text-white">Feedback</a></li>
+        <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
+    </ul>
+    <hr>
+    <a href="logout.php" class="nav-link text-white">Log out</a>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container-fluid">
+        <button id="hamburger" class="navbar-toggler" type="button"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
+        </div>
     </div>
+</nav>
     
     <div id="main-content" class="">
         <div class="">
             <div class="main-container my-5">
                 <h2 class="text-center mb-4"><strong>Edit Reservation</strong></h2>
-                <form action="update_reservation.php" method="POST">
+                <form action="update_user_reservation.php" method="POST">
                     <?php 
                     if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         if (isset($_GET['id']) && !empty($_GET['id'])) {
                             $bookingId = $_GET['id'];
                             // Fetch the booking details
-                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, reservationType_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
+                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, booking_tbl.is_rebook, reservationType_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
                                     FROM booking_tbl 
                                     LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id 
                                     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id 
                                     LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id 
                                     LEFT JOIN room_tbl ON bill_tbl.bill_id = room_tbl.bill_id 
                                     LEFT JOIN users ON booking_tbl.user_Id = users.user_id 
-                                    WHERE booking_tbl.booking_id = :bookingId ";
+                                    WHERE booking_tbl.booking_id = :bookingId AND booking_tbl.user_id = :user_id ";
                             $stmt = $pdo->prepare($sql);
                             $stmt->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
+                            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
                             $stmt->execute();
                             $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
                             if ($reservation): ?>
                                 <input type="hidden" id="booking-id" name="booking_id" value="<?= htmlspecialchars($reservation['booking_id']); ?>">
-                                <input type="hidden" id="status" name="status" value="<?= htmlspecialchars($reservation['status']); ?>">
+                                <input type="hidden" id="isrebook" name="isrebook" value="<?= htmlspecialchars($reservation['is_rebook']); ?>">
+                                <input type="hidden" id="prevDateIn" name="prevDateIn" value="<?= htmlspecialchars($reservation['dateIn']); ?>">
+                                <input type="hidden" id="prevDateOut" name="prevDateOut" value="<?= htmlspecialchars($reservation['dateOut']); ?>">
 
-                                <!-- Customer Information -->
-                                <div class="form-section">
-                                    <h4>Customer Information</h4>
-                                    <div class="row">
-                                        <div class="col-sm-12 col-md-6">
-                                            <label class="form-label">Customer Name</label>
-                                            <input type="text" class="form-control" value="<?= htmlspecialchars($reservation['firstname'] . ' ' . $reservation['lastname']); ?>" readonly>
-                                        </div>
-                                        <div class="col-sm-12 col-md-6">
-                                            <label class="form-label">Contact Number</label>
-                                            <input type="text" class="form-control" value="<?= htmlspecialchars($reservation['contact_number']); ?>" readonly>
-                                        </div>
-                                    </div>
-                                </div>
                                 <!-- Booking Details -->
                                 <div class="form-section">
+                            
                                     <h4>Booking Details</h4>
+                                    <h6 style="font-size: 15px;">Note: <strong>Changing Dates</strong> is considered Rebook</h6>    
+                                    
                                     <div class="row">
+                                    <?php if($reservation['is_rebook'] === 1): ?>
                                         <div class="col-sm-10 col-md-3">
                                             <label class="form-label">Date In</label>
-                                            <input type="text" name="dateIn" class="form-control" id="date-in" value="<?= htmlspecialchars($reservation['dateIn']); ?>" placeholder="Select a date" readonly>
+                                            <input type="text" name="dateIn" class="form-control" id="date-in" value="<?= htmlspecialchars($reservation['dateIn']); ?>" placeholder="Select a date" disabled>
                                         </div>
                                         <div class="col-sm-10 col-md-3">
                                             <label class="form-label">Date Out</label>
-                                            <input type="text" name="dateOut" class="form-control" id="date-out" value="<?= htmlspecialchars($reservation['dateOut']); ?>" placeholder="Select a date" readonly>
+                                            <input type="text" name="dateOut" class="form-control" id="date-out" value="<?= htmlspecialchars($reservation['dateOut']); ?>" placeholder="Select a date" disabled>
                                         </div>
+                                    <?php else: ?>
+                                        <div class="col-sm-10 col-md-3">
+                                            <label class="form-label">Date In</label>
+                                            <input type="text" name="dateIn" class="form-control" id="date-in" value="<?= htmlspecialchars($reservation['dateIn']); ?>" placeholder="Select a date">
+                                        </div>
+                                        <div class="col-sm-10 col-md-3">
+                                            <label class="form-label">Date Out</label>
+                                            <input type="text" name="dateOut" class="form-control" id="date-out" value="<?= htmlspecialchars($reservation['dateOut']); ?>" placeholder="Select a date">
+                                        </div>
+                                    <?php endif; ?>
+
                                         <div class="col-sm-10 col-md-2">
                                             <label class="form-label">Check-In Time</label>
                                             <select name="checkin" class="form-control" id="checkin-time" required>
@@ -567,11 +311,11 @@
                                     <h4>Pax Information</h4>
                                     <div class="row">
                                     <div class="col-sm-12 col-md-2">
-                                        <label class="form-label">Adults</label>
+                                        <label class="form-label">Adult(s)</label>
                                         <input type="number" name="adult" class="form-control" value="<?= htmlspecialchars($reservation['adult']); ?>" required maxlength="2">
                                     </div>
                                     <div class="col-sm-12 col-md-2">
-                                        <label class="form-label">Children</label>
+                                        <label class="form-label">Child(ren)</label>
                                         <input type="number" name="child" class="form-control" value="<?= htmlspecialchars($reservation['child']); ?>" maxlength="2">
                                     </div>
                                     <div class="col-sm-12 col-md-2">
@@ -601,6 +345,7 @@
                                         </div>
                                         <input type="hidden" name="base_rate" value="">
                                         <input type="hidden" name="extra_adult_rate" value="">
+                                        <input type="hidden" name="additional_rate" value="">
                                     </div>
                                 </div>
                                 <!-- Payment Information -->
@@ -610,10 +355,6 @@
                                         <div class="col-sm-12 col-md-4">
                                             <label class="form-label">Total Bill</label>
                                             <input type="text" id="total-bill-input" class="form-control" name="totalbill" value="<?= (int)$reservation['total_bill']; ?>" readonly>
-                                            <!-- Collapse button -->
-                                            <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#totalBillCollapse" aria-expanded="false" aria-controls="totalBillCollapse">
-                                                Adjust Total Bill
-                                            </button>
                                         </div>
 
                                         <div class="col-sm-12 col-md-4">
@@ -627,40 +368,19 @@
                                         </div>
                                     </div>
 
-                                    <!-- Collapsible adjustment form -->
-                                    <div class="collapse" id="totalBillCollapse">
-                                        <div class="row mt-3">
-                                            <div class="col-sm-12 col-md-3">
-                                                <label class="form-label">Add to Total Bill</label>
-                                                <div class="input-group">
-                                                    <input type="number" id="add-total-bill" class="form-control" value="0" min="0">
-                                                    <!-- Add Button -->
-                                                    <button class="btn btn-success" type="button" id="add-button">Add</button>
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-12 col-md-3">
-                                                <label class="form-label">Deduct from Total Bill</label>
-                                                <div class="input-group">
-                                                    <input type="number" id="deduct-total-bill" class="form-control" value="0" min="0">
-                                                    <!-- Deduct Button -->
-                                                    <button class="btn btn-danger" type="button" id="deduct-button">Deduct</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
 
                             <?php else: ?>
                                 <p class="text-danger">Reservation not found.</p>
                             <?php endif; 
                         } else { 
-                            echo '<script>window.location="pending_reservation.php";</script>'; 
+                            echo '<script>window.location="my-reservation.php";</script>'; 
                             exit(); 
                         } 
                     } ?>
                     <div class="d-flex justify-content-end">
                         <button type="submit" class="btn btn-success">Save Changes</button>
-                        <a onclick="history.back()" class="btn btn-secondary">Cancel</a>
+                        <a href="my-reservation.php" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
             </div>
@@ -700,31 +420,6 @@
     });
 
     $(document).ready(function() {
-        $('#add-button').on('click', function() {
-            let addAmount = parseInt($('#add-total-bill').val()) || 0;
-            let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
-
-            // Update total bill
-            let updatedTotalBill = currentTotalBill + addAmount;
-            $('#total-bill-input').val(updatedTotalBill);
-
-            // Recalculate balance
-            updateBalance(updatedTotalBill);
-        });
-
-    // Deduct from Total Bill functionality
-        $('#deduct-button').on('click', function() {
-            let deductAmount = parseInt($('#deduct-total-bill').val()) || 0;
-            let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
-
-            // Update total bill
-            let updatedTotalBill = currentTotalBill - deductAmount;
-            $('#total-bill-input').val(updatedTotalBill);
-
-            // Recalculate balance
-            updateBalance(updatedTotalBill);
-        });
-
         const priceForBalance = <?= $priceForBalance; ?>;
 
         $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
@@ -737,19 +432,24 @@
         function fetchBaseRate() {
             let dateIn = $('#date-in').val();
             let dateOut = $('#date-out').val();
+            let checkOut = $('#checkout-time').val();
+            let adults = parseInt($('input[name="adult"]').val()) || 0;
+            let totalPax = adults;
 
             if (dateIn && dateOut) {
                 $.ajax({
-                    url: 'fetch_rate.php',
+                    url: 'fetch_rate_user.php',
                     type: 'POST',
-                    data: { dateIn: dateIn, dateOut: dateOut },
+                    data: { dateIn: dateIn, dateOut: dateOut, checkOut: checkOut, totalPax: totalPax  },
                     success: function(response) {
                         let result = JSON.parse(response);
                         let baseRate = result.baseRate;
                         let extraAdultRate = result.extraAdultRate;
+                        let additional = result.additional;
 
                         $('input[name="base_rate"]').val(baseRate);
                         $('input[name="extra_adult_rate"]').val(extraAdultRate);
+                        $('input[name="additional_rate"]').val(additional);
                         
                         recomputeTotalBill(); // Recompute total bill with new rates
                     }
@@ -847,8 +547,9 @@
 
 
 
-        $('#date-in, #date-out').on('change', function() {
+        $('#date-in, #date-out, #checkin-time, #checkout-time' ).on('change', function() {
             fetchBaseRate();
+            recomputeTotalBill();
         });
 
         $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
@@ -894,8 +595,28 @@
             const roomPrice = parseInt($(this).closest('.room-item').data('price')) || 0;
             const offered = parseInt($(this).closest('.room-item').data('offered')) || 0;
 
-            $(this).closest('.room-item').remove();
-            $(`#hidden-rooms input[value="${roomId}"]`).remove();
+            let countOffered = 0;
+            let dateIn = $('input[name="dateIn"]').val();
+            let dateOut = $('input[name="dateOut"]').val();
+            let isOvernight = dateIn !== dateOut;
+
+            // Count rooms with data-offered = 1
+            $('#selected-rooms .room-item').each(function() {
+                const roomOffered = parseInt($(this).data('offered')) || 0;
+                if (roomOffered === 1) {
+                    countOffered++;
+                }
+            });
+
+            console.log(offered, countOffered, isOvernight);
+
+            // Adjust the amount for the first offered room during an overnight stay
+            if (offered === 1 && (countOffered === 1 || countOffered === 0 ) && isOvernight) {
+                alert('Offered Rooms cannot be remove.');
+            }else{
+                $(this).closest('.room-item').remove();
+                $(`#hidden-rooms input[value="${roomId}"]`).remove();
+            }
 
             if ($('#selected-rooms .room-item').length === 0) {
                 $('#no-rooms-message').show();
@@ -1503,6 +1224,10 @@ function updateDisabledDates(selectedCheckInDate) {
 
   fp.set('disable', disabledDatesForCheckIn);
   fp1.set('maxDate', null);
+
+  const maxDate = new Date(selectedCheckInDate);
+    maxDate.setDate(maxDate.getDate() + 4); 
+    fp1.set('maxDate', maxDate);
 
   if (maxCheckOutDate) {
     fp1.set('maxDate', maxCheckOutDate);

@@ -2,14 +2,15 @@
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    session_start();
 
     $senderId = $_POST['user_id'];
-    $adminId = 9;
+    $adminId = $_SESSION['user_id'];
     $message = $_POST['message'];
     $read = 0;
 
     $stmt = $pdo->prepare("
-        INSERT INTO message_tbl (sender_id, receiver_id, msg, timestamp, is_read)
+        INSERT INTO message_tbl (sender_id, receiver_id, msg, timestamp, is_read_user)
         VALUES (:adminId,:senderId,:message, NOW(), :read)
     ");
     $stmt->execute([

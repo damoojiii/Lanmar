@@ -571,6 +571,10 @@
                                             $class = "cancel";
                                             $textstatus = "Cancelled";
                                             break;
+                                        case "Rejected":
+                                            $class = "cancel";
+                                            $textstatus = "Rejected";
+                                            break;
                                         case "Completed":
                                             $class = "completed";
                                             $textstatus = "Completed";

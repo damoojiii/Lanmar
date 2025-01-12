@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Manila'); 
 session_start();
 $userId = $_SESSION['user_id'];
 try {
@@ -39,7 +40,7 @@ try {
             WHERE 
                 n.is_read_user = 1 AND b.user_id = :userId
             ORDER BY 
-                n.timestamp DESC";
+                n.timestamp DESC LIMIT 9";
 
     $query = $pdo->prepare($sql);
     $query->execute(['userId' => $userId]);

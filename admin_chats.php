@@ -10,7 +10,7 @@
     checkAccess('admin');
     $userId = $_GET['user_id']; 
 
-    $updateQuery = "UPDATE message_tbl SET is_read = 1 WHERE sender_id = :sender_id";
+    $updateQuery = "UPDATE message_tbl SET is_read_admin = 1 WHERE sender_id = :sender_id";
     $updateStmt = $pdo->prepare($updateQuery);
     $updateStmt->execute([':sender_id' => $userId]);
 
@@ -39,7 +39,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
 
-    <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -260,6 +259,7 @@
         align-items: flex-end;
         margin-bottom: 15px;
         padding-bottom: 10px;
+        position: relative;
     }
 
     .message.sent {
@@ -278,6 +278,8 @@
         padding: 10px 15px;
         border-radius: 15px;
         word-wrap: break-word;
+        background-color: #e9ecef; 
+        color: #000; 
         position: relative;
     }
 
@@ -294,8 +296,19 @@
         font-size: 0.8rem;
         color: #6c757d;
         position: absolute;
-        bottom: -18px;
+        bottom: 0;
+        left: 10px;
+        transform: translateY(100%); 
+        white-space: nowrap; 
+    }
+    .message-timestamp-sender{
+        font-size: 0.8rem;
+        color: #6c757d;
+        position: absolute;
+        bottom: 0;
         right: 10px;
+        transform: translateY(100%); 
+        white-space: nowrap; 
     }
 
     .date-stamp {
@@ -473,7 +486,7 @@
                 u.profile, 
                 MAX(m.timestamp) AS max_timestamp, 
                 MAX(CASE WHEN m.sender_id = u.user_id THEN m.msg END) AS latest_msg, 
-                COUNT(CASE WHEN m.is_read = 0 AND m.sender_id = u.user_id THEN 1 END) AS unread_count
+                COUNT(CASE WHEN m.is_read_admin = 0 AND m.sender_id = u.user_id THEN 1 END) AS unread_count
             FROM users u
             LEFT JOIN message_tbl m 
                 ON u.user_id = m.sender_id OR u.user_id = m.receiver_id
@@ -560,6 +573,10 @@
             });
         });
 
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
         $(document).ready(function () {
             const userId = '<?php echo $userId; ?>';
             let isAutoScrollEnabled = true;
@@ -601,7 +618,7 @@
                                     <div class="message sent">
                                         <div class="message-content">
                                             ${msg.msg}
-                                            <span class="message-timestamp">${formattedTime}</span>
+                                            <span class="message-timestamp-sender">Sent by ${capitalizeFirstLetter(msg.firstname)} ○ ${formattedTime}</span>
                                         </div>
                                     </div>`;
                             } else {

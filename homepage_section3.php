@@ -612,7 +612,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </a>
                     <a href="homepage_section6.php">
                         <div class="tab" id="facilityInfoTab">
-                            Update QR codes
+                            Booking Processes
                         </div>
                     </a>
                 </div>

@@ -9,14 +9,19 @@
     $con = new mysqli($servername, $username, $password, $dbname);
 
     if($con->connect_error){
-        die("Connection Failed".$con->connect_error);
+        die("Connection Failed: " . $con->connect_error);
     }
+    
+    session_start();
+    $userId = $_SESSION['user_id']; 
 
     $today = date('Y-m-d');
     $sql = "SELECT dateIn, dateOut, checkin, checkout, hours 
-        FROM booking_tbl 
-        WHERE (dateIn >= '$today' OR dateOut >= '$today') 
-        AND status NOT IN ('Cancelled', 'Rejected')";
+            FROM booking_tbl 
+            WHERE (dateIn >= '$today' OR dateOut >= '$today') 
+            AND (status NOT IN ('Cancelled', 'Rejected') 
+            OR (status = 'Cancelled' AND user_id = '$userId'))";
+            
     $result = $con->query($sql);
 
     $bookings = array();
