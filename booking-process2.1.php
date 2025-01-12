@@ -8,11 +8,7 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
-    //if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
-    //    echo '<script>
-    //               window.location="/lanmar/index1.php"; 
-    //    </script>';
-    //}
+
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
         echo '<script>
                     window.location="/lanmar/index1.php"; 
@@ -395,8 +391,6 @@
         button {
             margin-top: 10px;
         }
-        .modal-content {
-        }
 
         .modal-content h2 {
             font-size: 18px;
@@ -482,7 +476,6 @@
     // Check if the form is submitted
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && basename($_SERVER['PHP_SELF']) == 'booking-process2.1.php') {
     
-
     // Capture the reference ID from the form
     $ref_id = $_POST['ref_id'];
     $formamattedref_id = substr($ref_id, 0, 4). ' ' . substr($ref_id, 4, 3) . ' ' . substr($ref_id, 7);

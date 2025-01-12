@@ -3,8 +3,12 @@ session_start();
 include("connection.php");
 
 $error = "";
+if(isset($_GET['dateIn']) && isset($_GET['dateOut'])){
+    $_SESSION['preDateIn'] = $_GET['dateIn'];
+    $_SESSION['preDateOut'] = $_GET['dateOut'];
+}
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
@@ -130,7 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
+                <button type="submit" name="login" class="btn btn-primary w-100">Login</button>
             </form>
         </div>
 

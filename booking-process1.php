@@ -9,6 +9,8 @@
     include "role_access.php";
     checkAccess('user');
     $userId = $_SESSION['user_id'];
+    unset($_SESSION['preDateIn']);
+    unset($_SESSION['preDateOut']);
 
     if (isset($_GET['continue'])) {
         $_SESSION['dateIn'] = $_GET['dateIn'];
@@ -22,7 +24,7 @@
         echo '<script>
                     window.location="/lanmar/index1.php"; 
          </script>';
-    }
+    } 
 ?>
 
 <!DOCTYPE html>

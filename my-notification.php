@@ -241,7 +241,7 @@
                         AND n.status = :status 
                         AND b.user_id = :userId
                         ORDER BY n.timestamp DESC
-                        LIMIT 1";
+                        ";
                 $query = $pdo->prepare($sql);
                 $query->execute(['status' => $status, 'userId' => $userId]);
                 $notifications = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -308,14 +308,14 @@
         document.querySelector('.notification-container').addEventListener('click', function (event) {
             if (event.target && event.target.classList.contains('view-button')) {
                 const bookingId = event.target.dataset.bookingId;
-                window.location.href = `my-reservation.php?booking_id=${bookingId}`;
+                window.location.href = `my-reservation.php`;
             }
         });
 
         document.querySelector('.notification-container.read').addEventListener('click', function (event) {
             if (event.target && event.target.classList.contains('view-button')) {
                 const bookingId = event.target.dataset.bookingId;
-                window.location.href = `my-reservation.php?booking_id=${bookingId}`;                
+                window.location.href = `my-reservation.php`;                
             }
         });
     });

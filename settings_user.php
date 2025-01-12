@@ -9,6 +9,14 @@ include("connection.php");
 $success_message = "";
 $error_message = "";
 
+if (isset($_GET['success_message'])) {
+    $success_message = urldecode($_GET['success_message']);
+}
+
+if (isset($_GET['error_message'])) {
+    $error_message = urldecode($_GET['error_message']);
+}
+
 
 // Fetch current user information
 $user_id = $_SESSION['user_id'];
@@ -20,38 +28,46 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
 // Handle form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $firstname = $_POST['firstname'];
-    $lastname = $_POST['lastname'];
-    $email = $_POST['email'];
-    $contact_number = $_POST['contact_number'];
+if (isset($_POST['update_password'])) {
     $new_password = $_POST['new_password'];
     $current_password = $_POST['current_password'];
+    $conpass = $_POST['conpass'];
 
     // Verify current password
     if (password_verify($current_password, $user['password'])) {
-        // Update user information
-        $update_query = "UPDATE users SET firstname = ?, lastname = ?, email = ?, contact_number = ? WHERE user_id = ?";
-        $update_stmt = $conn->prepare($update_query);
-        $update_stmt->bind_param("ssssi", $firstname, $lastname, $email, $contact_number, $user_id);
-        
-        if ($update_stmt->execute()) {
-            $success_message = "Your information has been updated successfully.";
-            
             // Update password if provided
-            if (!empty($new_password)) {
+        if (!empty($new_password)) {
+            if($new_password === $conpass){
                 $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
                 $password_query = "UPDATE users SET password = ? WHERE user_id = ?";
                 $password_stmt = $conn->prepare($password_query);
                 $password_stmt->bind_param("si", $hashed_password, $user_id);
                 $password_stmt->execute();
-            }
-        } else {
-            $error_message = "Error updating your information. Please try again.";
+
+                $success_message = "Password changed successfully";
+            }else{
+                $error_message = "Current password and Confirm password doesnt match.";
+            }    
+        }else{
+            header("Location: settings_user.php");
+            exit();
         }
     } else {
         $error_message = "Current password is incorrect.";
     }
+}else if(isset($_POST['update_contact'])){
+    $contact_number = $_POST['contact_number'];
+    $gender = $_POST['gender'];
+
+    // Update user information
+    $update_query = "UPDATE users SET contact_number = ?, gender = ? WHERE user_id = ?";
+    $update_stmt = $conn->prepare($update_query);
+    $update_stmt->bind_param("ssi", $contact_number,$gender, $user_id);
+    if ($update_stmt->execute()) {
+        $success_message = "Your information has been updated successfully.";
+    } else {
+        $error_message = "Error updating your information. Please try again.";
+    }  
 }
 ?>
 <!DOCTYPE html>
@@ -59,10 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Settings</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <title>Lanmar Resort</title>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -274,26 +287,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <?php endif; ?>
                                 <form class="settings-form" action="" method="POST">
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label for="firstname" class="form-label">First Name</label>
                                             <input type="text" class="form-control" id="firstname" name="firstname" 
                                                    value="<?php echo htmlspecialchars($user['firstname']); ?>" readonly>
                                         </div>
-                                        <div class="col-md-6 mb-3">
+                                        <div class="col-md-4 mb-3">
                                             <label for="lastname" class="form-label">Last Name</label>
                                             <input type="text" class="form-control" id="lastname" name="lastname" 
                                                    value="<?php echo htmlspecialchars($user['lastname']); ?>" readonly>
                                         </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                value="<?php echo htmlspecialchars($user['email']); ?>" readonly>
+                                        </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" name="email" 
-                                               value="<?php echo htmlspecialchars($user['email']); ?>" readonly>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="contact_number" class="form-label">Contact Number</label>
-                                        <input type="tel" class="form-control" id="contact_number" name="contact_number" 
-                                               value="<?php echo htmlspecialchars($user['contact_number']); ?>" required>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="contact_number" class="form-label">Contact Number</label>
+                                            <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                                value="<?php echo htmlspecialchars($user['contact_number']); ?>" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="gender" class="form-label">Gender</label>
+                                            <select id="gender" name="gender" class="form-control" required>
+                                                <option value="Male" <?php echo ($user['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+                                                <option value="Female" <?php echo ($user['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+                                                <option value="Other" <?php echo ($user['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="text-end">
                                         <button type="submit" name="update_contact" class="btn">Update Information</button>
@@ -308,13 +331,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <label for="current_password" class="form-label">Current Password</label>
                                         <input type="password" class="form-control" id="current_password" name="current_password" required>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="new_password" class="form-label">New Password</label>
-                                        <input type="password" class="form-control" id="new_password" name="new_password" required>
-                                        <p id="message" style="display: none;"><span id="strength"></span></p>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="new_password" class="form-label">New Password</label>
+                                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                            <p id="message" style="display: none;"><span id="strength"></span></p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="conpass" class="form-label">Confirm Password</label>
+                                            <input type="password" class="form-control" id="conpass" name="conpass" required>
+                                        </div>
                                     </div>
                                     <div class="text-end">
-                                        <button type="submit" name="update_password" class="btn" id="update_password">Update Password</button>
+                                        <button type="submit" name="update_password" class="btn" id="update_password">Change Password</button>
                                     </div>
                                 </form>
                             </div>
@@ -344,6 +373,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     });
 
     $(document).ready(function() {
+        $('input[name="contact_number"]').on('input', function() {
+            let value = $(this).val();
+            if (value.length > 2) {
+                $(this).val(value.slice(0, 11)); // Limit to 2 digits
+            }
+        });
         function updateNotificationCount() {
             $.ajax({
                 url: 'notification_count.php',
@@ -393,24 +428,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         var strength = document.getElementById("strength");
         var arrow = document.getElementById("update_password"); // Updated to use the correct ID
 
-        arrow.addEventListener("click", function(event) {
-            // Check password strength
-            if (pass.value.length === 0) {
-                alert("Tip💡: Add UPPERCASE, lowercase, symbols, letters for more secure passwords");
-                event.preventDefault(); // Prevent form submission
-            } else if (pass.value.length < 5) {
-                alert("Password seems to be weak, Try more secure passwords.");
-                event.preventDefault(); // Prevent form submission
-            } else if (pass.value.length >= 5 && pass.value.length < 8) {
-                alert("Password seems to be medium, update it to be more secure.");
-                event.preventDefault(); // Prevent form submission
-            } else if (pass.value.length >= 8) {
-                alert("Password is strong. You can update your password.");
-                // Allow form submission if password is strong
-                document.querySelector("form").submit(); // Submit the form
-            }
-        });
-
         pass.addEventListener("input", () => {
             if (pass.value.length > 0) {
                 msg.style.display = "block"; // Show the message
@@ -419,17 +436,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
 
             if (pass.value.length < 5) {
-                strength.innerHTML = "Password is Weak";
                 pass.style.borderColor = "#ff5925"; // Set border color to red
                 msg.style.color = "#ff5925"; // Set message color to red
                 strength.style.color = "#ff5925"; // Set strength text color to red
             } else if (pass.value.length >= 5 && pass.value.length < 8) {
-                strength.innerHTML = "Password is Medium";
                 pass.style.borderColor = "#FFA500"; // Set border color to orange
                 msg.style.color = "#FFA500"; // Set message color to orange
                 strength.style.color = "#FFA500"; // Set strength text color to orange
             } else if (pass.value.length >= 8) {
-                strength.innerHTML = "Password is Strong";
                 pass.style.borderColor = "#26d730"; // Set border color to green
                 msg.style.color = "#26d730"; // Set message color to green
                 strength.style.color = "#26d730"; // Set strength text color to green

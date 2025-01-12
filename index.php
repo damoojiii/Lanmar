@@ -87,6 +87,7 @@ $descriptions = [];
   <link href="assets/vendor/aos/aos.css" rel="stylesheet">
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
@@ -98,6 +99,7 @@ $descriptions = [];
     }
     .sitename{
       font-family: 'nautigal';
+      font-size: 40px;
     }
     .hero {
         position: relative;
@@ -380,6 +382,9 @@ $descriptions = [];
         .feedback-card {
             width: calc(50% - 20px); 
         }
+        .hero{
+          min-height: 50vh;
+        }
     }
 
     @media (max-width: 576px) {
@@ -407,20 +412,6 @@ $descriptions = [];
           <li><a href="#accomo">Accommodations</a></li>
           <li><a href="#gallery">Gallery</a></li>
           <li><a href="#portfolio">Amenities</a></li>
-          <li class="dropdown"><a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="#">Dropdown 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                <ul>
-                  <li><a href="#">Deep Dropdown 1</a></li>
-                  <li><a href="#">Deep Dropdown 2</a></li>
-                  <li><a href="#">Deep Dropdown 3</a></li>
-                  <li><a href="#">Deep Dropdown 4</a></li>
-                  <li><a href="#">Deep Dropdown 5</a></li>
-                </ul>
-              </li>
-            </ul>
-          </li>
           <li><a href="#contact">Contact</a></li>
           <li><a href="login.php" class="btn btn-outline-light">Sign In</a></li>
         </ul>
@@ -445,15 +436,15 @@ $descriptions = [];
           <div class="col-lg-8">
             <div class="booking-container p-4 mb-5">
               <h3 class="text-center mb-3">Book Your Stay</h3>
-              <form>
+              <form action="login.php" action="GET">
                 <div class="row g-2">
                   <div class="col-md-6">
-                    <label for="checkin" class="form-label">Check-in Date</label>
-                    <input type="date" class="form-control" id="checkin" required onchange="calculateDays()">
+                    <label for="date-in" class="form-label">Check-in Date</label>
+                    <input id="date-in" class="form-control" type="text" placeholder="Select a date" name="dateIn" readonly required>
                   </div>
                   <div class="col-md-6">
                     <label for="checkout" class="form-label">Check-out Date</label>
-                    <input type="date" class="form-control" id="checkout" required onchange="calculateDays()">
+                    <input id="date-out" class="form-control" type="text" placeholder="Select check-out date" name="dateOut" readonly required>
                   </div>
                   <div class="col-12 mt-2">
                     <p id="daysDisplay" class="text-center fw-bold" style="color: #007bff;"></p>
@@ -632,25 +623,11 @@ $descriptions = [];
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/bootstrap/js/all.min.js"></script>
   <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
-  <script>
-    function calculateDays() {
-      const checkin = new Date(document.getElementById('checkin').value);
-      const checkout = new Date(document.getElementById('checkout').value);
-      const daysDisplay = document.getElementById('daysDisplay');
-
-      if (checkin && checkout && checkout > checkin) {
-        const diffTime = Math.abs(checkout - checkin);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        daysDisplay.textContent = `You're booking for ${diffDays} day${diffDays > 1 ? 's' : ''}.`;
-      } else {
-        daysDisplay.textContent = '';
-      }
-    }
-  </script>
 
   <script>
   let slideIndex = 1;
@@ -668,20 +645,30 @@ $descriptions = [];
     let i;
     const slides = document.getElementsByClassName("mySlides");
     const dots = document.getElementsByClassName("dot");
-    
-    if (n > slides.length) { slideIndex = 1 }
-    if (n < 1) { slideIndex = slides.length }
-    
+
+    // Correcting slideIndex if it's out of bounds
+    if (n > slides.length) { slideIndex = 1; }
+    if (n < 1) { slideIndex = slides.length; }
+
+    // Hide all slides
     for (i = 0; i < slides.length; i++) {
-      slides[i].style.display = "none";  
-    }
-    for (i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
+        slides[i].style.display = "none";
     }
     
-    slides[slideIndex - 1].style.display = "block";  
-    dots[slideIndex - 1].className += " active";
-  }
+    // Remove "active" class from all dots
+    for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" active", "");
+    }
+
+    // Show the current slide and add "active" class to the corresponding dot
+    if (slides[slideIndex - 1]) {
+        slides[slideIndex - 1].style.display = "block";
+    }
+    if (dots[slideIndex - 1]) {
+        dots[slideIndex - 1].className += " active";
+    }
+}
+
 
   // Optional: Automatic slideshow
   setInterval(() => {
@@ -731,7 +718,7 @@ $descriptions = [];
       }
       
       slides[roomSlideIndex-1].style.display = "block";
-      dots[roomSlideIndex-1].className += " active";
+      dots[roomSlideIndex-1].className = " active";
   }
   </script>
   <script>
@@ -768,6 +755,416 @@ $descriptions = [];
         slides[slideIndex1].style.display = "block";  
     }
 
+  </script>
+<script>
+let fp = '';
+let fp1 = '';
+
+const bookedTimeSlots = {}; // Store booked timeslots
+const disabledDates = {
+  checkIn: [],
+  checkOut: []
+};
+
+const earliestTime = 6; // 6:00 AM
+const earliestTime24hour = 0; // 12:00 AM
+const latestTime = 23.5; // 11:30 PM
+const minimumStay = 12;
+const cleanupTime = 2;
+
+// Fetch todays date
+const today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+const formattedToday = formatDate(today);
+
+const checkInTimeSelect = document.querySelector('select[name="checkin"]');
+const checkOutTimeSelect = document.querySelector('select[name="checkout"]');
+
+// Format time in 24-hour format
+function formatTime24(date) {
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+function getNextDay(date) {
+  const currentDate = new Date(date);
+  currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+
+  const year = currentDate.getFullYear();
+  const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); 
+  const day = currentDate.getDate().toString().padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+// Function to check if a time is within booked slots
+function isTimeBlocked(date, time) {
+  if (bookedTimeSlots[date]) {
+    return bookedTimeSlots[date].some(slot => {
+      const [slotStartHour, slotStartMin] = slot.start.split(':').map(Number);
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      
+      const slotStart = slotStartHour * 60 + slotStartMin; 
+      const slotEnd = slotEndHour * 60 + slotEndMin;       
+      const currentTime = time * 60;                       
+
+      const earliestPossibleCheckIn = slotEnd;
+      //console.log(date);
+      //console.log((earliestTime <= slotStart || currentTime >= slotStart) && currentTime <= slotEnd);
+
+      // If the current time is within a blocked slot, or if it violates the minimum stay
+      if ((earliestTime <= slotStart || currentTime >= slotStart) && currentTime <= slotEnd) {
+        return true;  // Time is blocked
+      }
+      if (currentTime < earliestPossibleCheckIn) {
+        return true;  // Time violates the minimum stay rule
+      }
+
+      return false;
+    });
+  }
+  return false;
+}
+
+// Function to check if a checkout time is blocked due to future bookings
+function isCheckoutTimeBlocked(date, time) {
+  if (bookedTimeSlots[date]) {
+    return bookedTimeSlots[date].some(slot => {
+      const [slotStartHour, slotStartMin] = slot.start.split(':').map(Number);
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      
+      const slotStart = slotStartHour * 60 + slotStartMin;  // Start time in minutes
+      const slotEnd = slotEndHour * 60 + slotEndMin;        // End time in minutes
+      const currentTime = Math.round(time * 60);                        // Current time in minutes
+
+      // Calculate cleanup time (2 hours before the next booking starts)
+      const nextBookingStartWithCleanup = slotStart - (cleanupTime * 60); // Subtract cleanup period (120 minutes)
+
+      // Block if the current time overlaps with the booking 
+      if ((currentTime >= slotStart && currentTime <= slotEnd) || currentTime > nextBookingStartWithCleanup) {
+        return true;  // Time is blocked
+      }
+
+      return false;
+    });
+  }
+  return false;
+}
+
+function hasPreviousDaySpillover(date) {
+  const prevDate = new Date(date);
+  prevDate.setDate(prevDate.getDate() - 1);
+  const formattedPrevDate = prevDate.toISOString().split('T')[0];
+
+  if (bookedTimeSlots[formattedPrevDate]) {
+    return bookedTimeSlots[formattedPrevDate].some(slot => {
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      return slotEndHour < earliestTime; // Spillover to the next day if the checkout is before 6 AM
+    });
+  }
+  return false;
+}
+function hasNextDaySpillover(date) {
+  const prevDate = new Date(date);
+  const formattedPrevDate = prevDate.toISOString().split('T')[0];
+
+  if (bookedTimeSlots[formattedPrevDate]) {
+    return bookedTimeSlots[formattedPrevDate].some(slot => {
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      return slotEndHour > earliestTime; // Spillover to the next day if the checkout is before 6 AM
+    });
+  }
+  return false;
+}
+
+function isTimeAvailable(date, time) {
+  if (bookedTimeSlots[date]) {
+    return bookedTimeSlots[date].some(slot => {
+      const [slotStartHour, slotStartMin] = slot.start.split(':').map(Number);
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+      
+      const slotStart = slotStartHour * 60 + slotStartMin;  
+      const slotEnd = slotEndHour * 60 + slotEndMin;        
+      const currentTime = time * 60;          
+      
+      // If the current time is within a blocked slot
+      if (currentTime >= slotStart && currentTime <= slotEnd) {
+        return false;  // Time is blocked
+      }
+      if(currentTime < slotEnd){
+        return false;
+      }
+
+      return true; // Time is available
+    });
+  }
+  return true; // If no booking exists for this date, time is available
+}
+function isTimeAvailableCheckIn(date, time) {
+  const currentTime = time * 60;  
+
+  if (bookedTimeSlots[date]) {
+    return bookedTimeSlots[date].every(slot => {
+      const [slotStartHour, slotStartMin] = slot.start.split(':').map(Number);
+      const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
+
+      const slotStart = slotStartHour * 60 + slotStartMin;  
+      const slotEnd = slotEndHour * 60 + slotEndMin;        
+
+      // Ensure times are correctly compared when the slot starts at or after midnight
+      if (slotStart === 0 && currentTime < slotEnd) {
+        return false;  
+      }
+
+      // Block time if it overlaps with a booked time slot
+      if ((currentTime >= slotStart && currentTime <= slotEnd) || currentTime < slotEnd) {
+        return false;  // Time is blocked
+      }
+
+      return true;  // Time is available
+    });
+  }
+  
+  return true; // If no booking exists for this date, time is available
+}
+
+//Convert time to minutes
+function timeToMinutes(time) {
+  const [hour, min] = time.split(':').map(Number);
+  return hour * 60 + min;
+}
+
+function isTimeAvailableForCheckIn(date, time) {
+  const minimumStayMinutes = minimumStay * 60;  // Minimum 12-hour stay in minutes
+
+  // Only allow time slots between 6:00 AM and 11:30 PM for check-in
+  if (time < earliestTime || time > latestTime) {
+    return false;  // Time is out of the allowed range for check-in
+  }
+  if (!isTimeAvailableCheckIn(date, time)) {
+    return false;
+  }
+
+  // Find the first booking slot after the selected check-in time
+  if (bookedTimeSlots[date]) {
+    const futureSlots = bookedTimeSlots[date].filter(slot => timeToMinutes(slot.start) > time * 60);
+    
+    if (futureSlots.length > 0) {
+      // Get the start time of the first booking slot after the check-in time
+      const firstFutureSlotStart = timeToMinutes(futureSlots[0].start);
+
+      // Check if the gap between the selected check-in time and the next booking is less than 12 hours
+      if (firstFutureSlotStart - (time * 60) < minimumStayMinutes) {
+        return false; // Gap is too small, doesnt allow a minimum stay of 12 hours
+      }
+    }
+  }
+
+  return true;
+}
+
+function isTimeAvailableForCheckOut(date, time) {
+  // Allow spillover times from previous bookings
+  return isTimeAvailable(date, time) || (hasPreviousDaySpillover(date) || hasNextDaySpillover(date));
+}
+
+function isDateFullyBookedForCheckIn(dateStr) {
+
+  for (let time = earliestTime; time <= latestTime; time += 0.5) {
+    if (isTimeAvailableForCheckIn(dateStr, time)) {
+      return false; // Theres at least one available slot, so the date is not fully booked
+    }
+  }
+  return true; // No available times, date is fully booked
+}
+
+function isDateFullyBookedForCheckOut(dateStr) {
+  const cutoffTimeMinutes = 4 * 60;
+  // If the date has bookings, check if the date is fully booked or not
+  if (bookedTimeSlots[dateStr]) {
+    const slots = bookedTimeSlots[dateStr];
+
+    // Sort the slots by their start time to find the earliest booking
+    const sortedSlots = slots.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+
+    const firstSlotStart = timeToMinutes(sortedSlots[0].start);
+    // check-out can be allowed until then
+    if (firstSlotStart < cutoffTimeMinutes) {
+      return true;  // Date is not fully booked, check-out is allowed before the first booking
+    }
+
+    // If the first booking starts at or before the cutoff time, block the entire date
+    for (let time = earliestTime24hour; time <= latestTime; time += 0.5) {
+
+        //console.log(isTimeAvailableForCheckOut(dateStr, time), dateStr, time);
+      if (isTimeAvailableForCheckOut(dateStr, time)) {
+        return false;  // Theres at least one available slot for check-out
+      }
+    }
+  }
+  
+  return true;  // No available times for check-out, or the day is fully booked
+}
+
+function findFirstFullyBookedDate(selectedCheckInDate) {
+  const sortedDates = Object.keys(bookedTimeSlots).sort(); 
+  for (let date of sortedDates) {
+    if (date > selectedCheckInDate && isDateFullyBookedForCheckOut(date)) {
+      return date; // Return the first fully booked date after the check-in date
+    }
+  }
+  return null; // No fully booked date found
+}
+
+function updateDisabledDates(selectedCheckInDate) {
+    disabledDates.checkIn = [];
+    disabledDates.checkOut = [];
+
+  for (const date in bookedTimeSlots) {
+    if (isDateFullyBookedForCheckIn(date)) {
+        disabledDates.checkIn.push(date); 
+    }
+
+    if (isDateFullyBookedForCheckOut(date)) {
+        disabledDates.checkOut.push(date); 
+    }
+  }
+
+  // Find the maximum check-out date
+  const maxCheckOutDate = findFirstFullyBookedDate(selectedCheckInDate);
+
+  // Update flatpickr options for both #date-in and #date-out
+  fp.set('disable', disabledDates.checkIn);
+  fp1.set('maxDate', null);
+
+  const maxDate = new Date(selectedCheckInDate);
+    maxDate.setDate(maxDate.getDate() + 5); 
+    fp1.set('maxDate', maxDate);
+
+  // Set maxDate for #date-out based on the found date
+  if (maxCheckOutDate) {
+    fp1.set('maxDate', maxCheckOutDate); // Limit checkout to the first fully booked date
+  }
+
+  fp1.set('disable', disabledDates.checkOut);
+}
+
+
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Fetch booked time slots from the server
+fetch(`fetch-booking.php`)
+    .then(response => response.json())
+    .then(bookings => {
+      bookings.forEach(booking => {
+        const dateIn = booking.dateIn;
+        const dateOut = booking.dateOut;
+        const checkin = booking.checkin;
+        const checkout = booking.checkout;
+        
+        // Calculate the cleanup end time by adding 2 hours to the checkout time
+        const endTime = new Date(`${dateOut} ${checkout}`);
+        const cleanupEndTime = new Date(endTime.getTime() + (cleanupTime * 60 * 60 * 1000) - (1 * 60 * 1000)); // Add 2 hours and subtract 1 minute
+    
+        // If dateIn and dateOut are the same
+        if (dateIn === dateOut) {
+            if (!bookedTimeSlots[dateIn]) {
+                bookedTimeSlots[dateIn] = [];
+            }
+    
+            bookedTimeSlots[dateIn].push({
+                date: dateIn,
+                start: checkin,
+                end: formatTime24(cleanupEndTime) 
+            });
+        } 
+        // If dateIn and dateOut are different
+        else {
+            const dateInObj = new Date(dateIn);
+            const dateOutObj = new Date(dateOut);
+            const intermediateDate = new Date(dateInObj);
+    
+            // Store booking for the check-in date
+            if (!bookedTimeSlots[dateIn]) {
+                bookedTimeSlots[dateIn] = [];
+            }
+            bookedTimeSlots[dateIn].push({
+                date: dateIn,
+                start: checkin,
+                end: '23:30' 
+            });
+    
+            // Block intermediate days fully between dateIn and dateOut
+            while (intermediateDate.setDate(intermediateDate.getDate() + 1) < dateOutObj.getTime()) {
+                const formattedIntermediateDate = intermediateDate.toISOString().split('T')[0]; 
+                
+                if (!bookedTimeSlots[formattedIntermediateDate]) {
+                    bookedTimeSlots[formattedIntermediateDate] = [];
+                }
+    
+                bookedTimeSlots[formattedIntermediateDate].push({
+                    date: formattedIntermediateDate,
+                    start: '00:00',
+                    end: '23:30' // Block the entire intermediate day
+                });
+            }
+    
+            // Store booking for the check-out date, including cleanup time
+            if (!bookedTimeSlots[dateOut]) {
+                bookedTimeSlots[dateOut] = [];
+            }
+            bookedTimeSlots[dateOut].push({
+                date: dateOut,
+                start: '00:00',
+                end: formatTime24(cleanupEndTime)
+            });
+        }
+    });
+        
+        // Initialize flatpickr after booking data is fetched
+        initializeFlatpickr();
+        // Disable Dates
+        updateDisabledDates(null);
+    })
+    .catch(error => console.error('Error fetching bookings:', error));
+
+function initializeFlatpickr() {
+  fp = flatpickr("#date-in", {
+    enableTime: false,
+    dateFormat: "Y-m-d",
+    minDate: new Date().fp_incr(1),
+    showMonths: 1,
+    disableMobile: "true", 
+    onChange: function (selectedDates, dateStr, instance) {
+      document.querySelector("#date-in").value = dateStr;
+
+      fp1.set('minDate', dateStr); // Set min date for checkout based on check-in date
+      fp1.setDate(null); // Reset checkout date
+
+      // Update the disabled dates and max checkout range based on check-in date
+      updateDisabledDates(dateStr);
+    }
+  });
+
+  fp1 = flatpickr("#date-out", {
+    enableTime: false,
+    dateFormat: "Y-m-d",
+    disableMobile: "true",
+    minDate: new Date().fp_incr(1),
+    onChange: function (selectedDates, dateStr, instance) {
+      document.querySelector("#date-out").value = dateStr;
+
+    }
+  });
+
+}
   </script>
 </body>
 

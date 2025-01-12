@@ -8,6 +8,7 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
+
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
         echo '<script>
                     window.location="/lanmar/index1.php"; 

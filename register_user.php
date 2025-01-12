@@ -7,6 +7,8 @@ require './PHPMailer/src/PHPMailer.php';
 require './PHPMailer/src/SMTP.php';
 require './vendor/autoload.php';
 
+session_start();
+
 $error = "";
 $success = "";
 
@@ -201,7 +203,7 @@ if (isset($_POST["register"])) {
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
             <input type="text" name="firstname" placeholder="First Name" required>
             <input type="text" name="lastname" placeholder="Last Name" required>
-            <input type="tel" name="contact_number" placeholder="Contact Number" required>
+            <input type="tel" id="contact" name="contact_number" placeholder="Contact Number" required>
             <input type="email" name="email" placeholder="Email" required>
             <select name="gender" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;" required>
                 <option value="" disabled hidden selected>Select Gender</option>
@@ -219,7 +221,7 @@ if (isset($_POST["register"])) {
             <p>Already have an account? <a href="login.php">Login here</a></p>
         </form>
     </div>
-
+    <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         var pass = document.getElementById("password");
@@ -293,6 +295,16 @@ if (isset($_POST["register"])) {
 
         // Add event listener for password
         pass.addEventListener("input", checkPasswordStrength);
+    });
+
+    $(document).ready(function() {
+        $('input[name="contact_number"]').on('input', function() {
+            let value = $(this).val();
+            if (value.length > 2) {
+                $(this).val(value.slice(0, 11)); // Limit to 2 digits
+            }
+        });
+
     });
 </script>
 

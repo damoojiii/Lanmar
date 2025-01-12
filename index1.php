@@ -8,7 +8,9 @@
     session_start();
     include "role_access.php";
     checkAccess('user');
-    $userId = $_SESSION['user_id']; 
+    $userId = $_SESSION['user_id'];
+    $preDateIn = $_SESSION['preDateIn'] ?? ''; 
+    $preDateOut = $_SESSION['preDateOut'] ?? ''; 
 
     unset($_SESSION['dateIn']);
     unset($_SESSION['dateOut']);
@@ -24,6 +26,19 @@
     unset($_SESSION['grandTotal']);
     unset($_SESSION['roomTotal']);
     unset($_SESSION['roomIds']);
+
+    $query = "SELECT COUNT(*) as completed_count FROM booking_tbl WHERE user_id = :user_id AND status = 'Completed'";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $completedCount = $row['completed_count'];
+
+    if ($completedCount === 1) {
+        echo "<script>var showModal = true;</script>";
+    } else {
+        echo "<script>var showModal = false;</script>";
+    }
 
     $sql = "SELECT dateIn, dateOut 
             FROM `booking_tbl` 
@@ -233,6 +248,9 @@
             background-color: #00214b;
             color: white;
         }
+        .modal-dialog{
+          margin: 15% auto;
+        }
 
         @media (max-width: 768px) {
             #sidebar {
@@ -295,6 +313,10 @@
             .calendar{
                 margin-inline: 5px;
             }
+            .modal-dialog{
+              margin-top: 300px;
+              margin-inline: 5%;
+            }
 
         }
         @media (max-width: 430px) {
@@ -310,6 +332,10 @@
             .progress-bar {
                 flex-direction: row;
                 gap: 1rem;
+            }
+            .modal-dialog{
+              margin-top: 250px;
+              margin-inline: 6%;
             }
 
         }
@@ -379,12 +405,12 @@
             <!-- Check-in Date -->
             <div class="col-md-3 mb-3">
                 <label for="date-in" class="form-label">Check-in Date:</label>
-                <input id="date-in" class="form-control" type="text" placeholder="Select a date" name="dateIn" readonly required>
+                <input id="date-in" class="form-control" type="text" placeholder="Select a date" value="<?php echo $preDateIn;?>" name="dateIn" readonly required>
             </div>
             <!-- Check-out Date -->
             <div class="col-md-3 mb-3">
                 <label for="date-out" class="form-label">Check-out Date:</label>
-                <input id="date-out" class="form-control" type="text" placeholder="Select check-out date" name="dateOut" readonly required>
+                <input id="date-out" class="form-control" type="text" placeholder="Select check-out date" value="<?php echo $preDateOut;?>" name="dateOut" readonly required>
             </div>
             <!-- Check-In Time -->
             <div class="col-md-2 mb-3">
@@ -454,6 +480,26 @@
     </form>
 </div>
 
+
+<!-- Modal Structure -->
+<div id="thankYouModal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thank You!</h5>
+      </div>
+      <div class="modal-body">
+        <p>Thank you for visiting our resort! <br><br>
+        We hope you had a great experience. You can submit a feedback to tell your experience about our resort.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="rateUs()">Rate Us</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -480,6 +526,16 @@
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (showModal) {
+        $('#thankYouModal').modal('show');
+    }
+});
+
+function rateUs() {
+    window.location.href = 'my-feedback.php';
+}
 
 $(document).ready(function() {
         function updateNotificationCount() {
@@ -632,7 +688,6 @@ function hasPreviousDaySpillover(date) {
   if (bookedTimeSlots[formattedPrevDate]) {
     return bookedTimeSlots[formattedPrevDate].some(slot => {
       const [slotEndHour, slotEndMin] = slot.end.split(':').map(Number);
-      console.log(bookedTimeSlots[formattedPrevDate], slotEndHour > earliestTime, slotEndHour, earliestTime);
       return slotEndHour < earliestTime; // Spillover to the next day if the checkout is before 6 AM
     });
   }
@@ -798,7 +853,6 @@ function updateDisabledDates(selectedCheckInDate) {
     disabledDates.checkIn = [];
     disabledDates.checkOut = [];
 
-    console.log(disabledDates.checkOut);
   for (const date in bookedTimeSlots) {
     if (isDateFullyBookedForCheckIn(date)) {
         disabledDates.checkIn.push(date); 
@@ -811,7 +865,6 @@ function updateDisabledDates(selectedCheckInDate) {
 
   // Find the maximum check-out date
   const maxCheckOutDate = findFirstFullyBookedDate(selectedCheckInDate);
-  console.log(maxCheckOutDate);
 
   // Update flatpickr options for both #date-in and #date-out
   fp.set('disable', disabledDates.checkIn);
@@ -906,7 +959,6 @@ fetch(`fetch-booking-user.php`)
         }
     });
         
-        console.log(bookedTimeSlots);
         // Initialize flatpickr after booking data is fetched
         initializeFlatpickr();
         // Disable Dates
@@ -949,8 +1001,6 @@ function populateCheckInTimes(checkInDate, checkOutDate) {
   if(checkInDate !== checkOutDate){
     maxCheckInTime = isNextDayBookingAffectingCheckIn();
   }
-  
-  console.log(maxCheckInTime);
 
   checkInTimeSelect.innerHTML = `<option value="" hidden selected>Select check-in time</option>`;
 
@@ -1046,8 +1096,6 @@ function calculateTotalHours() {
 
   const checkInDateTime = new Date(checkInDate);
   checkInDateTime.setHours(checkInHours, checkInMinutes, 0, 0); // Set hours and minutes for check-in
-  
-  console.log(checkInDateTime);
 
   const checkOutDateTime = new Date(checkOutDate);
   checkOutDateTime.setHours(checkOutHours, checkOutMinutes, 0, 0); // Set hours and minutes for check-out
