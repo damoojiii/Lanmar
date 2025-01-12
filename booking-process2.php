@@ -487,7 +487,7 @@
                 <div class="section-header">Additionals</div>
                 <form action="">
                     <label for="" class="form-label">Is there any special request?</label>
-                    <input type="text" class="message-box" name="additional" id="additional" placeholder="Type your message here...">
+                    <textarea class="message-box" name="additional" id="additional" placeholder="Type your message here..." rows="4" cols="50"></textarea>
                 </form>
                 <div class="section-header">Payment Method</div>
                 <form action="booking-process2.1.php" method="get" id="paymentForm">

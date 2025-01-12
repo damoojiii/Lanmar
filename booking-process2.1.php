@@ -185,6 +185,25 @@
         .sabmit{
             width: 50%;
         }
+        .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+}
+
+.modal-content {
+    background: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
     </style>
 <style>
         /* responsive */
@@ -228,6 +247,11 @@
     }
     .sabmit{
         width: 100%;
+    }
+    .modal-content {
+        width: 70%;
+        padding: 15px;
+        font-size: 16px;
     }
 }
 
@@ -308,6 +332,32 @@
             justify-content: flex-start;
             width: 100%;
         }
+        .modal-content {
+        width: 85%;
+        margin: 15% auto;
+        padding: 10px;
+        font-size: 14px;
+        }
+        .modal-content h2 {
+        font-size: 20px;
+        }
+
+        .modal-content p {
+            font-size: 14px;
+        }
+
+        .modal-content ul li {
+            font-size: 13px;
+        }
+
+        #policy-check {
+            margin-top: 10px;
+        }
+
+        #proceed-button {
+            margin-top: 15px;
+            font-size: 14px;
+        }
     }
 
     /* Phone (Small screen) - 430px and below */
@@ -346,6 +396,24 @@
         button {
             margin-top: 10px;
         }
+        .modal-content {
+        width: 90%;
+        margin: 20% auto;
+        font-size: 12px;
+        }
+
+        .modal-content h2 {
+            font-size: 18px;
+        }
+
+        .modal-content ul li {
+            font-size: 12px;
+        }
+
+        #proceed-button {
+            font-size: 12px;
+            padding: 8px 15px;
+        }   
     }
     </style>
 </head>
@@ -574,6 +642,23 @@
     }
 
 ?>
+<div id="policy-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 9999;">
+    <div class="modal-content" style="background: white; margin: 10% auto; padding: 20px; width: 50%; border-radius: 8px;">
+        <h2>Policy Agreement</h2>
+        <p>Please read and agree to the terms and conditions before proceeding.</p>
+        <ul>
+            <li>1. Ensure the uploaded image is clear and legible.</li>
+            <li>2. The reference ID must match the payment details.</li>
+            <li>3. Only valid payment methods are accepted.</li>
+            <li>4. Any discrepancies may lead to delays.</li>
+        </ul>
+        <div style="margin-top: 20px; text-align: right;">
+            <input type="checkbox" id="policy-check"> I agree to the terms and conditions.
+            <br><br>
+            <button id="proceed-button" class="btn btn-primary" disabled>Proceed</button>
+        </div>
+    </div>
+</div>
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
@@ -636,6 +721,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+     // Display the modal on page load
+     window.onload = function() {
+        document.getElementById('policy-modal').style.display = 'block';
+    };
+
+    // Enable the proceed button when checkbox is checked
+    document.getElementById('policy-check').addEventListener('change', function() {
+        const proceedButton = document.getElementById('proceed-button');
+        proceedButton.disabled = !this.checked;
+    });
+
+    // Hide the modal and show main content when Proceed is clicked
+    document.getElementById('proceed-button').addEventListener('click', function() {
+        document.getElementById('policy-modal').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    });
 document.getElementById('hamburger').addEventListener('click', function() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('show');
