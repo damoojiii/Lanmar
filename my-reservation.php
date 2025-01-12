@@ -359,7 +359,7 @@
                 </div>
                 <div class="col-6 col-md-4">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
-  View GCash Receipt
+  View
 </button>
                 </div>  
             </div>     
@@ -389,7 +389,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg " id="proofpicture">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="gcashReceiptModalLabel">GCash Receipt</h5>
+        <h5 class="modal-title" id="gcashReceiptModalLabel">Proof of Payment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="modal-IMAGE">
