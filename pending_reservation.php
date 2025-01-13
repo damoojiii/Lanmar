@@ -742,103 +742,135 @@
             header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
         }
     }
-    document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const bookingId = urlParams.get('booking_id');
-
-    if (bookingId) {
-        fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error('Booking not found');
-                    return;
-                }
-
-                // Populate the modal with the fetched data
-                document.getElementById('modalBookingId').textContent = data.bookingId;
-                document.getElementById('modalName').textContent = data.name;
-                document.getElementById('modalContact').textContent = data.contact;
-                document.getElementById('modalDateRange').textContent = data.dateRange;
-                document.getElementById('modalTimeRange').textContent = data.timeRange;
-                document.getElementById('modalHours').textContent = data.hours;
-                document.getElementById('modalAdults').textContent = data.adult;
-                document.getElementById('modalChild').textContent = data.child;
-                document.getElementById('modalPwd').textContent = data.pwds;
-                document.getElementById('modalTotalPax').textContent = data.totalPax;
-                document.getElementById('modalRoomType').textContent = data.type;
-
-                // Populate rooms
-                const roomsContainer = document.getElementById('modalRooms');
-                roomsContainer.innerHTML = '';
-                let ronum = 1;
-                data.roomName.forEach(room => {
-                    const roomElement = document.createElement('div');
-                    roomElement.classList.add('room-detail', 'col-3', 'col-md-3');
-                    roomElement.innerHTML = `<strong>Room ${ronum}:</strong> ${room.roomName}<br>`;
-                    roomsContainer.appendChild(roomElement);
-                    ronum++;
-                });
-
-                document.getElementById('modalAdds').textContent = data.additional;
-                document.getElementById('modalPaymode').textContent = data.paymode;
-                document.getElementById('modalTotalBill').textContent = data.totalBill;
-                document.getElementById('modalBalance').textContent = data.balance;
-                document.getElementById('modalrefNum').textContent = data.refNumber;
-                const modalBody = document.getElementById('modalProof');
-                modalBody.innerHTML = `<a href="${data.imageProof}" target="_blank">View image</a>`;
-
-                // Show the modal
-                $('#reservationModal').modal('show');
-            })
-            .catch(error => console.error('Error fetching data:', error));
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const tableIndex = new DataTable('#example', {
-        columnDefs: [
-            {
-                searchable: false,
-                orderable: false,
-                targets: 0
-            }
-        ],
-        order: [],
-        paging: true,
-        scrollY: '100%'
-    });
- 
- tableIndex.on('mouseenter', 'td', function () {
-     let colIdx = tableIndex.cell(this).index().column;
-  
-     tableIndex
-         .cells()
-         .nodes()
-         .each((el) => el.classList.remove('highlight'));
-  
-     tableIndex
-         .column(colIdx)
-         .nodes()
-         .each((el) => el.classList.add('highlight'));
- });
-    });
 
 document.addEventListener('DOMContentLoaded', () => {
+        const tableIndex = new DataTable('#example', {
+            columnDefs: [
+                {
+                    searchable: false,
+                    orderable: false,
+                    targets: 0
+                }
+            ],
+            order: [0, 'asc'],
+            paging: true,
+            scrollY: '100%'
+        });
+    
+    tableIndex.on('mouseenter', 'td', function () {
+        let colIdx = tableIndex.cell(this).index().column;
+    
+        tableIndex
+            .cells()
+            .nodes()
+            .each((el) => el.classList.remove('highlight'));
+    
+        tableIndex
+            .column(colIdx)
+            .nodes()
+            .each((el) => el.classList.add('highlight'));
+    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId1 = urlParams.get('booking_id');
+
+    if(bookingId1){
+        modal(bookingId1);
+    }
   // Event delegation to handle row click events
     let bookingIds;
     let userID;
+
+
     document.querySelector('tbody').addEventListener('click', function (event) {
       // Ensure the clicked element is a table row
       const row = event.target.closest('.table-row');
       if (row) {
         const userId = row.dataset.userId;
         userID = userId;
-        const bookingId = row.dataset.bookingId; // Get the booking ID
+        const bookingId = row.dataset.bookingId; 
         bookingIds = bookingId;
-          
-          // Fetch the booking details from the server
-          fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
+        modal(bookingId);
+      }
+  });
+
+  function editBooking() {
+        if (bookingIds) { 
+            window.location.href = `edit_reservation.php?id=${bookingIds}`;
+        } else {
+            console.log("No bookingId found!");
+        }
+    }
+    document.getElementById('editButton').addEventListener('click', editBooking);
+    document.getElementById("chatsbutton").onclick = function() {
+     
+    const newUrl = `admin_chats.php?user_id=${userID}`;
+    window.location.href = newUrl; 
+};
+const approvedButton = document.querySelector('.btnApproved');
+const rejectedButton = document.querySelector('.btnReject');
+  const bookingIdElement = document.getElementById('modalBookingId');
+
+  if (approvedButton && bookingIdElement) {
+    // Function to handle the approval action
+    approvedButton.addEventListener('click', function () {
+        event.preventDefault();
+      const bookingId = bookingIdElement.textContent.trim();
+      
+      const isConfirmed = confirm("Are you sure you want to approve this booking?");
+
+      // Create the form element
+      if(isConfirmed){
+      const form = document.createElement('form');
+      form.method = 'POST';  
+      form.action = '';  
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'bookingId';
+      input.value = bookingId;
+
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+        console.log('Booking approval canceled');
+      }
+    });
+  } else {
+    console.error('Error: The modal elements are not found.');
+  }
+
+  if (rejectedButton && bookingIdElement) {
+    rejectedButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        const bookingId = bookingIdElement.textContent.trim();
+
+        const isConfirmed = confirm("Are you sure you want to reject this booking?");
+
+        // Create the form element if confirmed
+        if (isConfirmed) {
+        const form = document.createElement('form');
+        form.method = 'POST';  
+        form.action = '';  
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'bookingIdReject';
+        input.value = bookingId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+        } else {
+        console.log('Booking rejection canceled');
+        }
+    });
+    } else {
+    console.error('Error: The modal elements are not found.');
+    }
+
+    function modal(bookingId){
+        fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
               .then(response => response.json())
               .then(data => {
                   if (data.error) {
@@ -887,97 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   $('#reservationModal').modal('show');
               })
               .catch(error => console.error('Error fetching data:', error));
-      }
-  });
-
-  function editBooking() {
-        if (bookingIds) { // Make sure bookingId is set
-            // Navigate to the cancellation page with the bookingId
-            window.location.href = `edit_reservation.php?id=${bookingIds}`;
-        } else {
-            console.log("No bookingId found!");
-        }
     }
-    document.getElementById('editButton').addEventListener('click', editBooking);
-    document.getElementById("chatsbutton").onclick = function() {
-     // Replace with your dynamic user_id value
-    const newUrl = `admin_chats.php?user_id=${userID}`;
-    window.location.href = newUrl; // Redirects to the new URL
-};
-const approvedButton = document.querySelector('.btnApproved');
-const rejectedButton = document.querySelector('.btnReject');
-  const bookingIdElement = document.getElementById('modalBookingId');
-
-  if (approvedButton && bookingIdElement) {
-    // Function to handle the approval action
-    approvedButton.addEventListener('click', function () {
-        event.preventDefault();
-      const bookingId = bookingIdElement.textContent.trim();
-      
-      const isConfirmed = confirm("Are you sure you want to approve this booking?");
-
-      // Create the form element
-      if(isConfirmed){
-      const form = document.createElement('form');
-      form.method = 'POST';  // Use POST method
-      form.action = '';  // Submitting to the same page
-
-      // Create a hidden input field for the bookingId
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'bookingId';
-      input.value = bookingId;
-      // Append the input field to the form
-      form.appendChild(input);
-      // Append the form to the body
-      document.body.appendChild(form);
-      // Submit the form
-      form.submit();
-    } else {
-        // If the user cancels (clicks "Cancel"), do nothing
-        console.log('Booking approval canceled');
-      }
-    });
-  } else {
-    console.error('Error: The modal elements are not found.');
-  }
-
-  if (rejectedButton && bookingIdElement) {
-  // Function to handle the rejection action
-  rejectedButton.addEventListener('click', function (event) {
-    event.preventDefault();
-    const bookingId = bookingIdElement.textContent.trim();
-
-    const isConfirmed = confirm("Are you sure you want to reject this booking?");
-
-    // Create the form element if confirmed
-    if (isConfirmed) {
-      const form = document.createElement('form');
-      form.method = 'POST';  // Use POST method
-      form.action = '';  // Submitting to the same page
-
-      // Create a hidden input field for the bookingId
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'bookingIdReject';
-      input.value = bookingId;
-
-      // Append the input field to the form
-      form.appendChild(input);
-
-      // Append the form to the body
-      document.body.appendChild(form);
-
-      // Submit the form
-      form.submit();
-    } else {
-      // If the user cancels (clicks "Cancel"), do nothing
-      console.log('Booking rejection canceled');
-    }
-  });
-} else {
-  console.error('Error: The modal elements are not found.');
-}
 });
 
 

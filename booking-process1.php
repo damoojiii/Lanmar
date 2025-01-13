@@ -355,6 +355,7 @@
             .check{
                 width: 100%;
             }
+            
         }
         @media (min-width: 768px) {
             #room-selection-dropdown {
@@ -377,6 +378,23 @@
             }
             .summary{
                 width: 100% !important;
+            }
+        }
+        @media (max-height: 932px){
+            #booked-rooms {
+                max-height: 300px; /* Adjust height as needed */
+                overflow-y: auto;
+                padding: 5px;
+            }
+        }
+        @media (max-height: 844px){
+            #booked-rooms {
+                max-height: 200px; /* Adjust height as needed */
+            }
+        }
+        @media (max-height: 740px){
+            #booked-rooms {
+                max-height: 100px; /* Adjust height as needed */
             }
         }
     </style>
@@ -713,7 +731,7 @@ function toggleSummary() {
 
     if (summarySection.classList.contains('collapse')) {
         summarySection.classList.remove('collapse');
-        summarySection.style.height = '100vh'; // Full screen height
+        summarySection.style.height = '90vh'; // Full screen height
         expandButton.textContent = 'Close';
     } else {
         summarySection.classList.add('collapse');

@@ -442,132 +442,6 @@ document.getElementById('hamburger').addEventListener('click', function() {
     document.getElementById('modalBookingId').focus();
   });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const bookingId = urlParams.get('booking_id');
-
-    if (bookingId) {
-        fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error('Booking not found');
-                    return;
-                }
-
-                // Populate the modal with the fetched data
-                document.getElementById('modalBookingId').textContent = data.bookingId;
-                document.getElementById('modalName').textContent = data.name;
-                document.getElementById('modalContact').textContent = data.contact;
-                document.getElementById('modalGender').textContent = data.gender;
-                document.getElementById('modalDateRange').textContent = data.dateRange;
-                document.getElementById('modalTimeRange').textContent = data.timeRange;
-                document.getElementById('modalHours').textContent = data.hours;
-                document.getElementById('modalAdults').textContent = data.adult;
-                document.getElementById('modalChild').textContent = data.child;
-                document.getElementById('modalPwd').textContent = data.pwds;
-                document.getElementById('modalTotalPax').textContent = data.totalPax;
-                document.getElementById('modalRoomType').textContent = data.type;
-
-                // Populate rooms
-                const roomsContainer = document.getElementById('modalRooms');
-                roomsContainer.innerHTML = '';
-                let ronum = 1;
-                data.roomName.forEach(room => {
-                    const roomElement = document.createElement('div');
-                    roomElement.classList.add('room-detail', 'col-3', 'col-md-3');
-                    roomElement.innerHTML = `<strong>Room ${ronum}:</strong> ${room.roomName}<br>`;
-                    roomsContainer.appendChild(roomElement);
-                    ronum++;
-                });
-
-                document.getElementById('modalAdds').textContent = data.additional;
-                document.getElementById('modalPaymode').textContent = data.paymode;
-                document.getElementById('modalTotalBill').textContent = data.totalBill;
-                document.getElementById('modalBalance').textContent = data.balance;
-                document.getElementById('modalrefNum').textContent = data.refNumber;
-                const modalBody = document.getElementById('modal-IMAGE');
-                modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
-
-                const chatButton = document.querySelector('.modal-footer .btn:nth-child(1)');
-                const editButton = document.querySelector('.modal-footer .btn:nth-child(2)');
-                const cancelButton = document.querySelector('#cancelButton');
-
-                console.log(data.status);
-                switch (data.status) {
-                    case 'Pending':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'none';
-                      cancelButton.style.display = 'block';
-                      break;
-                    case 'Cancellation1':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'none';
-                      cancelButton.style.display = 'block';
-                      break;
-                    case 'Cancellation2':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'none';
-                      cancelButton.style.display = 'block';
-                      break;
-                    case 'Rejected':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'none';
-                      cancelButton.style.display = 'none';
-                      break;
-                    case 'Cancelled':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'none';
-                      cancelButton.style.display = 'none';
-                      break;
-                    case 'Completed':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'none';
-                      cancelButton.style.display = 'none';
-                      break;
-                    case 'Approved':
-                      chatButton.style.display = 'block';
-                      editButton.style.display = 'block';
-                      cancelButton.style.display = 'block';
-                      break; // All buttons remain visible
-                }
-
-                // Show the modal
-                $('#reservationModal').modal('show');
-            })
-            .catch(error => console.error('Error fetching data:', error));
-        }
-    });
-
-document.addEventListener('DOMContentLoaded', () => {
-  const tableIndex = new DataTable('#example', {
-        columnDefs: [
-            {
-                searchable: false,
-                orderable: false,
-                targets: 0
-            }
-        ],
-        order: [],
-        paging: true,
-        scrollY: '100%'
-    });
- 
- tableIndex.on('mouseenter', 'td', function () {
-     let colIdx = tableIndex.cell(this).index().column;
-  
-     tableIndex
-         .cells()
-         .nodes()
-         .each((el) => el.classList.remove('highlight'));
-  
-     tableIndex
-         .column(colIdx)
-         .nodes()
-         .each((el) => el.classList.add('highlight'));
- });
-});
-
 $(document).ready(function() {
         function updateNotificationCount() {
             $.ajax({
@@ -613,21 +487,89 @@ $(document).ready(function() {
     });
 
 document.addEventListener('DOMContentLoaded', () => {
+  const tableIndex = new DataTable('#example', {
+        columnDefs: [
+            {
+                searchable: false,
+                orderable: false,
+                targets: 0
+            }
+        ],
+        order: [0, 'asc'],
+        paging: true,
+        scrollY: '100%'
+    });
+ 
+ tableIndex.on('mouseenter', 'td', function () {
+     let colIdx = tableIndex.cell(this).index().column;
+  
+     tableIndex
+         .cells()
+         .nodes()
+         .each((el) => el.classList.remove('highlight'));
+  
+     tableIndex
+         .column(colIdx)
+         .nodes()
+         .each((el) => el.classList.add('highlight'));
+ });
+  const urlParams = new URLSearchParams(window.location.search);
+  const bookingId1 = urlParams.get('booking_id');
 
-let bookingIds;
+  if(bookingId1){
+      modal(bookingId1);
+  }
+  let bookingIds;
 
     // Event delegation to handle row click events
-    document.querySelector('tbody').addEventListener('click', function (event) {
-        // Ensure the clicked element is a table row
-        const row = event.target.closest('.table-row');
-        if (row) {
-            const bookingId = row.dataset.bookingId; // Get the booking ID
-            bookingIds = bookingId;
+  document.querySelector('tbody').addEventListener('click', function (event) {
+      // Ensure the clicked element is a table row
+      const row = event.target.closest('.table-row');
+      if (row) {
+          const bookingId = row.dataset.bookingId; // Get the booking ID
+          bookingIds = bookingId;
 
-            //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
-            
-            // Fetch the booking details from the server
-            fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
+          modal(bookingIds);
+      }
+  });
+  const viewReceiptButton = document.getElementById('modalProof');
+  if (viewReceiptButton) {
+      viewReceiptButton.addEventListener('click', function () {
+          // Check if the modal exists before opening
+          const gcashModal = document.getElementById('gcashReceiptModal');
+          const modal = new bootstrap.Modal(gcashModal);
+          modal.show();
+      });
+  }
+    // Add event listener for closing the GCash Receipt modal and show Reservation modal
+  const gcashModal = document.getElementById('gcashReceiptModal');
+  if (gcashModal) {
+      gcashModal.addEventListener('hidden.bs.modal', function () {
+          const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+          reservationModal.show();
+      });
+  }
+
+    function cancelBooking() {
+      if (bookingIds) { // Make sure bookingId is set
+          // Navigate to the cancellation page with the bookingId
+          window.location.href = `cancellation_form.php?id=${bookingIds}`;
+      } else {
+          console.log("No bookingId found!");
+      }
+    }
+    function editBooking() {
+      if (bookingIds) { // Make sure bookingId is set
+          window.location.href = `my-edit-reservation.php?id=${bookingIds}`;
+      } else {
+          console.log("No bookingId found!");
+      }
+    }
+    document.getElementById('editButton').addEventListener('click', editBooking);
+    document.getElementById('cancelButton').addEventListener('click', cancelBooking);
+
+    function modal(bookingId){
+      fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -716,43 +658,7 @@ let bookingIds;
                     $('#reservationModal').modal('show');
                 })
                 .catch(error => console.error('Error fetching data:', error));
-        }
-    });
-    const viewReceiptButton = document.getElementById('modalProof');
-    if (viewReceiptButton) {
-        viewReceiptButton.addEventListener('click', function () {
-            // Check if the modal exists before opening
-            const gcashModal = document.getElementById('gcashReceiptModal');
-            const modal = new bootstrap.Modal(gcashModal);
-            modal.show();
-        });
     }
-    // Add event listener for closing the GCash Receipt modal and show Reservation modal
-  const gcashModal = document.getElementById('gcashReceiptModal');
-  if (gcashModal) {
-      gcashModal.addEventListener('hidden.bs.modal', function () {
-          const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-          reservationModal.show();
-      });
-  }
-
-    function cancelBooking() {
-    if (bookingIds) { // Make sure bookingId is set
-        // Navigate to the cancellation page with the bookingId
-        window.location.href = `cancellation_form.php?id=${bookingIds}`;
-    } else {
-        console.log("No bookingId found!");
-    }
-    }
-    function editBooking() {
-        if (bookingIds) { // Make sure bookingId is set
-            window.location.href = `my-edit-reservation.php?id=${bookingIds}`;
-        } else {
-            console.log("No bookingId found!");
-        }
-    }
-    document.getElementById('editButton').addEventListener('click', editBooking);
-document.getElementById('cancelButton').addEventListener('click', cancelBooking);
 
 });
 

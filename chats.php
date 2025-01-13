@@ -312,9 +312,10 @@
 
     $(document).ready(function () {
     const userId = '<?php echo $userId; ?>';
-    let isAutoScrollEnabled = true; // Flag to control auto-scroll
+    let isAutoScrollEnabled = true;
     let offset = 0;
     const limit = 20; 
+    const chatArea = $('#chat-area');
 
     function fetchMessages(initialLoad = true) {
         $.ajax({
@@ -328,7 +329,6 @@
                 const today = new Date().toISOString().split('T')[0];
                 let hasMoreMessages = false; 
 
-                // Check if we have any messages
                 if (messages.length > limit) {
                     hasMoreMessages = true;
                 }
@@ -336,7 +336,6 @@
                 messages.forEach((msg) => {
                     const [messageDate, messageTime] = msg.timestamp.split(' ');
 
-                    // Convert time to 12-hour format
                     const timeParts = messageTime.split(':');
                     let hours = parseInt(timeParts[0]);
                     const minutes = timeParts[1];
@@ -345,16 +344,11 @@
                     const formattedTime = `${hours}:${minutes} ${ampm}`;
 
                     if (messageDate !== lastDate) {
-                    lastDate = messageDate;
-
-                    const dateLabel = messageDate === today ? 'Today' : lastDate;
-                    chatHTML += `
-                        <div class="date-stamp">
-                            <span>${dateLabel}</span>
-                        </div>`;
+                        lastDate = messageDate;
+                        const dateLabel = messageDate === today ? 'Today' : lastDate;
+                        chatHTML += `<div class="date-stamp"><span>${dateLabel}</span></div>`;
                     }
 
-                    // Add message content
                     if (msg.role === 'admin') {
                         chatHTML += `
                             <div class="message received">
@@ -375,70 +369,69 @@
                     }
                 });
 
-                const chatArea = $('#chat-area');
+                if (!chatArea[0].classList.contains("active")) {
+                    scrollToBottom();
+                }
+
                 const wasAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
 
                 if (initialLoad) {
-                    chatArea.html(chatHTML); 
+                    chatArea.html(chatHTML);
                 } else {
-                    chatArea.prepend(chatHTML); 
+                    chatArea.prepend(chatHTML);
                 }
 
-                // Check if there are more messages to load
                 if (hasMoreMessages) {
-                    $('#load-more').show(); 
+                    $('#load-more').show();
                 } else {
-                    $('#load-more').hide(); 
-                }
-
-                // Auto-scroll logic
-                if (isAutoScrollEnabled || wasAtBottom) {
-                    chatArea.scrollTop(chatArea[0].scrollHeight); // Scroll to bottom
+                    $('#load-more').hide();
                 }
             }
         });
     }
+
 
     setInterval(fetchMessages, 2000);
+
     $('#send-message').click(function () {
-    const message = $('#message-input').val().trim();
+        const message = $('#message-input').val().trim();
 
-    if (message.length > 0) {
-        $.ajax({
-            url: 'send_message1.php',
-            method: 'POST',
-            data: { user_id: userId, message: message },
-            success: function (response) {
-                const result = JSON.parse(response);
-                if (result.success) {
-                    $('#message-input').val(''); // Clear input
-                    fetchMessages(); // Refresh chat
-                } else {
-                    alert('Error sending message.');
+        if (message.length > 0) {
+            $.ajax({
+                url: 'send_message1.php',
+                method: 'POST',
+                data: { user_id: userId, message: message },
+                success: function (response) {
+                    const result = JSON.parse(response);
+                    if (result.success) {
+                        $('#message-input').val('');
+                        scrollToBottom();
+                    } else {
+                        alert('Error sending message: ' + (result.error || 'Unknown error'));
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('AJAX error: ' + error);
                 }
-            }
-        });
-    }
-});
+            });
+        }
+    });
 
-    // Load more messages when the button is clicked
     $('#load-more').on('click', function () {
         offset += limit; 
         fetchMessages();
     });
 
-    // Monitor scroll position to detect manual backreading
     $('#chat-area').on('scroll', function () {
-        const chatArea = $(this);
         const isAtBottom = (chatArea[0].scrollHeight - chatArea.scrollTop()) === chatArea.outerHeight();
-
-        if (isAtBottom) {
-            isAutoScrollEnabled = true;
-        } else {
-            isAutoScrollEnabled = false;
-        }
+        isAutoScrollEnabled = isAtBottom;
     });
+
+    function scrollToBottom() {
+        chatArea.scrollTop(chatArea[0].scrollHeight);
+    }
 });
+
 
 
 

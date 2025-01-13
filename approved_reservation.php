@@ -8,9 +8,6 @@
         if(isset($_POST['bookingId'])){
         $bookingId = $_POST['bookingId'];
     
-        // Here, connect to the database and update the booking status
-        // Example using PDO for a MySQL database
-    
         try {
             // Prepare the SQL query to update the booking status
             $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Completed' WHERE booking_id = :bookingId");
@@ -575,7 +572,7 @@
                                     <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($statustext); ?></span></td>
                             <?php endforeach; ?>
                             <?php elseif(empty($results)):?>
-                                <td colspan="7" style="text-align: center;">No Approved Reservations</td>
+                                <td style="text-align: center;">No Approved Reservations</td>
                                 </tr>
                         <?php endif ?>
                         </tbody>
@@ -790,11 +787,9 @@
         columnDefs: [
             {
                 searchable: false,
-                orderable: false,
                 targets: 0
             }
         ],
-        order: [],
         paging: true,
         scrollY: '100%'
     });

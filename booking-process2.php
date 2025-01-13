@@ -336,6 +336,13 @@
                 width: 100% !important;
             }
         }
+        @media(max-height: 840px){
+            .scrollable-table{
+                max-height: 300px; /* Adjust as needed */
+                overflow-y: auto;
+                overflow-x: hidden; /* Prevent horizontal scrolling if not needed */
+            }
+        }
     </style>
 </head>
 <body>
@@ -536,6 +543,7 @@
                 </div>
 
                 <!-- Total Calculation Section -->
+            <div class="scrollable-table">
                 <table class="w-100 text-light">
                     <tr>
                         <td>Original Rate:</td>
@@ -604,7 +612,7 @@
                         <td class="text-end"><p id="PaymentChoice">none</p></td>
                     </tr>
                 </table>
-
+            </div>
                 <button type="submit" class="btn btn-primary w-100 mt-3" onclick="submitFormAndRedirect()" >Continue</button>
             </div>
         </div>

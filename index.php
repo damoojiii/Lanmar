@@ -644,29 +644,20 @@ $descriptions = [];
     let i;
     const slides = document.getElementsByClassName("mySlides");
     const dots = document.getElementsByClassName("dot");
-
-    // Correcting slideIndex if it's out of bounds
-    if (n > slides.length) { slideIndex = 1; }
-    if (n < 1) { slideIndex = slides.length; }
-
-    // Hide all slides
+    
+    if (n > slides.length) { slideIndex = 1 }
+    if (n < 1) { slideIndex = slides.length }
+    
     for (i = 0; i < slides.length; i++) {
-        slides[i].style.display = "none";
+      slides[i].style.display = "none";  
+    }
+    for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" active", "");
     }
     
-    // Remove "active" class from all dots
-    for (i = 0; i < dots.length; i++) {
-        dots[i].className = dots[i].className.replace(" active", "");
-    }
-
-    // Show the current slide and add "active" class to the corresponding dot
-    if (slides[slideIndex - 1]) {
-        slides[slideIndex - 1].style.display = "block";
-    }
-    if (dots[slideIndex - 1]) {
-        dots[slideIndex - 1].className += " active";
-    }
-}
+    slides[slideIndex - 1].style.display = "block";  
+    dots[slideIndex - 1].className += " active";
+  }
 
 
   // Optional: Automatic slideshow

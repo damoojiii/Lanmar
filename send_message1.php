@@ -8,7 +8,7 @@ try {
     $read = 0;
 
     $stmt = $pdo->prepare("
-        INSERT INTO message_tbl (sender_id, receiver_id, msg, timestamp, is_read)
+        INSERT INTO message_tbl (sender_id, receiver_id, msg, timestamp, is_read_admin)
         VALUES (:senderId,:adminId,:message, NOW(), :read)
     ");
     $stmt->execute([
