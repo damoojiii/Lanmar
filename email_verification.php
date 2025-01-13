@@ -6,14 +6,12 @@ if (isset($_POST["verify_email"])) {
     $email = $_POST["email"];
     $verification_code = $_POST["verification_code"];
 
-    $conn = mysqli_connect("localhost", "root", "", "lanmartest");
-
     $sql = "UPDATE users SET email_verify = NOW() WHERE email = '$email' AND verification_code = '$verification_code'";
     $result = mysqli_query($conn, $sql);
 
     if (mysqli_affected_rows($conn)==0) 
     {
-        $email = $_POST['email']; // or however you are getting the email
+        $email = $_POST['email']; 
 
         $delete_query = "DELETE FROM users WHERE email = ?";
         $delete_stmt = $conn->prepare($delete_query);
@@ -57,6 +55,8 @@ if (isset($_POST["verify_email"])) {
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: auto;
+            margin-inline: auto;
+            align-content: center;
         }
         .btn{
             background: #19315D;
@@ -76,8 +76,13 @@ if (isset($_POST["verify_email"])) {
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="">
+                        <?php if (!empty($_SESSION['error'])): ?>
+                            <div class="alert alert-danger"><?php echo htmlspecialchars($_SESSION['error']); ?></div>
+                        <?php endif; 
+                            unset($_SESSION['error']);
+                        ?>
                         <div class="mb-3">
-                            <input type="hidden" class="form-control" name="email" value="<?php echo $_GET['email']; ?>" required>
+                            <input type="hidden" class="form-control" name="email" value="<?php echo $_GET['email']?? $_SESSION['email']; ?>" required>
                         </div>
                         <h6>If not found, check your <strong>All mail</strong> or <strong>Spam</strong></h6>
                         <div class="mb-3">

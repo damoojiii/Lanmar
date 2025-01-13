@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+include("connection.php");
 include "role_access.php";
 checkAccess('admin');
 
@@ -8,11 +9,8 @@ checkAccess('admin');
 $success_message = $_SESSION['success_message'] ?? "";
 $error_message = $_SESSION['error_message'] ?? "";
 
-// Clear the messages so they don't show up again on refresh
 unset($_SESSION['success_message']);
 unset($_SESSION['error_message']);
-
-include("connection.php");
 
 $user_id = $_SESSION['user_id'];
 
@@ -502,7 +500,7 @@ $stmt->close();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>

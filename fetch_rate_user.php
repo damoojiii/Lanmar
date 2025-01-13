@@ -1,10 +1,5 @@
 <?php
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(['error' => $e->getMessage()]);
-}
+include("connection.php");
 
 $dateIn = $_POST['dateIn'];
 $dateOut = $_POST['dateOut'];

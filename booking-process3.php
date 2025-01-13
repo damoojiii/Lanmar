@@ -1,11 +1,6 @@
 <?php 
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-    }   
     session_start();
+    include("connection.php");
     include "role_access.php";
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
@@ -463,8 +458,12 @@
             </div>
             <div class="summary">
                 <h2>Thank You For Choosing <br> Lanmar Resort</h2>
-                <p>If you want two elements with specific dimensions (30px by 70px) displayed side by side horizontally, you can define their width and height in CSS. Here's an example using Flexbox:</p><br><br>
-                <div><a href="" onclick="printPage()" id="makePDF">Download Receipt</a></div>
+                <p>We appreciate your interest in experiencing the serene ambiance and luxurious amenities our resort has to offer. <br><br> Please note that your reservation is currently being processed, and we will confirm your stay with us as soon as possible. Due to high demand, we kindly ask for your patience as we work diligently to accommodate all our valued guests. </p><br><br>
+                <div class="d-flex justify-content-start">
+                    <div class="me-2"><a href="" onclick="printPage()" class="btn btn-primary btn-sm" id="makePDF">Download Receipt</a></div>
+                    <div><a href="my-reservation.php" class="btn btn-secondary btn-sm">Check my reservation</a></div>
+                </div>
+                
             </div>
         </div>
     </div>

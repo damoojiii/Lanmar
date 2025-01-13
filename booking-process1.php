@@ -1,11 +1,6 @@
-<?php 
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-    }   
+<?php    
     session_start();
+    include "connection.php";
     include "role_access.php";
     checkAccess('user');
     $userId = $_SESSION['user_id'];
@@ -652,9 +647,6 @@
                         <div class="col">
                             <h6 class="mb-0">Booked Rooms</h6>
                         </div>
-                        <div class="col-auto">
-                            <button type="button" class="btn btn-secondary btn-sm">Reset</button>
-                        </div>
                     </div>
                 
                     <div id="booked-rooms" class="mb-3">
@@ -694,7 +686,6 @@
 
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -1074,8 +1065,11 @@ function removeRoomIdFromForm(roomId) {
     const inputs = form.querySelectorAll('input[name="roomIds[]"]');  // Get all hidden inputs with name 'roomIds[]'
 
     inputs.forEach(input => {
-        if (input.value === roomId) {
-            form.removeChild(input);  // Remove the matching input from the form
+        if (input.value === String(roomId)) {
+            const parent = input.parentNode;
+            console.log(parent.removeChild(input)); // Get the parent node of the input element
+            parent.removeChild(input);  // Remove the matching input from the form
+            
         }
     });
 }

@@ -1,10 +1,8 @@
 <?php
-
 session_start();
+include("connection.php");
 include "role_access.php";
 checkAccess('admin');
-
-include "connection.php";
 
 $success_message = "";
 $error_message = "";

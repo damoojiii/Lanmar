@@ -1,23 +1,15 @@
 <?php
     date_default_timezone_set('Asia/Manila');
 
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "lanmartest";
-
-    $con = new mysqli($servername, $username, $password, $dbname);
-
-    if($con->connect_error){
-        die("Connection Failed".$con->connect_error);
-    }
+    session_start();
+    include("connection.php");
 
     $today = date('Y-m-d');
     $sql = "SELECT dateIn, dateOut, checkin, checkout, hours 
         FROM booking_tbl 
         WHERE (dateIn >= '$today' OR dateOut >= '$today') 
         AND status NOT IN ('Cancelled', 'Rejected')";
-    $result = $con->query($sql);
+    $result = $conn->query($sql);
 
     $bookings = array();
     if ($result->num_rows > 0) {

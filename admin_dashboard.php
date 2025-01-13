@@ -1,8 +1,10 @@
-<?php 
+<?php
+    session_start();
+    include("connection.php");
+    include "role_access.php";
+    checkAccess('admin');
+
     try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
         $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations FROM booking_tbl WHERE status = 'Pending'");
         $pending_stmt->execute();
         $pending_data = $pending_stmt->fetch(PDO::FETCH_ASSOC);
@@ -32,10 +34,6 @@
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
     }
-
-    session_start();
-    include "role_access.php";
-    checkAccess('admin');
     
 ?>
 

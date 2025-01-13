@@ -1,14 +1,7 @@
 <?php
+include("connection.php");
 if (isset($_GET['room_id'])) {
     $room_id = filter_input(INPUT_GET, 'room_id', FILTER_SANITIZE_NUMBER_INT);
-
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-        exit;
-    }
 
     $stmt = $pdo->prepare("SELECT room_name, image_path, description, minpax, maxpax, price, is_offered FROM rooms WHERE room_id = ?");
     $stmt->execute([$room_id]);

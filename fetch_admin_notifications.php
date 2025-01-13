@@ -1,8 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Manila'); 
+include("connection.php");
 try{
-$pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 function timeAgo($timestamp) {
     $timeAgo = '';

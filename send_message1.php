@@ -1,7 +1,6 @@
 <?php
+include("connection.php");
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $senderId = $_POST['user_id'];
     $adminId = 9;

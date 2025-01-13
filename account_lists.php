@@ -1,7 +1,6 @@
 <?php
-
-include("connection.php");
 session_start();
+include("connection.php");
 include "role_access.php";
 checkAccess('admin');
 
@@ -25,7 +24,7 @@ if (isset($_GET['unblockid'])) {
     $rid = intval($_GET['unblockid']);
     $sql = "UPDATE users SET status='1' WHERE user_id=?";
     $query = $conn->prepare($sql);
-    $query->bind_param("i", $rid); // Use "i" for integer type
+    $query->bind_param("i", $rid);
     $query->execute();
     
     if ($query->affected_rows > 0) {

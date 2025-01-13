@@ -36,6 +36,9 @@ if (isset($_POST['login'])) {
                     } elseif ($user['role'] === 'user') {
                         if ($user['email_verify'] === NULL) {
                             $error = "Please verify your email before logging in.";
+                            $_SESSION['error'] = $error;
+                            header("Location: email_verification.php");
+                            exit();
                         } else {
                             header("Location: index1.php");
                             exit();

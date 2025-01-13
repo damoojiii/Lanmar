@@ -1,12 +1,10 @@
 <?php
 date_default_timezone_set('Asia/Manila'); 
 session_start();
+include("connection.php");
 $userId = $_SESSION['user_id'];
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-
+    
     function timeAgo($timestamp) {
         $timeAgo = '';
         $currentTime = new DateTime();

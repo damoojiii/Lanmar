@@ -1,13 +1,7 @@
 <?php
     date_default_timezone_set('Asia/Manila'); 
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-    }
-// Start the session at the very beginning of the file
     session_start();
+    include("connection.php");
     include "role_access.php";
     checkAccess('admin');
 

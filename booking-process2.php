@@ -1,11 +1,6 @@
 <?php 
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-    }   
     session_start();
+    include("connection.php");
     include "role_access.php";
     checkAccess('user');
 
@@ -427,11 +422,12 @@
     $totalPax = $_SESSION['totalpax'] ?? '';
     $origPrice = $_SESSION['original'] ?? '';
     $paxCharges = $_SESSION['paxcharges'] ?? '';
+    $roomTotal = $_SESSION['roomTotal'] ?? '';
     $additionalCharges = $_SESSION['additional_rate'] ?? '';
-    $grandTotal = $origPrice + $paxCharges + $additionalCharges;
+    $grandTotal = $origPrice + $paxCharges + $additionalCharges + $roomTotal;
     $_SESSION['grandTotal'] = $grandTotal;
 
-    $roomTotal = $_SESSION['roomTotal'] ?? '';
+    
 
     $dateInDisplay = date("F j, Y" , strtotime($dateIn));
     $dateOutDisplay = date("F j, Y" , strtotime($dateOut));
@@ -572,7 +568,7 @@
                                     <?php if (!empty($rooms)): ?>
                                         <?php foreach ($rooms as $room): ?>
                                             <li>
-                                                <div class="d-flex justify-content-between">
+                                                <div class="d-flex justify-content-between mb-3">
                                                     <span>Room Name: <?php echo htmlspecialchars($room['room_name']); ?></span>
                                                     <span>Capacity: <?php echo htmlspecialchars($room['minpax']) . '-' . htmlspecialchars($room['maxpax']); ?> persons</span>
                                                 </div>

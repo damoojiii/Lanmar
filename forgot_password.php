@@ -1,8 +1,9 @@
 <?php
+session_start();
+include 'connection.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-include 'connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
@@ -18,7 +19,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         require './PHPMailer/src/Exception.php';
         require './PHPMailer/src/PHPMailer.php';
         require './PHPMailer/src/SMTP.php';
-        require './vendor/autoload.php';
 
         if (isset($_POST["submit"])) {
             $mail = new PHPMailer(true);
@@ -27,11 +27,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'fridaythe012@gmail.com';
-                $mail->Password = 'zaye hbft pwdh bqwo';
+                $mail->Username = $_ENV['MAIL_USERNAME'];
+                $mail->Password = $_ENV['MAIL_PASSWORD'];
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;
-                $mail->setFrom('your_email@gmail.com', 'Lanmar_Resort');
+                $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
                 $mail->addAddress($email, $fullname);
 
                 $mail->isHTML(true);

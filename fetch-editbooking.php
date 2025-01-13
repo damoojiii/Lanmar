@@ -3,19 +3,7 @@
 
     // Get the booking ID to exclude
     $id = $_GET['id'];
-
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "lanmartest";
-
-    // Create a connection
-    $con = new mysqli($servername, $username, $password, $dbname);
-
-    // Check the connection
-    if($con->connect_error){
-        die("Connection Failed: " . $con->connect_error);
-    }
+    include("connection.php");
 
     // Get today's date
     $today = date('Y-m-d');
@@ -25,7 +13,7 @@
             FROM booking_tbl 
             WHERE (dateIn >= '$today' OR dateOut >= '$today') AND booking_id != '$id'";
 
-    $result = $con->query($sql);
+    $result = $conn->query($sql);
 
     $bookings = array();
     if ($result->num_rows > 0) {
@@ -45,5 +33,5 @@
     echo json_encode($bookings);
 
     // Close the database connection
-    $con->close();
+    $conn->close();
 ?>

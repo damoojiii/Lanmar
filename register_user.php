@@ -1,13 +1,16 @@
 <?php
+
+session_start();
+include 'connection.php';
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require './PHPMailer/src/Exception.php';
 require './PHPMailer/src/PHPMailer.php';
 require './PHPMailer/src/SMTP.php';
-require './vendor/autoload.php';
 
-session_start();
+
 
 $error = "";
 $success = "";
@@ -46,8 +49,8 @@ if (isset($_POST["register"])) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'fridaythe012@gmail.com';
-        $mail->Password = 'zaye hbft pwdh bqwo';
+        $mail->Username = $_ENV['MAIL_USERNAME'];
+        $mail->Password = $_ENV['MAIL_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
@@ -63,8 +66,6 @@ if (isset($_POST["register"])) {
 
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Database connection
-        $conn = mysqli_connect("localhost", "root", "", "lanmartest");
         if (!$conn) {
             die("Connection failed: " . mysqli_connect_error());
         }
@@ -143,6 +144,7 @@ if (isset($_POST["register"])) {
             text-align: center;
             font-family: 'nautigal';
             font-size: 3rem;
+            font-weight: normal;
             margin: 0;
         }
         form {

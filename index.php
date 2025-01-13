@@ -22,7 +22,7 @@ if ($resultGallery->num_rows > 0) {
     }
 }
 try {
-  $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
+  $pdo = new PDO("mysql:host=$servername;dbname=$dbname", "$username", "");
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
   echo "Connection failed: " . $e->getMessage();
@@ -598,7 +598,6 @@ $descriptions = [];
           <!-- You can delete the links only if you've purchased the pro version. -->
           <!-- Licensing information: https://bootstrapmade.com/license/ -->
           <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
         </div>
       </div>
     </div>

@@ -1,10 +1,5 @@
 <?php 
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-    }
+    include("connection.php");
 
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {

@@ -36,18 +36,20 @@ $conn->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(to bottom right, #006994, #00FFFF);
+            background: linear-gradient(190deg, #6592F3, #3B558D);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: Arial, sans-serif;
         }
         .login-container {
-            background-color: white;
+            color: white;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            width: auto;
         }
     </style>
 </head>

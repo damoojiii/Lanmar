@@ -1,13 +1,6 @@
 <?php
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-    exit;
-}
-
 session_start();
+include("connection.php");
 include "role_access.php";
 checkAccess('user');
 

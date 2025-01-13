@@ -1,11 +1,6 @@
 <?php 
-    try {
-        $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-    }   
     session_start();
+    include("connection.php");
     include "role_access.php";
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
@@ -233,7 +228,6 @@
         <!-- Chat Header -->
         <div class="chat-header">
             <h3>Lanmar Resort</h3>
-            <span><i class="fa-solid fa-circle" style="color: #1ab106;"></i> Active now</span>
         </div>
 
         <!-- Chat Messages -->

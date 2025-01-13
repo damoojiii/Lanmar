@@ -1,14 +1,7 @@
 <?php
-// Database connection using PDO
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
-    exit();
-}
 
-// Function to fetch booking details by booking_id
+include("connection.php");
+
 function getBookingDetailsById($bookingId) {
     global $pdo;
 

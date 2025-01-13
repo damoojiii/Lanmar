@@ -1,5 +1,5 @@
 <?php
-include("connection.php"); // Ensure this file contains the correct connection code
+include("connection.php"); 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];

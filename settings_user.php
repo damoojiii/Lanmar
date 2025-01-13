@@ -1,10 +1,8 @@
 <?php
-// Start the session
 session_start();
+include("connection.php");
 include "role_access.php";
 checkAccess('user'); 
-
-include("connection.php");
 
 $success_message = "";
 $error_message = "";

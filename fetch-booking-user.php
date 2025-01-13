@@ -1,18 +1,8 @@
 <?php
     date_default_timezone_set('Asia/Manila');
 
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "lanmartest";
-
-    $con = new mysqli($servername, $username, $password, $dbname);
-
-    if($con->connect_error){
-        die("Connection Failed: " . $con->connect_error);
-    }
-    
     session_start();
+    include("connection.php");
     $userId = $_SESSION['user_id']; 
 
     $today = date('Y-m-d');
@@ -22,7 +12,7 @@
             AND (status NOT IN ('Cancelled', 'Rejected') 
             OR (status = 'Cancelled' AND user_id = '$userId'))";
             
-    $result = $con->query($sql);
+    $result = $conn->query($sql);
 
     $bookings = array();
     if ($result->num_rows > 0) {

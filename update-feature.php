@@ -1,11 +1,5 @@
 <?php
-try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-    exit;
-}
+include("connection.php");
 
 $data = json_decode(file_get_contents('php://input'), true);
 

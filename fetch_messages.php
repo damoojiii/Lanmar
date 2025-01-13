@@ -1,9 +1,8 @@
 <?php
+session_start();
+include("connection.php");
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
     $userId = $_GET['user_id'];
 
     $offset = isset($_GET['offset']) ? intval($_GET['offset']) : 0;

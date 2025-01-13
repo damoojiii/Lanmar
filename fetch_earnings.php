@@ -1,6 +1,5 @@
 <?php
-$pdo = new PDO("mysql:host=localhost;dbname=lanmartest", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+include("connection.php");
 
 if (isset($_GET['type'])) {
     $type = $_GET['type'];
