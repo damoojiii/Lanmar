@@ -667,7 +667,6 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 searchable: false,
                 orderable: false
-                orderable: false
             }
         ],
         order: [],
