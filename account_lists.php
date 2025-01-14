@@ -4,37 +4,43 @@ include("connection.php");
 include "role_access.php";
 checkAccess('admin');
 
-if (isset($_GET['delid'])) {
-    $rid = intval($_GET['delid']);
-    $sql = "UPDATE users SET status='0' WHERE user_id=?";
+function executeQuery($sql, $param, $successMessage, $errorMessage) {
+    global $conn;
     $query = $conn->prepare($sql);
-    $query->bind_param("i", $rid); // Use "i" for integer type
+    $query->bind_param("i", $param);
     $query->execute();
-    
-    if ($query->affected_rows > 0) {
-        echo "<script>alert('Blocked successfully');</script>";
-    } else {
-        echo "<script>alert('No user found or already blocked.');</script>";
-    }
-    
-    echo "<script>window.location.href = 'account_lists.php';</script>";
+    $message = ($query->affected_rows > 0) ? $successMessage : $errorMessage;
+    echo "<script>alert('$message');</script>";
 }
 
-if (isset($_GET['unblockid'])) {
-    $rid = intval($_GET['unblockid']);
+// Block user
+if (isset($_GET['bloid']) && isset($_GET['status'])) {
+    if ($_GET['status'] == 0){
+    $rid = intval($_GET['bloid']);
     $sql = "UPDATE users SET status='1' WHERE user_id=?";
-    $query = $conn->prepare($sql);
-    $query->bind_param("i", $rid);
-    $query->execute();
-    
-    if ($query->affected_rows > 0) {
-        echo "<script>alert('Unblocked successfully');</script>";
-    } else {
-        echo "<script>alert('No user found or already unblocked.');</script>";
+    executeQuery($sql, $rid, 'Blocked successfully', 'No user found or already blocked.');
     }
-    
-    echo "<script>window.location.href = 'account_lists.php';</script>";
+    else{
+        $rid = intval($_GET['bloid']);
+        $sql = "UPDATE users SET status='0' WHERE user_id=?";
+        executeQuery($sql, $rid, 'Unblocked successfully', 'No user found or already unblocked.');
+    }
+
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
 }
+
+// Delete user account
+if (isset($_GET['delid'])) {
+    $delid = intval($_GET['delid']);
+    $sql = "DELETE FROM users WHERE user_id=?";
+    executeQuery($sql, $delid, 'Account deleted successfully', 'No user found or already deleted.');
+
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+?>
 ?>
 
 <!DOCTYPE html>
@@ -46,6 +52,7 @@ if (isset($_GET['unblockid'])) {
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
     
     <style>
         @font-face {
@@ -345,13 +352,15 @@ if (isset($_GET['unblockid'])) {
 
         .table-full-width {
             width: 100%;
-            border-collapse: collapse; /* Optional: for better border handling */
         }
 
         .table-full-width th, .table-full-width td {
             padding: 8px; /* Optional: for spacing */
             text-align: left; /* Optional: for text alignment */
-            border: 1px solid #ddd; /* Optional: for borders */
+        }
+        thead.custom-header, thead.custom-header th {
+            background: linear-gradient(25deg,rgb(29, 69, 104),#19315D) !important;
+            color: white !important;
         }
 
         @media (max-width: 768px){
@@ -453,6 +462,12 @@ if (isset($_GET['unblockid'])) {
         <hr>
         <a href="logout.php" class="nav-link text-white">Log out</a>
     </div>
+    <?php
+        $query = "SELECT user_id, CONCAT(firstname, ' ', lastname) AS full_name, email, contact_number , email_verify, status FROM users";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    ?>
 
     <div id="main-content" class="p-3">
         <div class="flex-container">
@@ -463,94 +478,49 @@ if (isset($_GET['unblockid'])) {
                         See Blocked Users
                     </button>
                 </div>
-                <table class="table-full-width mt-4">
-                    <thead>
+                <table class="table table-full-width mt-4" id="example" style="width:100%">
+                    <thead class="custom-header">
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Contact Number</th>
+                            <th>Verified</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                    <?php
-                        $query = "SELECT user_id, CONCAT(firstname, ' ', lastname) AS full_name, email, contact_number FROM users WHERE status=1";
-                        $result = mysqli_query($conn, $query);
-
-                        if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_assoc($result)) { // Fetch each row
-                                ?>
-                                <tr>
+                    <?php if(!empty($results)): ?>
+                        <?php foreach ($results as $row): ?>
+                                <tr class="table-row">
                                     <td><?php echo htmlspecialchars($row['full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['contact_number']); ?></td>
+                                    <td><?php echo (!empty($row['email_verify'])) ? 'Verified' : 'No';?></td>
                                     <td>
-                                        <a href="account_lists.php?delid=<?php echo ($row['user_id']); ?>"
-                                            title="click for block"
-                                            onclick="return confirm('sure to block ?')">Block</i></a>
+                                        
+                                         
+                                        <?php if($row['status'] == 1):?>
+                                            <button class="blocks" onclick="if (confirm('Are you sure you want to unblock this user?')) { window.location.href='?bloid=<?php echo $row['user_id']; ?>&status=<?php echo $row['status']; ?>'; }">
+                                        <?php else: ?>
+                                            <button class="blocks" onclick="if (confirm('Are you sure you want to block this user?')) { window.location.href='?bloid=<?php echo $row['user_id']; ?>&status=<?php echo $row['status']; ?>'; }">
+                                        <?php endif ?>
+                                            <?php if($row['status'] == 1):?>
+                                            <i class="fa-regular fa-user"></i>
+                                            <?php else: ?>
+                                                <i class="fa-solid fa-user-slash"></i>
+                                            <?php endif ?>
+                                        </button>
+                                        <button class="delete" onclick="if (confirm('Are you sure you want to delete this user?')) { window.location.href='?delid=<?php echo urlencode($row['user_id']); ?>'; }">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                        
                                     </td>
                                 </tr>
-                    <?php
-                            }
-                        } else {
-                                echo "<tr><td colspan='4'>No accounts found.</td></tr>";
-                            }
-                            ?>
+                            <?php endforeach; ?>
+                        <?php endif ?>
                     </tbody>
                 </table>
                 
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal HTML -->
-    <div class="modal fade" id="blockedUsersModal" tabindex="-1" aria-labelledby="blockedUsersModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="blockedUsersModalLabel">Blocked Users</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="table-full-width">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Contact Number</th>
-                                <th>Email</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                        $query = "SELECT user_id, CONCAT(firstname, ' ', lastname) AS full_name, email, contact_number FROM users WHERE status=0";
-                        $result = mysqli_query($conn, $query);
-
-                        if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_assoc($result)) { // Fetch each row
-                                ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($row['full_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['contact_number']); ?></td>
-                                    <td>
-                                        <a href="account_lists.php?unblockid=<?php echo ($row['user_id']); ?>"
-                                            title="click for unblock"
-                                            onclick="return confirm('sure to unblock ?')">Unblock</i></a>
-                                    </td>
-                                </tr>
-                    <?php
-                            }
-                        } else {
-                                echo "<tr><td colspan='4'>No accounts found.</td></tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>
@@ -560,6 +530,8 @@ if (isset($_GET['unblockid'])) {
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+<script src="assets/DataTables/datatables.min.js"></script>
+
 <script>
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -585,6 +557,41 @@ if (isset($_GET['unblockid'])) {
             collapse.style.height = '0px';
         });
     });
+    document.addEventListener('DOMContentLoaded', () => {
+    function jsRenderCOL(data, type, row, meta) {
+            var dataRender;
+            if (data !== "dummy") {
+                dataRender = "you as dummy";
+            }
+            return dataRender;
+        }
+        
+        const tableIndex = new DataTable('#example', {
+            columnDefs: [
+                {
+                    searchable: false,
+                    orderable: false
+                }
+            ],
+            order: [],
+            paging: true,
+            scrollY: '100%'
+        });
+    
+    tableIndex.on('mouseenter', 'td', function () {
+        let colIdx = tableIndex.cell(this).index().column;
+    
+        tableIndex
+            .cells()
+            .nodes()
+            .each((el) => el.classList.remove('highlight'));
+    
+        tableIndex
+            .column(colIdx)
+            .nodes()
+            .each((el) => el.classList.add('highlight'));
+    });
+});
 
 </script>
 </body>

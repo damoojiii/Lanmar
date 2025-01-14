@@ -527,10 +527,12 @@
                 cancel_tbl.cancel_id, cancel_tbl.booking_id, cancel_tbl.cancellation_reason,
                 booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours,
                 users.firstname, users.lastname, users.contact_number, users.user_id
-            FROM cancel_tbl
-            LEFT JOIN booking_tbl ON cancel_tbl.booking_id = booking_tbl.booking_id
-            LEFT JOIN users ON booking_tbl.user_id = users.user_id
-            WHERE booking_tbl.status = 'Cancellation2' ORDER BY timestamp DESC
+            FROM booking_tbl
+            LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+            LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
+            LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
+            LEFT JOIN users ON booking_tbl.user_Id = users.user_id
+            WHERE booking_tbl.status = 'Approved' ORDER BY booking_id DESC
         ";
         $stmt = $pdo->prepare($sql_solo);
         $stmt->execute();
@@ -665,6 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 searchable: false,
                 orderable: false
+                orderable: false
             }
         ],
         order: [],
@@ -695,6 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bookingId = row.dataset.bookingId;
 
             //window.location.href = `cancellationfetch.php?cancel_id=${bookingId}`;
+            //window.location.href = `cancellationfetch.php?cancel_id=${bookingId}`;
             
             // Fetch the booking details from the server
             fetch(`cancellationfetch.php?cancel_id=${cancelId}`)
@@ -707,10 +711,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Populate the modal with the fetched data
                     document.getElementById('modalCId').textContent = data.cancelId;
+                    document.getElementById('modalCId').textContent = data.cancelId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
+                    document.getElementById('modalReason').textContent = data.reason;
                     document.getElementById('modalReason').textContent = data.reason;
 
                     // Show the modal
