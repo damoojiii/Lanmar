@@ -8,13 +8,17 @@ checkAccess('admin');
 // Get any messages from session
 $success_message = $_SESSION['success_message'] ?? "";
 $error_message = $_SESSION['error_message'] ?? "";
+$success_message1 = $_SESSION['success_message1'] ?? "";
+$error_message1 = $_SESSION['error_message1'] ?? "";
+
 
 unset($_SESSION['success_message']);
 unset($_SESSION['error_message']);
+unset($_SESSION['success_message1']);
+unset($_SESSION['error_message1']);
 
 $user_id = $_SESSION['user_id'];
 
-$stmt = $conn->prepare("SELECT firstname, lastname, email, contact_number,profile FROM users WHERE user_id = ?");
 $stmt = $conn->prepare("SELECT firstname, lastname, email, contact_number,profile FROM users WHERE user_id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -46,7 +50,11 @@ $stmt->close();
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
+        }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -57,17 +65,16 @@ $stmt->close();
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
-            z-index: 1000;
+            z-index: 199;
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -188,9 +195,9 @@ $stmt->close();
         }
         .settings-form button, 
         .save-btn {
-            border-radius: 10   px !important;  /* Added !important to override Bootstrap */
-            padding: 13px 30px;
-            background-color: #03045e;
+            border-radius: 10px !important; 
+            padding: 10px 15px;
+            background-color: rgb(29, 69, 104);
             border: none;
             cursor: pointer;
             color: white;
@@ -254,68 +261,57 @@ $stmt->close();
             margin-left: 250px; /* Add margin to align with sidebar */
         }
 
-        @media (max-width: 768px) {
-            #sidebar {
-                position: absolute;
-                transform: translateX(-100%);
-            }
-            
-            #sidebar.show {
-                transform: translateX(0);
-            }
-
-            .main-section {
-                margin-left: 0; /* Remove margin on mobile */
-            }
-        }
-        @media (max-width: 480px) {
-            .main-section {
-                margin-left: 0; /* Remove margin on mobile */
-            }
-        }
-
         @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            .main-section {
+                margin-left: 0; /* Remove margin on mobile */
             }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
+            .main-content{
+                padding: 0;
             }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
             }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
 
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
+            }
+            #header span{
+                display: block;
+            }
+            #header.shifted .font-logo-mobile{
+                display: none;
+            }
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
+            }
+            .logout{
+                margin-bottom: 3rem;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -372,7 +368,9 @@ $stmt->close();
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
         
     <div id="main-content" class="p-3">
@@ -426,69 +424,74 @@ $stmt->close();
                     <div class="col-md-8 mb-4"><!-- Second column - All other inputs -->
                         <div class="card shadow-sm">
                             <div class="card-body">
-                            <?php if ($success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
-                            <?php endif; ?>
+                                <?php if ($success_message): ?>
+                                    <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
+                                <?php endif; ?>
+                                <?php if ($error_message): ?>
+                                    <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
+                                <?php endif; ?>
                                 <form class="settings-form" method="POST" action="update_personal_info.php">
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label for="firstname" class="form-label">First Name</label>
                                                 <input type="text" class="form-control" id="firstname" name="firstname" 
-                                                    value="<?php echo htmlspecialchars($firstname); ?>" readonly>
+                                                    value="<?php echo htmlspecialchars($firstname); ?>">
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label for="lastname" class="form-label">Last Name</label>
                                                 <input type="text" class="form-control" id="lastname" name="lastname" 
-                                                value="<?php echo htmlspecialchars($lastname); ?>" readonly>
+                                                value="<?php echo htmlspecialchars($lastname); ?>">
                                             </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" id="email" name="email" 
-                                                value="<?php echo htmlspecialchars($email); ?>" readonly>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" name="email" 
+                                                    value="<?php echo htmlspecialchars($email); ?>">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="contact_number" class="form-label">Contact Number</label>
+                                                <input type="tel" class="form-control" id="contact_number" name="contact_number" 
+                                                    value="<?php echo htmlspecialchars($contact_number); ?>" required>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="contact_number" class="form-label">Contact Number</label>
-                                            <input type="tel" class="form-control" id="contact_number" name="contact_number" 
-                                                value="<?php echo htmlspecialchars($contact_number); ?>" required>
-                                        </div>
-
                                     <div class="button-container text-center">
                                         <button type="submit" name="update_personal_info" class="save-btn">Update Changes</button>
                                     </div>
                                 </form>
                                         <hr class="my-4">
                                         <h5 class="card-title mb-3">Change Password</h5>
-                                                               <form class="settings-form" method="POST" action="update_password.php" >
-                                    <div class="mb-3">
-                                            <input type="hidden" class="form-control" id="email" name="email" 
-                                                value="<?php echo htmlspecialchars($email); ?>" readonly>
-                                        </div>
-                                    <div class="mb-3">
-                                        <label for="new_password" class="form-label">New Password</label>
-                                        <input type="password" class="form-control" id="new_password" name="new_password" required>
-                                    </div>
-                                    <?php if (isset($_GET['error'])): ?>
+                                        <?php if ($error_message1): ?>
                                         <div class="alert alert-danger">
-                                            <?php echo htmlspecialchars($_GET['error']); ?>
+                                            <?php echo htmlspecialchars($error_message1); ?>
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if (isset($_GET['success'])): ?>
+                                    <?php if ($success_message1): ?>
                                         <div class="alert alert-success">
-                                            <?php echo htmlspecialchars($_GET['success']); ?>
+                                            <?php echo htmlspecialchars($success_message1); ?>
                                         </div>
                                     <?php endif; ?>
+                                <form class="settings-form" method="POST" action="update_password.php">
                                     <div class="mb-3">
-                                        <label for="confirm_password" class="form-label">Confirm Password</label>
-                                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                                        <label for="current_password" class="form-label">Current Password</label>
+                                        <input type="password" class="form-control" id="current_password" name="current_password" required>
                                     </div>
-                                    
-                                    <div class="text-end">
-                                        <button type="submit" class="btn" id="update_password">Update Password</button>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="new_password" class="form-label">New Password</label>
+                                            <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="message"></div>
+                                    </div>
+                                    <div class="button-container text-end">
+                                        <button type="submit" name="update_password" class="btn" id="update_password" >Update Password</button>
                                     </div>
                                 </form>
                             </div>
@@ -505,21 +508,16 @@ $stmt->close();
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
-        function toggleSidebar() {
+        document.getElementById('hamburger').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const header = document.getElementById('header');
-
             sidebar.classList.toggle('show');
-
-            if (sidebar.classList.contains('show')) {
-                mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-                header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-            } else {
-                mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-                header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-            }
-        }
+            
+            const navbar = document.getElementById('header');
+            navbar.classList.toggle('shifted');
+            
+            const mainContent = document.getElementById('main-content');
+            mainContent.classList.toggle('shifted');
+        });
 
         document.querySelectorAll('.collapse').forEach(collapse => {
             collapse.addEventListener('show.bs.collapse', () => {
@@ -532,49 +530,40 @@ $stmt->close();
     </script>
 
     <script>
-        var pass = document.getElementById("password");
-        var msg = document.getElementById("message");
-        var strength = document.getElementById("strength");
-        var arrow = document.querySelector("button[name='update_password']");
+         $(document).ready(function() {
+        var $pass = $("#new_password");
+        var $button = $("button[name='update_password']");
+        var $form = $("form[action='update_password.php']");
 
-        arrow.addEventListener("click", function(event) {
+        $button.on("click", function(event) {
             // Prevent form submission initially
             event.preventDefault();
 
-            if (pass.value.length === 0) {
+            var passValue = $pass.val();
+
+            if (passValue.length === 0) {
                 alert("Tip💡: Add UPPERCASE, lowercase, numbers for more secure passwords");
-            } else if (pass.value.length < 4) {
+            } else if (passValue.length < 4) {
                 alert("Password seems to be weak, Try more secure passwords.");
-            } else if (pass.value.length >= 6 && pass.value.length < 12) {
+            } else if (passValue.length >= 6 && passValue.length < 12) {
                 alert("Password seems to be medium, update it to be more secure.");
-            } else if (pass.value.length >= 12) {
-                alert("Password is strong");
-                // Allow form submission if password is strong
-                document.querySelector("form[action='update_password.php']").submit();
+            } else if (passValue.length >= 12) {
+                $form.submit();
             }
         });
 
-        pass.addEventListener("input", () => {
-            if (pass.value.length > 0) {
-                msg.style.display = "block";
-            } else {
-                msg.style.display = "none";
-            }
+        $pass.on("input", function() {
+            var passValue = $pass.val();
 
-            if (pass.value.length < 4) {
-                strength.innerHTML = "Password is Weak";
-                pass.style.borderColor="#ff5925";
-                msg.style.color="#ff5925";
-            } else if (pass.value.length >= 6 && pass.value.length < 12) {
-                strength.innerHTML = "Password is Medium";
-                pass.style.borderColor="yellow";
-                msg.style.color = "yellow";
-            } else if (pass.value.length >= 12) {
-                strength.innerHTML = "Password is Strong";
-                pass.style.borderColor="#26d730";
-                msg.style.color="#26d730";
+            if (passValue.length < 4) {
+                $pass.css("border-color", "#ff5925");
+            } else if (passValue.length >= 6 && passValue.length < 12) {
+                $pass.css("border-color", "yellow");
+            } else if (passValue.length >= 12) {
+                $pass.css("border-color", "#26d730");
             }
         });
+    });
 
     </script>
 

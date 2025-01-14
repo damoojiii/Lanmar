@@ -43,7 +43,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
-    <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -53,14 +52,25 @@
             font-family: 'nautigal';
             src: url(font/TheNautigal-Regular.ttf);
         }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        *, p{
+            margin: 0;
+        }
         body {
         font-family: Arial, sans-serif;
         background-color: #f8f9fa;
         }
 
-        #sidebar span {
+        #sidebar span{
             font-family: 'nautigal';
             font-size: 50px !important;
+        }
+
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -69,21 +79,21 @@
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            z-index: 199;
         }
 
         header {
+            position: none;
             top: 0;
             left: 0;
-            right: 0;
-            height: 60px;
-            z-index: 1000;
-            display: flex;
+            right: 0; 
+            width: calc(100% - 250px);
+            height: 50px;
+            transition: margin-left 0.3s ease;
             align-items: center;
-            padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            display: flex;  /* Smooth transition for header */
         }
 
         #hamburger {
@@ -206,17 +216,23 @@
     @media (max-width: 768px) {
         #sidebar {
             position: fixed;
-            transform: translateX(-100%); /* Hide sidebar off-screen */
+            transform: translateX(-100%);
+            z-index: 199;
         }
 
         #sidebar.show {
             transform: translateX(0); /* Show sidebar */
         }
 
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+
         #main-content {
-            margin-left: 0; /* Remove margin for smaller screens */
+            margin-inline: 10px; 
             padding: 0;
-            max-width: 100%;
+            max-width: 90%;
         }
 
         #hamburger {
@@ -225,11 +241,31 @@
         .container {
             max-width: 100%;
         }
-
-        .header {
-        padding: 15px;
+        .container-fluid{
+            margin-inline: 5px;
+            padding: 0;
         }
 
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+        }
+        #header span{
+            display: block;
+        }
+        #header.shifted .font-logo-mobile{
+            display: none;
+        }
+        .header{ 
+            width: 100%;
+            margin-inline: auto;
+        }
+        .stats{
+            display: block !important;
+        }
         .stats-card {
             padding: 15px;
         }
@@ -237,6 +273,7 @@
         .chart-container {
             padding: 15px;
         }
+
 
     }
     </style>
@@ -247,7 +284,7 @@
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -319,32 +356,32 @@
 
         <!-- Statistics Cards Section -->
         <div class="row mt-4">
-            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+            <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Pending Reservations</h5>
                     <h2><?php echo number_format($pending_reservations); ?></h2>
                     <p>-2.65% Less booking than usual</p>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+            <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Incoming Books this Week</h5>
                     <h3><?php echo number_format($incoming_books); ?></h3>
                     <p>+8.35% More incoming books than usual</p>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+            <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Weekly Earnings</h5>
                     <h3>₱ <?php echo number_format($weekly_earnings); ?></h3>
                     <p>+8.35% More earnings than usual</p>
                 </div>
             </div>
-            <div class="col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
+            <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
-                    <h5>Visitors Today</h5>
+                    <h5>Upcoming Cancellations</h5>
                     <h2>17,212</h2>
-                    <p>+5.50% More visitors than usual</p>
+                    <p>+5.50% More cancellation than usual</p>
                 </div>
             </div>
         </div>
@@ -538,21 +575,16 @@
         });
 
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const header = document.getElementById('header');
-
-            sidebar.classList.toggle('show');
-
-            if (sidebar.classList.contains('show')) {
-                mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-                header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-            } else {
-                mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-                header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-            }
-        }
+        document.getElementById('hamburger').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show');
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+        });
 
         document.querySelectorAll('.collapse').forEach(collapse => {
             collapse.addEventListener('show.bs.collapse', () => {

@@ -12,10 +12,6 @@ $gallery_error_message = "";
 // Define the target directory for uploads
 $targetDir = "uploads/"; 
 
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Handle background image upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) {
     $image = $_FILES['background_image'];
@@ -73,6 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
             font-family: 'nautigal';
             font-size: 50px !important;
         }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
+        }
 
         #sidebar {
             width: 250px;
@@ -82,17 +82,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
-            z-index: 1000;
+            z-index: 199;
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -345,60 +344,68 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
     .button-container {
         display: flex;
         justify-content: end;
+        margin-right: 5px;
     }
 
     .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
+    .save-btn {
+        border-radius: 10px !important; 
+        padding: 10px 15px;
+        background-color: rgb(29, 69, 104);
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
+
+    @media (max-width: 768px){
+        #sidebar {
+            position: fixed;
+            transform: translateX(-100%);
+            z-index: 199;
         }
 
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
+        #sidebar.show {
+            transform: translateX(0); /* Show sidebar */
         }
 
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+        }
+        #header span{
+            display: block;
+        }
+        #header.shifted .font-logo-mobile{
+            display: none;
+        }
+        #main-content{
+            margin-top: 60px;
+            padding-inline: 10px;
+        }
+        .logout{
+            margin-bottom: 3rem;
+        }
+        .settings-form-container {
+            margin-top: 10px;
+            padding-inline: 10px;
+        }
+    }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -455,7 +462,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div id="main-content" class="p-3">
@@ -567,8 +576,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                     }
                 </style>
                 <div class="flex-container">
-                    <!-- Sidebar -->
-                    <!-- Main Content -->
                     <div class="main-content">
                         <!-- Main content goes here -->
                         <div class="settings-form-container">
@@ -605,21 +612,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
 </script>
 </body>
 <style>

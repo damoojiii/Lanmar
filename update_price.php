@@ -1,21 +1,23 @@
 <?php
-include("connection.php"); 
+include 'connection.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id = $_POST['id'];
-    $payment_name = $_POST['payment_name'];
     $price = $_POST['price'];
 
-    // Prepare and execute the update statement
-    $stmt = $conn->prepare("UPDATE prices_tbl SET payment_name = ?, price = ? WHERE id = ?");
-    $stmt->bind_param("ssi", $payment_name, $price, $id);
+    // Validate inputs
+    if (!empty($id) && !empty($price)) {
+        $stmt = $conn->prepare("UPDATE prices_tbl SET price = ? WHERE id = ?");
+        $stmt->bind_param("di", $price, $id);
 
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true]);
+        if ($stmt->execute()) {
+            echo "Price updated successfully.";
+        } else {
+            echo "Error updating price.";
+        }
+        $stmt->close();
     } else {
-        echo json_encode(['success' => false]);
+        echo "Invalid input.";
     }
-
-    $stmt->close();
 }
 ?>

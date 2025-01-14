@@ -181,24 +181,35 @@
             width: 50%;
         }
         .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 9999;
-}
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+        }
 
-.modal-content {
-    background: white;
-    margin: 5% auto;
-    padding: 20px;
-    width: 50%;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-}
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 20px;
+            width: 50%;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .timer{
+            font-weight: bold;
+            border-radius: 10px;
+            background-color:rgb(11, 69, 156);
+            padding: 10px;
+            color: #fff;
+            gap: 5px;
+        }
+        .timer-container{
+            margin-left: 100px;
+        }
     </style>
 <style>
         /* responsive */
@@ -348,6 +359,10 @@
         #proceed-button {
             margin-top: 15px;
             font-size: 14px;
+        }
+        .timer-container{
+            margin-inline: auto;
+            justify-content: center !important;
         }
     }
 
@@ -660,6 +675,12 @@
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
+    <div class="timer-container d-flex justify-content-start p-1">
+        <div class="d-flex timer">
+            <div class="">Timer: </div>
+            <div id="timer-display">10:00</div>
+        </div>
+    </div>
     <div class="container1">
         <div class="row" style="justify-content:space-between;">
         <div class="bill-message" >
@@ -718,6 +739,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Timer duration in seconds (10 minutes)
+    const timerDuration = 10 * 60;
+    const redirectUrl = 'index1.php'; // Replace with your main page URL
+
+    // Function to start or resume the timer
+    function startTimer() {
+        let endTime = sessionStorage.getItem('bookingTimerEndTime');
+
+        if (!endTime) {
+            const currentTime = Date.now();
+            endTime = currentTime + timerDuration * 1000; // Set end time
+            sessionStorage.setItem('bookingTimerEndTime', endTime);
+        }
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = Math.max(0, endTime - now);
+            const minutes = Math.floor(timeLeft / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            // Display the timer on the page (replace 'timer-display' with your element ID)
+            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            // Redirect when time runs out
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
+                alert('You ran out of time. Please book again.');
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+    }
+
+    // Call the function to start the timer
+    startTimer();
+});
      // Display the modal on page load
      window.onload = function() {
         document.getElementById('policy-modal').style.display = 'block';
@@ -734,16 +792,16 @@
         document.getElementById('policy-modal').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
     });
-document.getElementById('hamburger').addEventListener('click', function() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('show');
-    
-    const navbar = document.querySelector('.navbar');
-    navbar.classList.toggle('shifted');
-    
-    const mainContent = document.getElementById('main-content');
-    mainContent.classList.toggle('shifted');
-});
+    document.getElementById('hamburger').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show');
+        
+        const navbar = document.querySelector('.navbar');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
 function validateInput(input, paymentMethod) {
     // Remove non-numeric characters
     input.value = input.value.replace(/\D/g, '');

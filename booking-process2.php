@@ -220,6 +220,14 @@
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for aesthetics */
         }
+        .timer{
+            font-weight: bold;
+            border-radius: 10px;
+            background-color:rgb(11, 69, 156);
+            padding: 10px;
+            color: #fff;
+            gap: 5px;
+        }
 
     </style>
     <style>
@@ -464,6 +472,12 @@
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
+    <div class="d-flex justify-content-start p-1">
+        <div class="d-flex timer">
+            <div class="">Timer: </div>
+            <div id="timer-display">10:00</div>
+        </div>
+    </div>
     <div class="container1">
         <div class="row " style="justify-content:space-between;">
         <div class="guest col-md-6" style="width: 70%;">
@@ -640,6 +654,43 @@ document.getElementById('hamburger').addEventListener('click', function() {
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
 });
+document.addEventListener("DOMContentLoaded", function() {
+    // Timer duration in seconds (10 minutes)
+    const timerDuration = 10 * 60;
+    const redirectUrl = 'index1.php'; // Replace with your main page URL
+
+    // Function to start or resume the timer
+    function startTimer() {
+        let endTime = sessionStorage.getItem('bookingTimerEndTime');
+
+        if (!endTime) {
+            const currentTime = Date.now();
+            endTime = currentTime + timerDuration * 1000; // Set end time
+            sessionStorage.setItem('bookingTimerEndTime', endTime);
+        }
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = Math.max(0, endTime - now);
+            const minutes = Math.floor(timeLeft / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            // Display the timer on the page (replace 'timer-display' with your element ID)
+            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            // Redirect when time runs out
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+    }
+
+    // Call the function to start the timer
+    startTimer();
+});
+
 $(document).ready(function() {
         function updateNotificationCount() {
             $.ajax({

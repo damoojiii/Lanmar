@@ -26,6 +26,10 @@
             font-family: 'nautigal';
             font-size: 50px !important;
         }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
+        }
 
         #sidebar {
             width: 250px;
@@ -39,6 +43,7 @@
         }
 
         header {
+            position: none;
             top: 0;
             left: 0;
             right: 0;
@@ -299,37 +304,38 @@
     }
 
     @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
+        #sidebar {
+            position: fixed;
+            transform: translateX(-100%);
+            z-index: 199;
         }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
+
+        #sidebar.show {
+            transform: translateX(0); /* Show sidebar */
         }
+
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+        }
+        #header span{
+            display: block;
+        }
+        #header.shifted .font-logo-mobile{
+            display: none;
+        }
+        #main-content{
+            margin-top: 60px;
+            padding-inline: 10px;
+        }
+    }
     </style>
 </head>
 <body>
@@ -338,7 +344,7 @@
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -414,7 +420,7 @@
             FROM users u
             LEFT JOIN message_tbl m 
                 ON u.user_id = m.sender_id OR u.user_id = m.receiver_id
-            WHERE u.role = 'user'
+            WHERE u.role = 'user' AND m.msg_id
             GROUP BY u.user_id
             ORDER BY max_timestamp DESC
             LIMIT 10
@@ -460,21 +466,16 @@
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
-        function toggleSidebar() {
+        document.getElementById('hamburger').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const header = document.getElementById('header');
-
             sidebar.classList.toggle('show');
-
-            if (sidebar.classList.contains('show')) {
-                mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-                header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-            } else {
-                mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-                header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-            }
-        }
+            
+            const navbar = document.getElementById('header');
+            navbar.classList.toggle('shifted');
+            
+            const mainContent = document.getElementById('main-content');
+            mainContent.classList.toggle('shifted');
+        });
 
         document.querySelectorAll('.collapse').forEach(collapse => {
             collapse.addEventListener('show.bs.collapse', () => {

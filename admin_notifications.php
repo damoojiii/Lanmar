@@ -45,6 +45,12 @@
             font-family: 'nautigal';
             src: url(font/TheNautigal-Regular.ttf);
         }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        *, p{
+            margin: 0;
+        }
 
         body {
             font-family: Arial, sans-serif;
@@ -54,6 +60,10 @@
         #sidebar span {
             font-family: 'nautigal';
             font-size: 50px !important;
+        }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -68,12 +78,11 @@
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -92,7 +101,6 @@
         #main-content {
             transition: margin-left 0.3s ease;
             margin-left: 250px; 
-            margin-top: 40px; /* Add top margin for header */
             padding: 20px; /* Padding for content */
         }
 
@@ -442,19 +450,36 @@
         }
 
         @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
             #header{
                 background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
             }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
+            #header span{
+                display: block;
             }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
+            #header.shifted .font-logo-mobile{
+                display: none;
             }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
             }
             .notification-card {
                 width: calc(50% - 20px);
@@ -462,20 +487,6 @@
         }
 
         @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
             .notification-card {
                 width: 100%;
             }
@@ -486,10 +497,10 @@
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -689,21 +700,16 @@
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
 
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {

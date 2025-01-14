@@ -30,7 +30,12 @@ checkAccess('admin');
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
+        }
+
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -41,16 +46,16 @@ checkAccess('admin');
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            z-index: 1000;
+            z-index: 199;
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -305,14 +310,14 @@ checkAccess('admin');
     }
 
     .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
+    .save-btn {
+        border-radius: 10px !important; 
+        padding: 10px 15px;
+        background-color: rgb(29, 69, 104);
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
 
         /* Main container styles */
         .main-content {
@@ -321,11 +326,6 @@ checkAccess('admin');
             background-color: #ffff;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Form container styles */
-        .settings-form-container {
-            margin-bottom: 20px;
         }
 
         /* Form styles */
@@ -364,16 +364,6 @@ checkAccess('admin');
             justify-content: end;
         }
 
-        .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
         /* Tab container styles */
         .tab-container {
             display: flex;
@@ -398,10 +388,6 @@ checkAccess('admin');
             background-color: #1c2531;
             color: white;
             width: 100%;
-        }
-
-        .tab-container .tab.active {
-            background-color: #00968f;
         }
 
         .tab:hover {
@@ -429,12 +415,43 @@ checkAccess('admin');
             .btn-modal{
                 width: 100%;
             }
-            .room-info {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr); /* Three equal columns */
-                grid-template-rows: repeat(2, auto); /* Two rows, auto height */
-                gap: 10px; /* Optional: spacing between items */
-                padding: 10px; /* Optional: padding around the grid */
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
+            }
+            #header span{
+                display: block;
+            }
+            #header.shifted .font-logo-mobile{
+                display: none;
+            }
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
+            }
+            .logout{
+                margin-bottom: 3rem;
+            }
+            .settings-form-container {
+                margin-top: 10px;
+                padding-inline: 10px;
             }
         }
 
@@ -444,49 +461,15 @@ checkAccess('admin');
                 flex: 1 1 calc(50% - 8px);
             }
         }
-
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -543,7 +526,9 @@ checkAccess('admin');
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div id="main-content" class="p-3">
@@ -614,207 +599,55 @@ checkAccess('admin');
                     }
                 </style>
 
-                <div class="flex-container">
-                    <div class="main-content">
-                        <style>
-                            .review-card-container {
-                                display: flex;
-                                flex-wrap: wrap;
-                                gap: 20px; /* Space between cards */
-                                margin-top: 20px; /* Space above the card container */
-                            }
-
-                            .review-card {
-                                background-color: #f8f9fa; /* Light background for cards */
-                                border: 1px solid #ddd; /* Light border */
-                                border-radius: 8px; /* Rounded corners */
-                                padding: 15px; /* Inner padding */
-                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-                                flex: 1 1 calc(30% - 20px); /* Responsive card width */
-                                min-width: 250px; /* Minimum width for cards */
-                                transition: transform 0.3s; /* Smooth hover effect */
-                            }
-
-                            .review-card:hover {
-                                transform: translateY(-5px); /* Lift effect on hover */
-                            }
-
-                            .review-card h3 {
-                                font-size: 1.2rem; /* Font size for payment name */
-                                margin: 0 0 10px; /* Margin below the title */
-                            }
-
-                            .review-card h2 {
-                                font-size: 1rem; /* Font size for price */
-                                color: #007bff; /* Color for price */
-                                margin: 0; /* No margin */
-                            }
-                        </style>
-
-<?php
-// Fetch reviews with status = 0
-$stmt = $conn->prepare("SELECT id, payment_name, price FROM prices_tbl");
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Check if there are any reviews
-if ($result->num_rows > 0) {
-    echo '<table class="table">';
-    echo '<thead>';
-    echo '<tr>';
-    echo '<th>Payment Name</th>';
-    echo '<th>Price</th>';
-    echo '<th>Action</th>';
-    echo '</tr>';
-    echo '</thead>';
-    echo '<tbody>';
-    // Output data of each row
-    while ($row = $result->fetch_assoc()) {
-        echo '<tr>';
-        echo '<td>' . htmlspecialchars($row['payment_name']) . '</td>';
-        echo '<td>' . htmlspecialchars($row['price']) . '</td>';
-        echo '<td><button class="update-btn" data-id="' . $row['id'] . '" data-name="' . htmlspecialchars($row['payment_name']) . '" data-price="' . htmlspecialchars($row['price']) . '">Update Price</button></td>';
-        echo '</tr>';
-    }
-    echo '</tbody>';
-    echo '</table>';
-} else {
-    echo 'No reviews found.';
-}
-$stmt->close();
-?>
-
-<!-- Modal for updating price -->
-<div id="updatePriceModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>Update Price</h2>
-        <form id="updatePriceForm">
-            <input type="hidden" id="priceId" name="id" />
-            <label for="paymentName">Payment Name</label>
-            <input type="text" id="paymentName" name="payment_name" readonly />
-            <label for="newPrice">New Price</label>
-            <input type="number" id="newPrice" name="price" required />
-            <button type="submit">Update</button>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Styling -->
-<style>
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-    }
-
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-    }
-
-    .close-btn {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .close-btn:hover,
-    .close-btn:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-</style>
-
-<!-- JavaScript for handling the modal and AJAX submission -->
-<script>
-    // Open modal when Update button is clicked
-    document.querySelectorAll('.update-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const id = this.getAttribute('data-id');
-            const paymentName = this.getAttribute('data-name');
-            const price = this.getAttribute('data-price');
-
-            document.getElementById('priceId').value = id;
-            document.getElementById('paymentName').value = paymentName;
-            document.getElementById('newPrice').value = price;
-
-            document.getElementById('updatePriceModal').style.display = 'block';
-        });
-    });
-
-    // Close modal
-    document.querySelector('.close-btn').addEventListener('click', function () {
-        document.getElementById('updatePriceModal').style.display = 'none';
-    });
-
-    // Submit form to update the price in the database via AJAX
-    document.getElementById('updatePriceForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-
-        fetch('update_price.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Price updated successfully!');
-                window.location.reload();  // Optionally reload the page to see the updated price
-            } else {
-                alert('Failed to update the price');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-</script>
-
-                    </div>
+    <div class="flex-container">
+        <div class="main-content">
+            <div class="row">
+                <!-- Price Form -->
+                <div class="col-md-6 col-sm-12">
+                    <form id="update-price-form">
+                        <div class="mb-3">
+                            <label for="price-selector" class="form-label">Select Price</label>
+                            <div id="dropdown-container">
+                                <!-- Dropdown will be populated here via AJAX -->
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price-input" class="form-label">Edit Price</label>
+                            <input type="number" id="price-input" class="form-control" placeholder="Enter new price">
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="save-btn btn btn-primary">Update Price</button>
+                        </div>
+                    </form>
+                    <div id="response-message"></div>
                 </div>
 
-
-            </div>
+                <!-- Booking Hour Form -->
+                <div class="col-md-6 col-sm-12">
+                    <form id="update-booking-hour-form">
+                        <div class="mb-3">
+                            <label for="booking-selector" class="form-label">Edit Booking Time</label>
+                            <select id="booking-selector" class="form-control">
+                                <option value="1">Starting Time</option>
+                                <option value="2">Closing Time</option>
+                                <option value="3">Cleanup Time</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="value-input" class="form-label">Edit Hours</label>
+                            <input type="number" step="0.1" id="value-input" class="form-control" placeholder="Enter new value">
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="save-btn btn btn-primary">Update Hour</button>
+                        </div>
+                    </form>
+                    <div id="response-message-hour"></div>
+                </div>
+            </div>    
         </div>
     </div>
 
-    <!-- Update Modal -->
-<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateModalLabel">Update Price</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="updateRoomId">
-                <p>Payment Name: <span id="updatePaymentName"></span></p>
-                <div class="form-group">
-                    <label for="updatePrice">New Price</label>
-                    <input type="text" class="form-control" id="updatePrice" placeholder="Enter new price">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="updatePrice()">Update</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
@@ -822,60 +655,18 @@ $stmt->close();
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
-<style>
-/* Add these styles */
-.modal-dialog {
-    max-width: 400px;
-    margin: 1rem auto;
-}
-
-.modal-content {
-    border-radius: 12px;
-}
-
-.modal-header {
-    padding: 0.75rem 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    border-radius: 12px 12px 0 0;
-}
-
-.modal-body {
-    padding: 1rem;
-}
-
-.form-label {
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
-}
-
-.form-control-sm {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-}
-
-/* Mobile specific styles */
-@media (max-width: 576px) {
-    .modal-dialog {
-        margin: 0.5rem;
-        max-width: none;
-    }
-    
-    .modal-content {
-        border-radius: 8px;
-    }
-    
-    .modal-body {
-        padding: 0.75rem;
-    }
-    
-    .btn {
-        padding: 0.375rem 0.75rem;
-    }
-}
-</style>
-
 <script>
+    document.getElementById('hamburger').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show');
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
+
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {
             collapse.style.height = collapse.scrollHeight + 'px';
@@ -884,44 +675,115 @@ $stmt->close();
             collapse.style.height = '0px';
         });
     });
-
-    $(document).on('click', '.openModal', function() {
-        const roomId = $(this).data('id');
-        const roomName = $(this).data('name');
-        const description = $(this).data('capacity');
-        const price = $(this).data('price');
-        const maxpax = $(this).data('maxpax');
-        const minpax = $(this).data('minpax');
-
-        $('#room_id').val(roomId);
-        $('#room_name').val(roomName);
-        $('#description').val(description);
-        $('#price').val(price);
-        $('#maxpax').val(maxpax);
-        $('#minpax').val(minpax);
-
-        $('#editRoomModal').modal('show');
-    });
-
-    $('#editRoomForm').on('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-
+    $(document).ready(function() {
         $.ajax({
-            type: 'POST',
-            url: 'update_room.php', // Create this file to handle the update
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                alert('Room updated successfully!');
-                location.reload(); // Reload the page to see changes
+            url: 'get_prices.php',
+            type: 'GET',
+            success: function(data) {
+                $('#dropdown-container').html(data);
             },
             error: function() {
-                alert('Error updating room.');
+                $('#dropdown-container').html('<div class="alert alert-danger">Failed to load prices.</div>');
             }
         });
-    });
+
+        // Fetch price or booking hour based on selection
+        function fetchValue(url, selector, inputField, responseContainer) {
+            var selectedId = $(selector).val();
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: { id: selectedId },
+                success: function(value) {
+                    $(inputField).val(value);
+                },
+                error: function() {
+                    $(responseContainer).html('<div class="alert alert-danger">Failed to fetch hours.</div>');
+                }
+            });
+        }
+
+        $(document).on('change', '#price-selector', function() {
+            fetchValue('fetch_price.php', '#price-selector', '#price-input', '#response-message');
+        });
+
+        $('#booking-selector').on('change', function() {
+            fetchValue('fetch_booking_hour.php', '#booking-selector', '#value-input', '#response-message-hour');
+        });
+
+        function handleFormSubmission(formId, url, dataObj, responseContainer) {
+            $(formId).on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: dataObj,
+                    success: function(response) {
+                        $(responseContainer).html('<div class="alert alert-success">' + response + '</div>');
+                    },
+                    error: function() {
+                        $(responseContainer).html('<div class="alert alert-danger">Error updating hour. Please try again.</div>');
+                    }
+                });
+            });
+        }
+
+        // Price form submission
+        handleFormSubmission('#update-price-form', 'update_price.php', {
+            id: $('#price-selector').val(),
+            price: $('#price-input').val()
+        }, '#response-message');
+
+        // Booking hour form submission with validation
+        $('#update-booking-hour-form').on('submit', function(event) {
+            event.preventDefault();
+
+            var selectedId = $('#booking-selector').val();
+            var newValue = parseFloat($('#value-input').val());
+            var isValid = true;
+            var errorMsg = '';
+
+            if (newValue % 1 !== 0 && newValue % 1 !== 0.5) {
+                isValid = false;
+                errorMsg = "Value must be a whole number or end in .5 (e.g., 6, 6.5, 7, 7.5).";
+            }
+
+            if (isValid) {
+                if ((selectedId == 1 || selectedId == 2) && (newValue < 6 || newValue > 23.5)) {
+                    isValid = false;
+                    errorMsg = "Hour for Starting Time and Closing Time must be between 6 and 23.5.";
+                } else if (selectedId == 3 && (newValue < 1 || newValue > 5)) {
+                    isValid = false;
+                    errorMsg = "Hour for Cleanup Time must be between 1 and 5.";
+                }
+            }
+
+            if (!isValid) {
+                $('#response-message-hour').html('<div class="alert alert-danger">' + errorMsg + '</div>');
+            }
+            else{
+                $.ajax({
+                    url: 'update_booking_hour.php',
+                    type: 'POST',
+                    data: {
+                        id: selectedId,
+                        value: newValue
+                    },
+                    success: function(response) {
+                        $('#response-message-hour').html('<div class="alert alert-success">' + response + '</div>');
+                    },
+                    error: function() {
+                        $('#response-message-hour').html('<div class="alert alert-danger">Error updating hour. Please try again.</div>');
+                    }
+                });
+            }
+
+        });
+
+        // Trigger change event to load initial value
+        $('#booking-selector').trigger('change');
+});
+
 </script>
 
 </body>
@@ -956,101 +818,6 @@ $stmt->close();
     .tab:hover {
         background-color: #0175FE;
         color: white;
-    }
-
-    .flex-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .room-card {
-        display: flex;
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        width: 100%;
-    }
-
-    .room-image {
-        flex: 0 0 40%;
-        max-width: 40%;
-    }
-
-    .room-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .room-details {
-        flex: 1;
-        padding: 15px;
-    }
-
-    .room-details h2 {
-        margin: 0 0 10px 0;
-        font-size: 1.5rem;
-    }
-
-    .description {
-        margin-bottom: 10px;
-        font-size: 0.9rem;
-    }
-
-    .room-info p {
-        margin: 5px 0;
-        font-size: 0.9rem;
-    }
-
-    .action-buttons {
-        margin-top: 15px;
-        text-align: right;
-    }
-
-    .openModal {
-        padding: 8px 16px;
-        background-color: #19315D;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    /* Mobile Responsive Styles */
-    @media (max-width: 768px) {
-        .room-card {
-            flex-direction: column;
-        }
-
-        .room-image {
-            max-width: 100%;
-            height: 200px;
-        }
-
-        .room-details {
-            padding: 15px;
-        }
-
-        .room-details h2 {
-            font-size: 1.2rem;
-        }
-
-        .room-info {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .action-buttons {
-            text-align: center;
-        }
-    }
-
-    @media (max-width: 480px) {
-    
     }
 </style>
 </html>

@@ -1,5 +1,6 @@
 <?php 
     session_start();
+    date_default_timezone_set('Asia/Manila');
     include("connection.php");
     include "role_access.php";
     checkAccess('admin');
@@ -17,7 +18,6 @@
     if ($user) {
         $firstname = htmlspecialchars(ucwords($user['firstname']));
         $lastname = htmlspecialchars(ucwords($user['lastname']));
-        $status = $user['status'] == 1 ? '<i class="fa-solid fa-circle" style="color: #1ab106;"></i> Active Now' : '<i class="fa-solid fa-circle" style="color: #aea7a7;"></i> Offline';
     } else {
         // Default values if user is not found
         $firstname = 'User';
@@ -49,6 +49,11 @@
             font-size: 50px !important;
         }
 
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
+        }
+
         #sidebar {
             width: 250px;
             position: fixed;
@@ -61,6 +66,7 @@
         }
 
         header {
+            position: none;
             top: 0;
             left: 0;
             right: 0;
@@ -349,21 +355,37 @@
     }
 
     @media (max-width: 768px) {
-        #header{
-            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-        }
         #sidebar {
             position: fixed;
-            transform: translateX(-100%); /* Hide sidebar off-screen */
+            transform: translateX(-100%);
+            z-index: 199;
         }
 
         #sidebar.show {
             transform: translateX(0); /* Show sidebar */
         }
 
-        #main-content {
-            margin-left: 0; /* Remove margin for smaller screens */
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+        }
+        #header span{
+            display: block;
+        }
+        #header.shifted .font-logo-mobile{
+            display: none;
+        }
+        #main-content{
+            margin-top: 60px;
             padding: 0;
+            margin-left: 0;
         }
 
         #hamburger {
@@ -409,7 +431,7 @@
         <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -485,7 +507,7 @@
             FROM users u
             LEFT JOIN message_tbl m 
                 ON u.user_id = m.sender_id OR u.user_id = m.receiver_id
-            WHERE u.role = 'user'
+            WHERE u.role = 'user' AND m.msg_id
             GROUP BY u.user_id
             ORDER BY max_timestamp DESC
             LIMIT 10
@@ -517,7 +539,6 @@
             <!-- Chat Header -->
             <div class="chat-header">
                 <h3><?php echo $firstname . ' ' . $lastname; ?></h3>
-                <span><?php echo $status; ?></span>
             </div>
 
             <!-- Chat Messages -->
@@ -543,21 +564,16 @@
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
 
-        function toggleSidebar() {
+        document.getElementById('hamburger').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            const header = document.getElementById('header');
-
             sidebar.classList.toggle('show');
-
-            if (sidebar.classList.contains('show')) {
-                mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-                header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-            } else {
-                mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-                header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-            }
-        }
+            
+            const navbar = document.getElementById('header');
+            navbar.classList.toggle('shifted');
+            
+            const mainContent = document.getElementById('main-content');
+            mainContent.classList.toggle('shifted');
+        });
 
         document.querySelectorAll('.collapse').forEach(collapse => {
             collapse.addEventListener('show.bs.collapse', () => {
@@ -575,6 +591,7 @@
         $(document).ready(function () {
             const userId = '<?php echo $userId; ?>';
             let isAutoScrollEnabled = true;
+            const chatArea = $('#chat-area');
             function fetchMessages() {
                 $.ajax({
                     url: 'fetch_messages.php',
@@ -627,17 +644,17 @@
                                     </div>`;
                             }
                         });
-
-                        const chatArea = $('#chat-area');
-                        const wasAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
-
                         chatArea.html(chatHTML);
-
-                        if (isAutoScrollEnabled || wasAtBottom) {
-                            chatArea.scrollTop(chatArea[0].scrollHeight); // Scroll to bottom
-                        }
                     }
                 });
+            }
+            
+            const wasAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
+
+            
+
+            if (isAutoScrollEnabled || wasAtBottom) {
+                chatArea.scrollTop(chatArea[0].scrollHeight); // Scroll to bottom
             }
             setInterval(fetchMessages, 2000);
             $('#send-message').click(function () {

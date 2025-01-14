@@ -25,13 +25,17 @@ checkAccess('admin');
         }
 
         body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
+        }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -46,12 +50,11 @@ checkAccess('admin');
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -307,14 +310,14 @@ checkAccess('admin');
     }
 
     .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
+    .save-btn {
+        border-radius: 10px !important; 
+        padding: 10px 15px;
+        background-color: rgb(29, 69, 104);
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
 
         /* Main container styles */
         .main-content {
@@ -366,16 +369,6 @@ checkAccess('admin');
             justify-content: end;
         }
 
-        .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
         /* Tab container styles */
         .tab-container {
             display: flex;
@@ -402,10 +395,6 @@ checkAccess('admin');
             width: 100%;
         }
 
-        .tab-container .tab.active {
-            background-color: #00968f;
-        }
-
         .tab:hover {
             background-color: #0175FE;
         }
@@ -425,8 +414,8 @@ checkAccess('admin');
                 padding: 8px 15px;
                 font-size: 12px;
             }
-            .main-content{
-                padding: 0;
+            .main-content, #main-content{
+                padding: 0 !important;
             }
             .btn-modal{
                 width: 100%;
@@ -438,6 +427,44 @@ checkAccess('admin');
                 gap: 10px; /* Optional: spacing between items */
                 padding: 10px; /* Optional: padding around the grid */
             }
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
+            }
+            #header span{
+                display: block;
+            }
+            #header.shifted .font-logo-mobile{
+                display: none;
+            }
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
+            }
+            .logout{
+                margin-bottom: 3rem;
+            }
+            .settings-form-container {
+                margin-top: 10px;
+                padding-inline: 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -446,32 +473,15 @@ checkAccess('admin');
                 flex: 1 1 calc(50% - 8px);
             }
         }
-
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -606,9 +616,11 @@ checkAccess('admin');
                         ?>
                         <div class="settings-form-container">
                             <h2 class="text-center mb-4">Featured Rooms</h2>
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
-                                Add Room
-                            </button>
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                                    Add Room
+                                </button>
+                            </div>
                             <div class="flex-container">
                                 <?php if ($result->num_rows > 0): ?>
                                     <?php while($row = $result->fetch_assoc()): ?>
@@ -659,6 +671,65 @@ checkAccess('admin');
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+<script>
+    document.getElementById('hamburger').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('show');
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
+    
+    document.querySelectorAll('.collapse').forEach(collapse => {
+        collapse.addEventListener('show.bs.collapse', () => {
+            collapse.style.height = collapse.scrollHeight + 'px';
+        });
+        collapse.addEventListener('hidden.bs.collapse', () => {
+            collapse.style.height = '0px';
+        });
+    });
+
+    $(document).on('click', '.openModal', function() {
+        const roomId = $(this).data('id');
+        const roomName = $(this).data('name');
+        const description = $(this).data('capacity');
+        const price = $(this).data('price');
+        const maxpax = $(this).data('maxpax');
+        const minpax = $(this).data('minpax');
+
+        $('#room_id').val(roomId);
+        $('#room_name').val(roomName);
+        $('#description').val(description);
+        $('#price').val(price);
+        $('#maxpax').val(maxpax);
+        $('#minpax').val(minpax);
+
+        $('#editRoomModal').modal('show');
+    });
+
+    $('#editRoomForm').on('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        $.ajax({
+            type: 'POST',
+            url: 'update_room.php', // Create this file to handle the update
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                alert('Room updated successfully!');
+                location.reload(); // Reload the page to see changes
+            },
+            error: function() {
+                alert('Error updating room.');
+            }
+        });
+    });
+</script>
 
 <!-- Modal -->
 <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
@@ -761,55 +832,6 @@ checkAccess('admin');
     }
 }
 </style>
-
-<script>
-    document.querySelectorAll('.collapse').forEach(collapse => {
-        collapse.addEventListener('show.bs.collapse', () => {
-            collapse.style.height = collapse.scrollHeight + 'px';
-        });
-        collapse.addEventListener('hidden.bs.collapse', () => {
-            collapse.style.height = '0px';
-        });
-    });
-
-    $(document).on('click', '.openModal', function() {
-        const roomId = $(this).data('id');
-        const roomName = $(this).data('name');
-        const description = $(this).data('capacity');
-        const price = $(this).data('price');
-        const maxpax = $(this).data('maxpax');
-        const minpax = $(this).data('minpax');
-
-        $('#room_id').val(roomId);
-        $('#room_name').val(roomName);
-        $('#description').val(description);
-        $('#price').val(price);
-        $('#maxpax').val(maxpax);
-        $('#minpax').val(minpax);
-
-        $('#editRoomModal').modal('show');
-    });
-
-    $('#editRoomForm').on('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-
-        $.ajax({
-            type: 'POST',
-            url: 'update_room.php', // Create this file to handle the update
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                alert('Room updated successfully!');
-                location.reload(); // Reload the page to see changes
-            },
-            error: function() {
-                alert('Error updating room.');
-            }
-        });
-    });
-</script>
 
 <!-- Modal for Adding Room -->
 <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">

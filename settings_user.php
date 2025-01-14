@@ -44,7 +44,7 @@ if (isset($_POST['update_password'])) {
 
                 $success_message = "Password changed successfully";
             }else{
-                $error_message = "Current password and Confirm password doesnt match.";
+                $error_message = "New password and Confirm password doesnt match.";
             }    
         }else{
             header("Location: settings_user.php");

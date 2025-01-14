@@ -8,25 +8,6 @@
         if(isset($_POST['bookingId'])){
         $bookingId = $_POST['bookingId'];
     
-        // Here, connect to the database and update the booking status
-        // Example using PDO for a MySQL database
-    
-        try {
-            // Prepare the SQL query to update the booking status
-            $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Completed' WHERE booking_id = :bookingId");
-            $stmt->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
-    
-            // Execute the query
-            if ($stmt->execute()) {
-                //echo "Booking Completed successfully!";
-            } else {
-                echo "Failed to update booking status.";
-            }
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-        }
-    }else {
-        $bookingId = $_POST['bookingIdCancel'];    
         try {
             // Prepare the SQL query to update the booking status
             $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Cancelled' WHERE booking_id = :bookingId");
@@ -34,21 +15,38 @@
     
             // Execute the query
             if ($stmt->execute()) {
+                //echo "Booking Completed successfully!";
+            } else {
+                echo "<script> alert('Failed to update booking status.') </script>";
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
+    }else {
+        $bookingId = $_POST['bookingIdback'];    
+        try {
+            // Prepare the SQL query to update the booking status
+            $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Pending' WHERE booking_id = :bookingId");
+            $stmt->bindParam(':bookingId', $bookingId, PDO::PARAM_INT);
+    
+            // Execute the query
+            if ($stmt->execute()) {
                 $notification_sql = "INSERT INTO notification_tbl (booking_id, status, is_read_user, is_read_admin, timestamp) 
-                        VALUES (:booking_id, 3, 0, 0, NOW())";
+                        VALUES (:booking_id, 3, 0, 2, NOW())";
                 $stmt_notification = $pdo->prepare($notification_sql);
                 $stmt_notification->execute([
                 ':booking_id' => $bookingId
                 ]);
                 //echo "Booking approved successfully!";
             } else {
-                echo "Failed to update booking status.";
+                echo "<script> alert('Failed to update booking status.') </script>";
             }
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
         }
     }
     }
+
 ?>
 
 <!DOCTYPE html>
@@ -60,7 +58,6 @@
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
-    <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
     <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
 
     <style>
@@ -78,6 +75,10 @@
             font-family: 'nautigal';
             font-size: 30px !important;
         }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
+        }
 
         #sidebar {
             width: 250px;
@@ -87,16 +88,15 @@
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -349,20 +349,13 @@
         display: flex;
         justify-content: end;
     }
-
-    .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
         thead.custom-header, thead.custom-header th {
-            background-color: #19315D !important;
+            background: linear-gradient(25deg,rgb(29, 69, 104),#19315D) !important;
             color: white !important;
+        }
+        .active>.page-link, .page-link.active {
+            background-color: #004080;
+            border-color: #004080;
         }
         .table-row {
         cursor: pointer;
@@ -392,24 +385,45 @@
         font-size: 14px; /* Slightly smaller text for mobile */
         margin: 0;
         }
-
-        @media (max-width: 576px) {
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
+        .modal-mobile, .modal-mobile-remove{
+            background-color: #d6d6d6;
+            padding-block: 5px;
+        }
+        .modal-mobile-add{
+            background-color: transparent;
         }
 
         @media (max-width: 768px){
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
             #header{
                 background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
+            }
+            #header span{
+                display: block;
+            }
+            #header.shifted .font-logo-mobile{
+                display: none;
+            }
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
             }
             .modal-body h6 {
                 font-size: 16px; /* Slightly larger headers for readability */
@@ -422,21 +436,17 @@
                 font-size: 0.8rem;
                 padding: 0.5rem;
             }
-        }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            .modal-mobile, .modal-mobile-remove{
+                padding-block: 2px;
             }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
+            .modal-mobile-remove{
+                background-color: transparent;
             }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
+            .modal-mobile-add{
+                background-color: #d6d6d6;
             }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
+            .logout{
+                margin-bottom: 3rem;
             }
         }
 
@@ -445,10 +455,10 @@
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -505,33 +515,31 @@
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>    
     </div>
     
     <!-- tabel fetch-->
     <?php
         $sql_solo = "
             SELECT 
-                booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.status,
-                reservationType_tbl.reservation_type,
-                pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
-                bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode,
+                cancel_tbl.cancel_id, cancel_tbl.booking_id, cancel_tbl.cancellation_reason,
+                booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours,
                 users.firstname, users.lastname, users.contact_number, users.user_id
-            FROM booking_tbl
-            LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
-            LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
-            LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
-            LEFT JOIN users ON booking_tbl.user_Id = users.user_id
-            WHERE booking_tbl.status = 'Approved' ORDER BY booking_id DESC
+            FROM cancel_tbl
+            LEFT JOIN booking_tbl ON cancel_tbl.booking_id = booking_tbl.booking_id
+            LEFT JOIN users ON booking_tbl.user_id = users.user_id
+            WHERE booking_tbl.status = 'Cancellation2' ORDER BY timestamp DESC
         ";
-        $stmt_solo = $pdo->prepare($sql_solo);
-        $stmt_solo->execute();
-        $results = $stmt_solo->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare($sql_solo);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
      ?>
     
     <div id="main-content" class="">
         <div class="">
-            <div class="main-container my-5">
+            <div class="main-container my-1">
                 <h2 class="mb-4"><strong>Cancellation Forms</strong></h2>
                 <div class="table-responsive">
                     <table class="table table-hover" id="example" style="width:100%">
@@ -542,17 +550,15 @@
                                 <th class="d-none d-sm-table-cell">Contact No.</th>
                                 <th>Date</th>
                                 <th>Time</th>
-                                <th class="d-none d-md-table-cell">Total No. of Pax</th>
-                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php if(!empty($results)): ?>
                             <?php foreach ($results as $row): ?>
-                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>"
-                                data-user-id="<?php echo htmlspecialchars($row['user_id']); ?>">
+                                <tr class="table-row" data-bs-toggle="modal" data-bs-target="#reservationModal" data-cancel-id="<?php echo htmlspecialchars($row['cancel_id']); ?>"
+                                data-booking-id="<?php echo htmlspecialchars($row['booking_id']); ?>">
 
-                                    <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['cancel_id']); ?></td>
                                     <td><?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?></td>
                                     <td><?php echo htmlspecialchars($row['contact_number']); ?></td>
                                     <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
@@ -563,29 +569,8 @@
                                     <td><?php 
                                     echo date("g:i A" , strtotime($row["checkin"])) . " to " . date("g:i A" , strtotime($row["checkout"]));
                                     ?></td>
-                                    <td class="d-none d-md-table-cell"><?php $totalPax = $row['adult'] + $row['child'] + $row['pwd'];
-                                    echo htmlspecialchars($totalPax); ?></td>
-                                    <?php 
-                                    switch ($row['status']) {
-                                    case "Approved":
-                                        $class = "approved";
-                                        break;
-                                    case "Pending":
-                                        $class = "pending";
-                                        break;
-                                    case "Cancel":
-                                        $class = "cancel";
-                                        break;
-                                    case "Completed":
-                                        $class = "completed";
-                                        break;
-                                    }
-                                    ?>
-                                    <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($row['status']); ?></span></td>
+                                    </td>
                             <?php endforeach; ?>
-                            <?php elseif(empty($results)):?>
-                                <td colspan="7" style="text-align: center;">No Approved Reservations</td>
-                                </tr>
                         <?php endif ?>
                         </tbody>
                     </table>
@@ -598,14 +583,14 @@
   <div class="modal-dialog modal-lg">
   <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="reservationModalLabel">Reservation Details</h5>
+        <h5 class="modal-title" id="reservationModalLabel">Cancellation Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <!-- Reservation ID -->
         <div class="mb-4" >
-          <h6 class="fw-bold">Reservation ID:</h6>
-          <p id="reservation-id" class="py-1" style="background-color: #d6d6d6;"> #<span id="modalBookingId"></span> </p>
+          <h6 class="fw-bold">Cancellation ID:</h6>
+          <p id="reservation-id" class="py-1" style="background-color: #d6d6d6;"> #<span id="modalCId"></span> </p>
         </div>
 
         <!-- Personal Information Section -->
@@ -617,9 +602,6 @@
             </div>
             <div class="col-12 col-md-4">
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
-            </div>
-            <div class="col-12 col-md-4">
-              <p><strong>Gender:</strong> Female</p>
             </div>
           </div>
         </div>
@@ -634,84 +616,24 @@
             <div class="col-12 col-md-4">
               <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
-            <div class="col-12 col-md-3">
-              <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
-            </div>
-          </div>
-          <div class="row g-2 mb-2">
-            <div class="col-4 col-md-3">
-              <p><strong>Adults:</strong> <span id="modalAdults"></span></p>
-            </div>
-            <div class="col-4 col-md-3">
-              <p><strong>Children:</strong> <span id="modalChild"></span></p>
-            </div>
-            <div class="col-4 col-md-3">
-              <p><strong>PWD:</strong> <span id="modalPwd"></span></p>
-            </div>
-            <div class="col-12 col-md-3">
-              <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
-            </div>
           </div>
           <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
-          </div>
-          <div class="row g-2">
-            <div><p><strong>Rooms:</strong> <span id="modalRooms" class="row g-2"></p></div>
-          </div>
-        </div>
-
-        <!-- Booking Details Section -->
-        <div class="mb-4">
-          <h6 class="fw-bold">Special Requests</h6>
-          <div class="row g-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
-              <p><strong>Additionals:</strong> <span id="modalAdds"></p>
+            <div class="col-12 col-md-3">
+              <p><strong>Reason:</strong> <span id="modalReason"></span></p>
             </div>
           </div>
         </div>
 
-        <!-- Payment Section -->
-        <div class="mb-4">
-          <h6 class="fw-bold">Payment</h6>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
-              <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
-            </div>
-            <div class="col-6 col-md-4">
-              <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
-            </div>
-            <div class="col-6 col-md-4">
-              <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
-            </div>
-          </div>
-          <div class="row g-2">
-                <div class="col-6 col-md-4">
-                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-                </div>
-                <div class="col-6 col-md-4">
-                    <div id="modalProof"></div>
-                </div>  
-            </div>     
-        </div>
-      </div>
+
       <div class="modal-footer d-flex justify-content-end">
-        
-            <button id="chatsbutton" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
-                <i class="fa-solid fa-message" style="color: #ffffff;"></i>
-            </button>
-
-            <button type="button" id="editButton" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
-                <i class="fa-solid fa-pen" style="color: #ffffff;"></i>
-            </button>
-
             <!-- Check Button -->
-            <button type="button" class="btn btnCompleted" style="width:auto; background-color: #1daa2d; border-color: #1daa2d; color: #ffffff;">
-                <i class="fa-solid fa-check" style="color: #ffffff;"></i> Complete
+            <button type="button" class="btn btnCancelled" style="width:auto; background-color: #1daa2d; border-color: #1daa2d; color: #ffffff;">
+                <i class="fa-solid fa-check" style="color: #ffffff;"></i> Approve Cancellation
             </button>
 
             <!-- Cancel Button -->
-            <button type="button" class="btn btnCancel" style="width:auto; background-color: #ee1717; border-color: #ee1717; color: #ffffff;">
-                <i class="fa-solid fa-xmark" style="color: #ffffff;"></i> Cancel
+            <button type="button" class="btn btnPendingBack" style="width:auto; background-color: #ee1717; border-color: #ee1717; color: #ffffff;">
+                <i class="fa-solid fa-xmark" style="color: #ffffff;"></i> Reject
             </button>
         </div>
 
@@ -727,28 +649,22 @@
 <script src="assets/DataTables/datatables.min.js"></script>
 
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        const tableIndex = new DataTable('#example', {
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
+document.addEventListener('DOMContentLoaded', () => {
+    const tableIndex = new DataTable('#example', {
         columnDefs: [
             {
                 searchable: false,
-                orderable: false,
-                targets: 0
+                orderable: false
             }
         ],
         order: [],
@@ -769,24 +685,19 @@
          .nodes()
          .each((el) => el.classList.add('highlight'));
     });
-});
-
-    document.addEventListener('DOMContentLoaded', () => {
-        let bookingIds;
-        let userID;
+    let bookingId;
     // Event delegation to handle row click events
     document.querySelector('tbody').addEventListener('click', function (event) {
         // Ensure the clicked element is a table row
         const row = event.target.closest('.table-row');
         if (row) {
-            const bookingId = row.dataset.bookingId;
-            bookingIds = bookingId; // Get the booking ID
-            userID = row.dataset.userId;
+            const cancelId = row.dataset.cancelId;
+            bookingId = row.dataset.bookingId;
 
-            //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
+            //window.location.href = `cancellationfetch.php?cancel_id=${bookingId}`;
             
             // Fetch the booking details from the server
-            fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
+            fetch(`cancellationfetch.php?cancel_id=${cancelId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
@@ -795,138 +706,84 @@
                     }
 
                     // Populate the modal with the fetched data
-                    document.getElementById('modalBookingId').textContent = data.bookingId;
+                    document.getElementById('modalCId').textContent = data.cancelId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
-                    document.getElementById('modalHours').textContent = data.hours;
-                    document.getElementById('modalAdults').textContent = data.adult;
-                    document.getElementById('modalChild').textContent = data.child;
-                    document.getElementById('modalPwd').textContent = data.pwds;
-                    document.getElementById('modalTotalPax').textContent = data.totalPax;
-                    document.getElementById('modalRoomType').textContent = data.type;
-                    // Optionally, loop over the rooms and display them in the modal (if needed)
-                    const roomsContainer = document.getElementById('modalRooms');
-                    roomsContainer.innerHTML = ''; // Clear existing rooms
-
-                    data.roomName.forEach(room => {
-                        const roomElement = document.createElement('div');
-                        roomElement.classList.add('room-detail','col-3','col-md-3');
-                        roomElement.innerHTML = `
-                            <strong>Room :</strong> ${room.roomName}<br>
-                        `;
-                        roomsContainer.appendChild(roomElement);
-                    });
-                    document.getElementById('modalAdds').textContent = data.additional;
-                    document.getElementById('modalPaymode').textContent = data.paymode;
-                    document.getElementById('modalTotalBill').textContent = data.totalBill;
-                    document.getElementById('modalBalance').textContent = data.balance;
-                    document.getElementById('modalrefNum').textContent = data.refNumber;
-
-                    const modalBody = document.getElementById('modalProof');
-                    modalBody.innerHTML = `
-                    <a href="${data.imageProof}" target="_blank">View image</a>
-                    `
-                    
+                    document.getElementById('modalReason').textContent = data.reason;
 
                     // Show the modal
                     $('#reservationModal').modal('show');
                 })
                 .catch(error => console.error('Error fetching data:', error));
-                alert(`An error occurred: ${error.message}`);
         }
     });
-    document.getElementById("chatsbutton").onclick = function() {
-        // Replace with your dynamic user_id value
-        const newUrl = `admin_chats.php?user_id=${userID}`;
-        window.location.href = newUrl; // Redirects to the new URL
-    };
-    function editBooking() {
-        if (bookingIds) { // Make sure bookingId is set
-            // Navigate to the cancellation page with the bookingId
-            window.location.href = `edit_reservation.php?id=${bookingIds}`;
+
+
+    const approvedButton = document.querySelector('.btnCancelled');
+    const rejectedButton = document.querySelector('.btnPendingBack');
+
+    if (approvedButton && rejectedButton) {
+    // Function to handle the approval action
+    approvedButton.addEventListener('click', function () {
+        if (!bookingId) {
+                console.error('Booking ID is not available');
+                return;
+            }
+
+        const isConfirmed = confirm("Are you sure you want to cancelled this booking?");
+        // Create the form element
+        if(isConfirmed){
+        const form = document.createElement('form');
+        form.method = 'POST';  
+        form.action = '';  
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'bookingId';
+        input.value = bookingId;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+
+
         } else {
-            console.log("No bookingId found!");
+            console.log('Booking approval canceled');
         }
-    }
-    document.getElementById('editButton').addEventListener('click', editBooking);
+        });
 
-const approvedButton = document.querySelector('.btnCompleted');
-const cancelButton = document.querySelector('.btnCancel');
-const bookingIdElement = document.getElementById('modalBookingId');
+        rejectedButton.addEventListener('click', function (event) {
+            if (!bookingId) {
+                console.error('Booking ID is not available');
+                return;
+            }
 
-if (approvedButton && bookingIdElement) {
-  // Function to handle the approval action
-  approvedButton.addEventListener('click', function () {
-      event.preventDefault();
-    const bookingId = bookingIdElement.textContent.trim();
-    
-    const isConfirmed = confirm("Please review booking details before proceeding.");
+            const isConfirmed = confirm("Void this cancellation. Are you sure?");
+            // Create the form element if confirmed
+            if (isConfirmed) {
+            const form = document.createElement('form');
+            form.method = 'POST';  
+            form.action = '';  
 
-    // Create the form element
-    if(isConfirmed){
-    const form = document.createElement('form');
-    form.method = 'POST';  // Use POST method
-    form.action = '';  // Submitting to the same page
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'bookingIdback';
+            input.value = bookingId;
 
-    // Create a hidden input field for the bookingId
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'bookingId';
-    input.value = bookingId;
-    // Append the input field to the form
-    form.appendChild(input);
-    // Append the form to the body
-    document.body.appendChild(form);
-    // Submit the form
-    form.submit();
-  } else {
-      // If the user cancels (clicks "Cancel"), do nothing
-      console.log('Booking approval canceled');
-    }
-  });
-} else {
-  console.error('Error: The modal elements are not found.');
-}
-
-if (cancelButton && bookingIdElement) {
-  // Function to handle the rejection action
-  cancelButton.addEventListener('click', function (event) {
-    event.preventDefault();
-    const bookingId = bookingIdElement.textContent.trim();
-
-    const isConfirmed = confirm("Are you sure you want to cancel this booking?");
-
-    // Create the form element if confirmed
-    if (isConfirmed) {
-      const form = document.createElement('form');
-      form.method = 'POST';  // Use POST method
-      form.action = '';  // Submitting to the same page
-
-      // Create a hidden input field for the bookingId
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'bookingIdCancel';
-      input.value = bookingId;
-
-      // Append the input field to the form
-      form.appendChild(input);
-
-      // Append the form to the body
-      document.body.appendChild(form);
-
-      // Submit the form
-      form.submit();
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            } else {
+            console.log('Booking rejection canceled');
+            }
+        });
     } else {
-      // If the user cancels (clicks "Cancel"), do nothing
-      console.log('Booking rejection canceled');
+        console.error('Error: The modal or buttons are not found.');
     }
-  });
-} else {
-  console.error('Error: The modal elements are not found.');
-}
 });
+
 </script>
 </body>
 </html>

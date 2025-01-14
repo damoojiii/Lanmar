@@ -6,10 +6,7 @@
     *, *::before, *::after {
         box-sizing: border-box;
     }
-    * {
-        margin: 0;
-    }
-    p{
+    *, p{
         margin: 0;
     }
     body{

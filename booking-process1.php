@@ -247,6 +247,14 @@
             margin-top: 10px;
             border-top: 1px solid #ccc;
         }
+        .timer{
+            font-weight: bold;
+            border-radius: 10px;
+            background-color:rgb(11, 69, 156);
+            padding: 10px;
+            color: #fff;
+            gap: 5px;
+        }
     </style>
     <style>
         /* responsive */
@@ -538,6 +546,13 @@
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
+    <div class="d-flex justify-content-start p-1">
+        <div class="d-flex timer">
+            <div class="">Timer: </div>
+            <div id="timer-display">10:00</div>
+        </div>
+    </div>
+    
     <div class="container1">
         <div class="row whole">
             <div class="guest col-md-6" style="width: 75%;">
@@ -873,6 +888,39 @@ $(document).ready(function() {
 
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Timer duration in seconds (10 minutes)
+    const timerDuration = 10 * 60;
+    const redirectUrl = 'index1.php'; 
+
+    // Function to start or resume the timer
+    function startTimer() {
+        let endTime = sessionStorage.getItem('bookingTimerEndTime');
+
+        if (!endTime) {
+            const currentTime = Date.now();
+            endTime = currentTime + timerDuration * 1000; // Set end time
+            sessionStorage.setItem('bookingTimerEndTime', endTime);
+        }
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = Math.max(0, endTime - now);
+            const minutes = Math.floor(timeLeft / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            // Redirect when time runs out
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+    }
+
+    // Call the function to start the timer
+    startTimer();
 
     document.querySelectorAll('.room-btn').forEach(button => {
         const isOffered = button.dataset.offered === "1";

@@ -8,6 +8,9 @@
         if(isset($_POST['bookingId'])){
         $bookingId = $_POST['bookingId'];
     
+        // Here, connect to the database and update the booking status
+        // Example using PDO for a MySQL database
+    
         try {
             // Prepare the SQL query to update the booking status
             $stmt = $pdo->prepare("UPDATE booking_tbl SET status = 'Completed' WHERE booking_id = :bookingId");
@@ -58,14 +61,19 @@
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
     <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
-    <link rel="stylesheet" href="assets/DataTables/datatables.min.css" />
+    
 
     <style>
         @font-face {
             font-family: 'nautigal';
             src: url(font/TheNautigal-Regular.ttf);
         }
-
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        *, p{
+            margin: 0;
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
@@ -76,6 +84,11 @@
             font-size: 50px !important;
         }
 
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
+        }
+
         #sidebar {
             width: 250px;
             position: fixed;
@@ -84,11 +97,11 @@
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
@@ -171,6 +184,10 @@
         .dropdown-item:hover{
             background-color: #fff !important;
             color: #000 !important;
+        }
+        .active>.page-link, .page-link.active {
+          background-color: #004080;
+          border-color: #004080;
         }
 
         @media (max-width: 768px) {
@@ -399,8 +416,36 @@
         }
 
         @media (max-width: 768px){
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
             #header{
                 background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
+            }
+            #header span{
+                display: block;
+            }
+            #header.shifted .font-logo-mobile{
+                display: none;
+            }
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
             }
             .modal-body h6 {
                 font-size: 16px; /* Slightly larger headers for readability */
@@ -412,6 +457,15 @@
             .table tbody td {
                 font-size: 0.8rem;
                 padding: 0.5rem;
+            }
+            .modal-mobile, .modal-mobile-remove{
+              padding-block: 2px;
+            }
+            .modal-mobile-remove{
+              background-color: transparent;
+            }
+            .modal-mobile-add{
+              background-color: #d6d6d6;
             }
         }
         @media (max-width: 576px) {
@@ -437,10 +491,10 @@
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -505,16 +559,16 @@
         $sql_solo = "
             SELECT 
                 booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.status,
-                reservationType_tbl.reservation_type,
+                reservationtype_tbl.reservation_type,
                 pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
                 bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode,
-                users.firstname, users.lastname, users.contact_number, users.user_id
+                users.firstname, users.lastname, users.contact_number, users.user_id, users.gender
             FROM booking_tbl
-            LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+            LEFT JOIN reservationtype_tbl ON booking_tbl.reservation_id = reservationtype_tbl.id
             LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
             LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
             LEFT JOIN users ON booking_tbl.user_Id = users.user_id
-            WHERE booking_tbl.status = 'Approved' ORDER BY booking_id DESC
+            WHERE booking_tbl.status = 'Approved' ORDER BY updated_at DESC
         ";
         $stmt_solo = $pdo->prepare($sql_solo);
         $stmt_solo->execute();
@@ -523,7 +577,7 @@
     
     <div id="main-content" class="">
         <div class="">
-            <div class="main-container my-5">
+            <div class="main-container my-1">
                 <h2 class="mb-4"><strong>Approved Reservations</strong></h2>
                 <div class="table-responsive">
                     <table class="table table-hover" id="example" style="width:100%">
@@ -570,10 +624,8 @@
                                     }
                                     ?>
                                     <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($statustext); ?></span></td>
+                                    </tr>
                             <?php endforeach; ?>
-                            <?php elseif(empty($results)):?>
-                                <td style="text-align: center;">No Approved Reservations</td>
-                                </tr>
                         <?php endif ?>
                         </tbody>
                     </table>
@@ -599,14 +651,14 @@
         <!-- Personal Information Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
+          <div class="row g-2">
+            <div class="col-12 col-md-4 modal-mobile">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 modal-mobile-remove">
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 modal-mobile">
               <p><strong>Gender:</strong> Female</p>
             </div>
           </div>
@@ -615,14 +667,14 @@
         <!-- Booking Details Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-5">
+          <div class="row g-2 mb-2" >
+            <div class="col-12 col-md-5 modal-mobile">
               <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 modal-mobile-remove">
               <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-3 modal-mobile">
               <p><strong>Total Hours:</strong> <span id="modalHours"></span></p>
             </div>
           </div>
@@ -636,11 +688,11 @@
             <div class="col-4 col-md-3">
               <p><strong>PWD:</strong> <span id="modalPwd"></span></p>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-3 modal-mobile-add">
               <p><strong>Total Pax:</strong> <span id="modalTotalPax"></span></p>
             </div>
           </div>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
+          <div class="row g-2 mb-2 modal-mobile-remove">
             <div><p><strong>Reservation Type:</strong> <span id="modalRoomType"></p></div>
           </div>
           <div class="row g-2">
@@ -661,23 +713,25 @@
         <!-- Payment Section -->
         <div class="mb-4">
           <h6 class="fw-bold">Payment</h6>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
+          <div class="row g-2 mb-2">
+            <div class="col-12 col-md-4 modal-mobile">
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-6 col-md-4 modal-mobile-remove">
               <p><strong>Total Price:</strong>₱ <span id="modalTotalBill"></span></p>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-6 col-md-4 modal-mobile-remove">
               <p><strong>Balance Remaining:</strong>₱ <span id="modalBalance"></span></p>
             </div>
           </div>
           <div class="row g-2">
-                <div class="col-6 col-md-4">
+                <div class="col-6 col-md-4 modal-mobile">
                 <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
                 </div>
-                <div class="col-6 col-md-4">
-                    <div id="modalProof"></div>
+                <div class="col-6 col-md-4 modal-mobile">
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
+                    View Proof
+                </button>
                 </div>  
             </div>     
         </div>
@@ -706,6 +760,20 @@
     </div>
   </div>
 </div>
+<!-- Modal for Viewing GCash Receipt (Nested Modal) -->
+<div class="modal" id="gcashReceiptModal" tabindex="-1" aria-labelledby="gcashReceiptModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg " id="proofpicture">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="gcashReceiptModalLabel">Proof of Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-IMAGE">
+        <!-- Image will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -715,21 +783,16 @@
 <script src="assets/DataTables/datatables.min.js"></script>
 
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
     document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('booking_id');
@@ -782,14 +845,26 @@
             .catch(error => console.error('Error fetching data:', error));
         }
     });
+    
+
     document.addEventListener('DOMContentLoaded', () => {
+        function jsRenderCOL(data, type, row, meta) {
+            var dataRender;
+            if (data !== "dummy") {
+                dataRender = "you as dummy";
+            }
+            return dataRender;
+        }
+        
         const tableIndex = new DataTable('#example', {
         columnDefs: [
             {
                 searchable: false,
+                orderable: false,
                 targets: 0
             }
         ],
+        order: [0, 'asc'],
         paging: true,
         scrollY: '100%'
     });
@@ -807,9 +882,7 @@
          .nodes()
          .each((el) => el.classList.add('highlight'));
     });
-});
-
-    document.addEventListener('DOMContentLoaded', () => {
+        
         let bookingIds;
         let userID;
     // Event delegation to handle row click events
@@ -861,13 +934,8 @@
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
                     document.getElementById('modalrefNum').textContent = data.refNumber;
-
-                    const modalBody = document.getElementById('modalProof');
-                    modalBody.innerHTML = `
-                    <a href="${data.imageProof}" target="_blank">View image</a>
-                    `
-                    
-
+                    const modalBody = document.getElementById('modal-IMAGE');
+                    modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
                     // Show the modal
                     $('#reservationModal').modal('show');
                 })
@@ -880,6 +948,23 @@
         const newUrl = `admin_chats.php?user_id=${userID}`;
         window.location.href = newUrl; // Redirects to the new URL
     };
+    const viewReceiptButton = document.getElementById('modalProof');
+    if (viewReceiptButton) {
+      viewReceiptButton.addEventListener('click', function () {
+          // Check if the modal exists before opening
+          const gcashModal = document.getElementById('gcashReceiptModal');
+          const modal = new bootstrap.Modal(gcashModal);
+          modal.show();
+      });
+    }
+    // Add event listener for closing the GCash Receipt modal and show Reservation modal
+    const gcashModal = document.getElementById('gcashReceiptModal');
+    if (gcashModal) {
+      gcashModal.addEventListener('hidden.bs.modal', function () {
+          const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+          reservationModal.show();
+      });
+    }
     function editBooking() {
         if (bookingIds) { // Make sure bookingId is set
             // Navigate to the cancellation page with the bookingId
