@@ -484,11 +484,11 @@ if ($conn->connect_error) {
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="#hero">Home</a></li>
+          <li><a href="index.php">Home</a></li>
           <li><a href="accomodation.php" class="active">Accommodations</a></li>
-          <li><a href="#gallery">Gallery</a></li>
-          <li><a href="#portfolio">Amenities</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="index.php#gallery">Gallery</a></li>
+          <li><a href="index.php#amenities">Amenities</a></li>
+          <li><a href="index.php#contact">Contact</a></li>
           <li><a href="login.php" class="btn btn-outline-light">Sign In</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
