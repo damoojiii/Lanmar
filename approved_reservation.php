@@ -414,6 +414,24 @@
         font-size: 14px; /* Slightly smaller text for mobile */
         margin: 0;
         }
+        .modal-mobile, .modal-mobile-remove{
+          background-color: #d6d6d6;
+          padding-block: 5px;
+        }
+        .modal-mobile-add{
+          background-color: transparent;
+        }
+        #proofpicture {
+          max-width: 419px;
+          max-height: 900px;
+          overflow: hidden;
+        }
+        #proofpicture img{
+          width: 100%; /* Make the image responsive to the container's width */
+          height: auto; /* Maintain the aspect ratio */
+          object-fit: contain;
+        }
+
 
         @media (max-width: 768px){
             #sidebar {
@@ -551,7 +569,9 @@
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
     
     <!-- tabel fetch-->
@@ -659,7 +679,7 @@
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
             <div class="col-12 col-md-4 modal-mobile">
-              <p><strong>Gender:</strong> Female</p>
+                <p><strong>Gender:</strong> <span id="modalGender"></span></p>
             </div>
           </div>
         </div>
@@ -725,10 +745,10 @@
             </div>
           </div>
           <div class="row g-2">
-                <div class="col-6 col-md-4 modal-mobile">
+                <div class="col-6 col-md-4 modal-mobile-add">
                 <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
                 </div>
-                <div class="col-6 col-md-4 modal-mobile">
+                <div class="col-6 col-md-4 modal-mobile-add">
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
                     View Proof
                 </button>
@@ -810,6 +830,7 @@
                 document.getElementById('modalBookingId').textContent = data.bookingId;
                 document.getElementById('modalName').textContent = data.name;
                 document.getElementById('modalContact').textContent = data.contact;
+                document.getElementById('modalGender').textContent = data.gender;
                 document.getElementById('modalDateRange').textContent = data.dateRange;
                 document.getElementById('modalTimeRange').textContent = data.timeRange;
                 document.getElementById('modalHours').textContent = data.hours;
@@ -860,11 +881,10 @@
         columnDefs: [
             {
                 searchable: false,
-                orderable: false,
-                targets: 0
+                orderable: false
             }
         ],
-        order: [0, 'asc'],
+        order: [],
         paging: true,
         scrollY: '100%'
     });
@@ -909,6 +929,7 @@
                     document.getElementById('modalBookingId').textContent = data.bookingId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
+                    document.getElementById('modalGender').textContent = data.gender;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;

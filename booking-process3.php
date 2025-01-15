@@ -271,6 +271,9 @@
   #makePDF{
     display: none;
   }
+  #myreserve{
+    display: none;
+  }
 
   /* Ensure the content to print is visible */
   .print-content {
@@ -461,7 +464,7 @@
                 <p>We appreciate your interest in experiencing the serene ambiance and luxurious amenities our resort has to offer. <br><br> Please note that your reservation is currently being processed, and we will confirm your stay with us as soon as possible. Due to high demand, we kindly ask for your patience as we work diligently to accommodate all our valued guests. </p><br><br>
                 <div class="d-flex justify-content-start">
                     <div class="me-2"><a href="" onclick="printPage()" class="btn btn-primary btn-sm" id="makePDF">Download Receipt</a></div>
-                    <div><a href="my-reservation.php" class="btn btn-secondary btn-sm">Check my reservation</a></div>
+                    <div><a href="my-reservation.php" id="myreserve" class="btn btn-secondary btn-sm">Check my reservation</a></div>
                 </div>
                 
             </div>

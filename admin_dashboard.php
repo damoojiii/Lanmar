@@ -4,13 +4,20 @@
     include "role_access.php";
     checkAccess('admin');
 
+    $id = $_SESSION['user_id'];
+
     try {
+        $name_sql = $pdo->prepare("SELECT firstname FROM users WHERE user_id = '$id'");
+        $name_sql->execute();
+        $name_data = $name_sql->fetch(PDO::FETCH_ASSOC);
+        $name = $name_data['firstname'];
+
         $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations FROM booking_tbl WHERE status = 'Pending'");
         $pending_stmt->execute();
         $pending_data = $pending_stmt->fetch(PDO::FETCH_ASSOC);
         $pending_reservations = $pending_data['pending_reservations'];
     
-        $incoming_stmt = $pdo->prepare("SELECT COUNT(*) AS incoming_books FROM booking_tbl WHERE WEEK(dateIn) = WEEK(CURDATE()) AND YEAR(dateIn) = YEAR(CURDATE())");
+        $incoming_stmt = $pdo->prepare("SELECT COUNT(*) AS incoming_books FROM booking_tbl WHERE WEEK(dateIn) = WEEK(CURDATE()) AND YEAR(dateIn) = YEAR(CURDATE()) AND status = 'Approved'");
         $incoming_stmt->execute();
         $incoming_data = $incoming_stmt->fetch(PDO::FETCH_ASSOC);
         $incoming_books = $incoming_data['incoming_books'];
@@ -19,6 +26,11 @@
         $earnings_stmt->execute();
         $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
         $weekly_earnings = $earnings_data['weekly_earnings'];
+
+        $cancellation_stmt = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation FROM booking_tbl WHERE status = 'Cancellation2'");
+        $cancellation_stmt->execute();
+        $cancellation_data = $cancellation_stmt->fetch(PDO::FETCH_ASSOC);
+        $cancellation_reservations = $cancellation_data['upcoming_cancellation'];
 
         $sql = "SELECT YEAR(dateIn) AS year, MONTH(dateIn) AS month, SUM(p.adult + p.child + p.pwd) AS totalPax
         FROM booking_tbl b
@@ -281,7 +293,7 @@
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
         <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
@@ -341,7 +353,9 @@
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div id="main-content" class="container mt-1">
@@ -349,7 +363,7 @@
         <!-- Header Section -->
         <div class="row">
             <div class="col-12 header">
-                <h2>Welcome, User!</h2>
+                <h2>Welcome, <?php echo ucwords($name);?>!</h2>
                 <p>You have 24 new messages and 5 new notifications.</p>
             </div>
         </div>
@@ -380,7 +394,7 @@
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Upcoming Cancellations</h5>
-                    <h2>17,212</h2>
+                    <h2><?php echo number_format($cancellation_reservations);  ?></h2>
                     <p>+5.50% More cancellation than usual</p>
                 </div>
             </div>

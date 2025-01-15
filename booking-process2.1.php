@@ -702,7 +702,7 @@
                 ?>" alt="QRCode"/>
                 </div>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
-                    <input type="file" name="image" accept="image/*">
+                    <input type="file" name="image" accept="image/*" required>
                     <p>Reference ID</p>
                     <input type="text" 
                         name="ref_id" 
@@ -739,43 +739,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    // Timer duration in seconds (10 minutes)
-    const timerDuration = 10 * 60;
-    const redirectUrl = 'index1.php'; // Replace with your main page URL
-
-    // Function to start or resume the timer
-    function startTimer() {
-        let endTime = sessionStorage.getItem('bookingTimerEndTime');
-
-        if (!endTime) {
-            const currentTime = Date.now();
-            endTime = currentTime + timerDuration * 1000; // Set end time
-            sessionStorage.setItem('bookingTimerEndTime', endTime);
-        }
-
-        const interval = setInterval(() => {
-            const now = Date.now();
-            const timeLeft = Math.max(0, endTime - now);
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-            // Display the timer on the page (replace 'timer-display' with your element ID)
-            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-            // Redirect when time runs out
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
-                alert('You ran out of time. Please book again.');
-                window.location.href = redirectUrl;
-            }
-        }, 1000);
-    }
-
-    // Call the function to start the timer
-    startTimer();
-});
      // Display the modal on page load
      window.onload = function() {
         document.getElementById('policy-modal').style.display = 'block';

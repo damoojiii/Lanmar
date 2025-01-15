@@ -717,7 +717,10 @@ checkAccess('admin');
                 $.ajax({
                     url: url,
                     type: 'POST',
-                    data: dataObj,
+                    data: {
+                        id: dataObj,
+                        price: dataObj
+                    },
                     success: function(response) {
                         $(responseContainer).html('<div class="alert alert-success">' + response + '</div>');
                     },
@@ -745,7 +748,7 @@ checkAccess('admin');
 
             if (newValue % 1 !== 0 && newValue % 1 !== 0.5) {
                 isValid = false;
-                errorMsg = "Value must be a whole number or end in .5 (e.g., 6, 6.5, 7, 7.5).";
+                errorMsg = "Hour must be a whole number or end in .5 (e.g., 6, 6.5, 7, 7.5).";
             }
 
             if (isValid) {

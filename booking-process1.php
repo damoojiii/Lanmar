@@ -942,6 +942,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('room-details').innerHTML = `
+                        <div id="success-alert" class="alert alert-success alert-dismissible fade" role="alert" style="display: none;">
+                            <span id="alert-message"></span>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <img src="${data.image_path}" class="placeholder-img" style="width: 100%; height: 200px;">
@@ -995,6 +998,9 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 document.getElementById('room-details').innerHTML = `
+                    <div id="success-alert" class="alert alert-success alert-dismissible fade" role="alert" style="display: none;">
+                        <span id="alert-message"></span>
+                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <img src="${data.image_path}" class="placeholder-img" style="width: 100%; height: 200px;">
@@ -1112,6 +1118,25 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
     }
 
     showAllRooms(); 
+    showSuccessAlert(`"${roomName}" is added successfully.`);
+}
+
+function showSuccessAlert(message) {
+    const alertElement = document.getElementById('success-alert');
+    const alertMessage = document.getElementById('alert-message');
+    
+    alertMessage.textContent = message;
+    alertElement.style.display = 'block';
+    alertElement.classList.add('show');
+    alertElement.classList.remove('fade');
+
+    setTimeout(() => {
+        alertElement.classList.add('fade');
+        alertElement.classList.remove('show');
+        setTimeout(() => {
+            alertElement.style.display = 'none';
+        }, 150);
+    }, 3000); // Time in milliseconds before fading out
 }
 
 function addRoomIdToForm(roomId) {

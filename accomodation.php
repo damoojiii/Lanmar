@@ -1,17 +1,5 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "lanmartest";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include 'connection.php';
 ?>
 
 <!DOCTYPE html>
@@ -539,7 +527,7 @@ if ($conn->connect_error) {
                         </ul>
                         <div class="room-actions">
                             <button class="btn-view-details">View Details</button>
-                            <button class="btn-book-now" onclick="window.location.href='booking-process1.php'">Book Now</button>
+                            <button class="btn-book-now" onclick="window.location.href='index1.php'">Book Now</button>
                         </div>
                     </div>
                 </div>

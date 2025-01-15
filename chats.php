@@ -233,7 +233,7 @@
         <!-- Chat Messages -->
         <div class="chat-area" id="chat-area">
             <div class="d-flex justify-content-center">
-                <button id="load-more">Load More</button>
+                <button id="load-more">Loading..</button>
             </div>
             
         </div>

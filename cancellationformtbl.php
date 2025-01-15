@@ -532,6 +532,7 @@
             LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
             LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
             LEFT JOIN users ON booking_tbl.user_Id = users.user_id
+            LEFT JOIN cancel_tbl ON booking_tbl.booking_id = cancel_tbl.booking_id
             WHERE booking_tbl.status = 'Approved' ORDER BY booking_id DESC
         ";
         $stmt = $pdo->prepare($sql_solo);

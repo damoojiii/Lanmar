@@ -1,8 +1,6 @@
 <?php  
     session_start();
     include("connection.php");
-    include "role_access.php";
-    checkAccess('user');
     $userId = $_SESSION['user_id'];
     $preDateIn = $_SESSION['preDateIn'] ?? ''; 
     $preDateOut = $_SESSION['preDateOut'] ?? ''; 

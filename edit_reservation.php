@@ -22,7 +22,12 @@
             font-family: 'nautigal';
             src: url(font/TheNautigal-Regular.ttf);
         }
-
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        *, p{
+            margin: 0;
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
@@ -30,7 +35,12 @@
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
+        }
+
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -39,19 +49,18 @@
             top: 0; 
             height: 100vh;
             overflow-y: auto; 
-            background: #001A3E;
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
-            z-index: 1000;
+            z-index: 199;
             display: flex;
             align-items: center;
             padding: 0 15px;
@@ -153,9 +162,6 @@
             display: flex;
             gap: 20px;
         }
-        .settings-form-container {
-            margin-bottom: 20px;
-        }
         .alert {
             padding: 10px;
             margin: 10px 0;
@@ -183,50 +189,6 @@
         display: flex;
         gap: 20px;
     }
-
-    .sidebar-settings {
-        display: flex;
-        flex-direction: column;
-        width: 230px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 35px 15px 15px 15px;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .settings-links {
-        width: 100%
-    }
-
-    .settings-links ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .settings-links li {
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .settings-links a {
-        text-decoration: none;
-        color: #333;
-        padding: 10px 15px;
-        border-radius: 2px;
-        transition: 0.3s;
-    }
-
-    .settings-links a:hover {
-        background-color: #ddd;
-    }
-
-    .settings-links .links {
-        margin-bottom: 30px;
-    }
-
     .main-content {
         flex: 1;
         padding: 25px;
@@ -238,21 +200,6 @@
     .form-group input {
         margin-bottom: 10px;
     }
-
-    .settings-form .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: bold;
-        font-size: 17px;
-    }
-
-    .settings-form .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 0px;
-    }
-
     .breadcrumb {
         display: flex;
         align-items: center;
@@ -261,13 +208,6 @@
         float: right;
         margin-left: 16%;
         margin-bottom: 15px;
-    }
-
-    .four-box-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        margin: 5px 0 0 0;
     }
 
     .links {
@@ -304,16 +244,6 @@
         justify-content: end;
     }
 
-    .settings-form button, 
-    .save-btn {
-        border-radius: 10px !important;  
-        padding: 13px 30px;
-        background-color: #03045e;
-        border: none;
-        cursor: pointer;
-        color: white;
-    }
-
     .form-section {
         margin-bottom: 20px;
     }
@@ -327,7 +257,48 @@
         margin-top: 20px;
     }
 
-        
+    @media (max-width: 768px) {
+        #sidebar {
+            position: fixed;
+            transform: translateX(-100%);
+            z-index: 199;
+        }
+
+        #sidebar.show {
+            transform: translateX(0); /* Show sidebar */
+        }
+
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        #main-content {
+            margin-inline: 10px; 
+            padding: 0;
+        }
+
+        #hamburger {
+            display: block; /* Show hamburger button on smaller screens */
+        }
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+        }
+        #header span{
+            display: block;
+        }
+        #header.shifted .font-logo-mobile{
+            display: none;
+        }
+        .header{ 
+            width: 100%;
+            margin-inline: auto;
+        }
+    }    
 
     @media (max-width: 576px) {
 
@@ -339,10 +310,10 @@
 <body>
     <!-- Header -->
     <header id="header">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -380,7 +351,7 @@
                 <a href="feedback.php" class="nav-link text-white">Guest Feedback</a>
             </li>
             <li>
-                <a href="reports.php" class="nav-link text-white">Reports</a>
+                <a href="cancellationformtbl.php" class="nav-link text-white">Cancellations</a>
             </li>
             <li>
                 <a href="account_lists.php" class="nav-link text-white">Account List</a>
@@ -412,9 +383,9 @@
                         if (isset($_GET['id']) && !empty($_GET['id'])) {
                             $bookingId = $_GET['id'];
                             // Fetch the booking details
-                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, reservationType_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
+                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, reservationtype_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
                                     FROM booking_tbl 
-                                    LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id 
+                                    LEFT JOIN reservationtype_tbl ON booking_tbl.reservation_id = reservationtype_tbl.id 
                                     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id 
                                     LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id 
                                     LEFT JOIN room_tbl ON bill_tbl.bill_id = room_tbl.bill_id 
