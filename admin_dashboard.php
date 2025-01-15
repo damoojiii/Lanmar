@@ -22,10 +22,19 @@
         $incoming_data = $incoming_stmt->fetch(PDO::FETCH_ASSOC);
         $incoming_books = $incoming_data['incoming_books'];
     
-        $earnings_stmt = $pdo->prepare("SELECT SUM(bill_tbl.total_bill) AS weekly_earnings FROM booking_tbl LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id WHERE WEEK(booking_tbl.dateIn) = WEEK(CURDATE()) AND YEAR(booking_tbl.dateIn) = YEAR(CURDATE())");
+        $earnings_stmt = $pdo->prepare("
+            SELECT SUM(bill_tbl.total_bill) AS weekly_earnings 
+            FROM booking_tbl 
+            LEFT JOIN bill_tbl 
+            ON booking_tbl.bill_id = bill_tbl.bill_id 
+            WHERE WEEK(booking_tbl.dateIn) = WEEK(CURDATE()) 
+            AND YEAR(booking_tbl.dateIn) = YEAR(CURDATE()) 
+            AND booking_tbl.status NOT IN ('Pending', 'Cancelled', 'Rejected')
+        ");
         $earnings_stmt->execute();
         $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
         $weekly_earnings = $earnings_data['weekly_earnings'];
+
 
         $cancellation_stmt = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation FROM booking_tbl WHERE status = 'Cancellation2'");
         $cancellation_stmt->execute();

@@ -470,7 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h2 class="text-center mb-5 mt-4"><strong>Homepage Settings</strong></h2>
+                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">

@@ -12,10 +12,8 @@ include("connection.php");
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $notification_count = $result['notification_count'];
 
     // Return the notification count as a JSON response
-    foreach($result as $results){
-        echo $results['notification_count'];
-    }
-
+    echo json_encode($notification_count);
 ?>

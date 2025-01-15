@@ -87,7 +87,7 @@
             background-color: #f8f9fa;
         }
 
-        #sidebar span {
+        #sidebar span .font-logo{
             font-family: 'nautigal';
             font-size: 50px !important;
         }
@@ -529,7 +529,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="fs-4 font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">

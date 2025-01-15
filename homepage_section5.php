@@ -606,9 +606,11 @@ checkAccess('admin');
                 <div class="col-md-6 col-sm-12">
                     <form id="update-price-form">
                         <div class="mb-3">
-                            <label for="price-selector" class="form-label">Select Price</label>
+                            <label for="price-selector" class="form-label" id="">Select Price</label>
                             <div id="dropdown-container">
-                                <!-- Dropdown will be populated here via AJAX -->
+                                <select id="price-selector" class="form-select">
+
+                                </select>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -680,10 +682,10 @@ checkAccess('admin');
             url: 'get_prices.php',
             type: 'GET',
             success: function(data) {
-                $('#dropdown-container').html(data);
+                $('#price-selector').html(data);
             },
             error: function() {
-                $('#dropdown-container').html('<div class="alert alert-danger">Failed to load prices.</div>');
+                $('##response-message').html('<div class="alert alert-danger">Failed to load prices.</div>');
             }
         });
 
@@ -711,16 +713,16 @@ checkAccess('admin');
             fetchValue('fetch_booking_hour.php', '#booking-selector', '#value-input', '#response-message-hour');
         });
 
-        function handleFormSubmission(formId, url, dataObj, responseContainer) {
+        function handleFormSubmission(formId, url, responseContainer) {
             $(formId).on('submit', function(event) {
                 event.preventDefault();
+                const id = $('#price-selector').val();
+                const price = $('#price-input').val();
+
                 $.ajax({
                     url: url,
                     type: 'POST',
-                    data: {
-                        id: dataObj,
-                        price: dataObj
-                    },
+                    data: {id: id, price: price},
                     success: function(response) {
                         $(responseContainer).html('<div class="alert alert-success">' + response + '</div>');
                     },
@@ -732,10 +734,8 @@ checkAccess('admin');
         }
 
         // Price form submission
-        handleFormSubmission('#update-price-form', 'update_price.php', {
-            id: $('#price-selector').val(),
-            price: $('#price-input').val()
-        }, '#response-message');
+        handleFormSubmission('#update-price-form', 'update_price.php','#response-message');
+
 
         // Booking hour form submission with validation
         $('#update-booking-hour-form').on('submit', function(event) {
