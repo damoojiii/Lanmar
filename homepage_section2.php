@@ -65,13 +65,17 @@ if (isset($_POST['delete_id'])) {
         }
 
         body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
+        }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -86,12 +90,11 @@ if (isset($_POST['delete_id'])) {
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -110,8 +113,8 @@ if (isset($_POST['delete_id'])) {
         #main-content {
             transition: margin-left 0.3s ease;
             margin-left: 250px; 
-            margin-top: 25px;
-            padding: 20px;
+            margin-top: 25px; /* Add top margin for header */
+            padding: 20px; /* Padding for content */
         }
 
         hr {
@@ -146,6 +149,7 @@ if (isset($_POST['delete_id'])) {
             display: inline-block;
             font-size: 20px;
         }
+
         .navcircle{
             font-size: 7px;
             text-align: justify;
@@ -192,7 +196,9 @@ if (isset($_POST['delete_id'])) {
 
         .flex-container {
             display: flex;
+            flex-direction: column;
             gap: 20px;
+            padding: 0 15px;
         }
         .settings-form-container {
             margin-bottom: 20px;
@@ -346,14 +352,14 @@ if (isset($_POST['delete_id'])) {
     }
 
     .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
+    .save-btn {
+        border-radius: 10px !important; 
+        padding: 10px 15px;
+        background-color: rgb(29, 69, 104);
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
 
         /* Main container styles */
         .main-content {
@@ -405,16 +411,6 @@ if (isset($_POST['delete_id'])) {
             justify-content: end;
         }
 
-        .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
         /* Tab container styles */
         .tab-container {
             display: flex;
@@ -441,10 +437,6 @@ if (isset($_POST['delete_id'])) {
             width: 100%;
         }
 
-        .tab-container .tab.active {
-            background-color: #19315D;
-        }
-
         .tab:hover {
             background-color: #0175FE;
         }
@@ -464,8 +456,8 @@ if (isset($_POST['delete_id'])) {
                 padding: 8px 15px;
                 font-size: 12px;
             }
-            .main-content{
-                padding: 0;
+            .main-content, #main-content{
+                padding: 0 !important;
             }
             .btn-modal{
                 width: 100%;
@@ -476,6 +468,44 @@ if (isset($_POST['delete_id'])) {
                 grid-template-rows: repeat(2, auto); /* Two rows, auto height */
                 gap: 10px; /* Optional: spacing between items */
                 padding: 10px; /* Optional: padding around the grid */
+            }
+            #sidebar {
+                position: fixed;
+                transform: translateX(-100%);
+                z-index: 199;
+            }
+
+            #sidebar.show {
+                transform: translateX(0); /* Show sidebar */
+            }
+
+            #header.shifted{
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            #header{
+                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+                padding: 15px;
+                margin: 0;
+                width: 100%;
+                position: fixed;
+            }
+            #header span{
+                display: block;
+            }
+            #header.shifted .font-logo-mobile{
+                display: none;
+            }
+            #main-content{
+                margin-top: 60px;
+                padding-inline: 10px;
+            }
+            .logout{
+                margin-bottom: 3rem;
+            }
+            .settings-form-container {
+                margin-top: 10px;
+                padding-inline: 10px;
             }
         }
 
@@ -495,9 +525,9 @@ if (isset($_POST['delete_id'])) {
             display: flex;
             overflow-x: auto;
             gap: 20px;
-            padding: 10px 0;
-            scrollbar-width: thin;
-            scrollbar-color: #001A3E #f0f0f0;
+            padding: 20px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
         .gallery-scroll::-webkit-scrollbar {
@@ -505,68 +535,60 @@ if (isset($_POST['delete_id'])) {
         }
 
         .gallery-scroll::-webkit-scrollbar-track {
-            background: #f0f0f0;
+            background: #f1f1f1;
             border-radius: 4px;
         }
 
         .gallery-scroll::-webkit-scrollbar-thumb {
-            background: #001A3E;
+            background: #19315D;
             border-radius: 4px;
         }
 
         .gallery-scroll .card {
             min-width: 250px;
-            margin: 0;
-            flex: 0 0 auto;
+            max-width: 250px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .gallery-scroll .card img {
+            width: 100%;
             height: 200px;
             object-fit: cover;
         }
 
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
+        .gallery-scroll .card .card-body {
+            padding: 10px;
+            text-align: center;
         }
 
+        /* Override horizontal scroll for mobile */
+        @media (max-width: 768px) {
+            .gallery-scroll {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 10px;
+                justify-content: center;
+            }
+
+            .gallery-scroll .card {
+                width: 100%;
+                max-width: none;
+                min-width: auto;
+                margin-bottom: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
@@ -709,7 +731,7 @@ if (isset($_POST['delete_id'])) {
 
                             <form class="settings-form" method="POST" enctype="multipart/form-data">
                                 <div class="form-group text-center">
-                                    <label for="gallery_image" class="mb-2">Upload New Gallery Image:</label>
+                                    <label for="gallery_image" class="mt-5 mb-2">Upload New Gallery Image:</label>
                                     <input type="file" name="gallery_image" id="gallery_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Gallery Image">
                                 </div>
                                 <div class="button-container">
@@ -733,7 +755,7 @@ if (isset($_POST['delete_id'])) {
                                     }
                                     echo '</div>';
                                 } else {
-                                    echo '<p>No images found in the gallery.</p>';
+                                    echo '<p class="text-center">No images found in the gallery.</p>';
                                 }
                                 ?>
                             </div>
@@ -799,37 +821,4 @@ if (isset($_POST['delete_id'])) {
     </script>
 
 </body>
-<style>
-      .tab-container {
-        display: flex;
-        margin-top: 5px;
-        margin-bottom: 1px;
-    }
-
-    .tab-container .tab.active {
-        background-color: #19315D;
-        color: white;
-    }
-
-    .tab-container .tab {
-        padding: 8px 29.8px;
-        text-align: center;
-        cursor: pointer;
-        border: 1px solid transparent;
-        border-radius: 10px 10px 0 0;
-        margin-right: 21px;
-        transition: 0.3s;
-        background-color: white;
-        font-size: 12px;
-        background-color: #1c2531;
-        color: white;
-        border-bottom: 1px solid white;
-        text-decoration: none;
-    }
-
-    .tab:hover {
-        background-color: #0175FE;
-        color: white;
-    }
-</style>
 </html>
