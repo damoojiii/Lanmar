@@ -378,6 +378,42 @@ $descriptions = [];
     .feedback-line {
         margin: 40px 0;
     }
+      .amenities {
+        padding: 60px 0;
+        background-color: #19315D;
+      }
+
+      .amenity-card {
+        background: #fff;
+        padding: 30px 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+        height: 100%;
+        transition: transform 0.3s ease;
+      }
+
+      .amenity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      }
+
+      .amenity-card i {
+        color: #19315D;
+        margin-bottom: 20px;
+      }
+
+      .amenity-card h4 {
+        color: #19315D;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .amenity-card p {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+      }
     @media (max-width: 768px) {
         .feedback-card {
             width: calc(50% - 20px); 
@@ -409,10 +445,10 @@ $descriptions = [];
       <nav id="navmenu" class="navmenu">
         <ul>
           <li><a href="#hero" class="active">Home</a></li>
-          <li><a href="#accomo">Accommodations</a></li>
+          <li><a href="accomodation.php">Accommodations</a></li>
           <li><a href="#gallery">Gallery</a></li>
-          <li><a href="#portfolio">Amenities</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="#amenities">Amenities</a></li>
+          <li><a href="#location">Locate Us</a></li>
           <li><a href="login.php" class="btn btn-outline-light">Sign In</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -578,6 +614,177 @@ $descriptions = [];
             </div>
       </div>
     </section>
+    <section id="amenities" class="amenities section">
+      <div class="container">
+        <div class="section-header text-center">
+          <h2 style="color: white;">Our Amenities</h2>
+          <p style="color: white;">Comfort and Convenience at Your Fingertips</p>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up">
+            <div class="amenity-card text-center">
+              <i class="bi bi-wifi fs-1"></i>
+              <h4>Free WiFi</h4>
+              <p>Stay connected with high-speed internet access throughout your stay</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+            <div class="amenity-card text-center">
+              <i class="bi bi-snow fs-1"></i>
+              <h4>Air Conditioning</h4>
+              <p>Climate controlled rooms for your comfort in any weather</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+            <div class="amenity-card text-center">
+              <i class="bi bi-8-circle fs-1"></i>
+              <h4>Billiards</h4>
+              <p>Challenge friends and family to an exciting game of billiards</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+            <div class="amenity-card text-center">
+              <i class="bi bi-water fs-1"></i>
+              <h4>Swimming Pool</h4>
+              <p>Refreshing pool perfect for relaxation and recreation</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+            <div class="amenity-card text-center">
+              <i class="bi bi-p-circle fs-1"></i>
+              <h4>Free Parking</h4>
+              <p>Secure parking space available for all guests</p>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="600">
+            <div class="amenity-card text-center">
+            <i class="bi bi-music-note-beamed fs-1"></i>
+              <h4>Videoke</h4>
+              <p>Enjoy singing with friends and family with our videoke facility</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="500">
+            <div class="amenity-card text-center">
+              <i class="bi bi-shield-check fs-1"></i>
+              <h4>24/7 Security</h4>
+              <p>Round-the-clock security for your peace of mind</p>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="amenity-card text-center">
+              <i class="bi bi-telephone fs-1"></i>
+              <h4>24/7 Support</h4>
+              <p>Always available to assist with your needs</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+
+    <!-- Location Section -->
+    <section id="location" class="location section">
+      <div class="container">
+        <div class="section-title text-center mb-5">
+          <h2>Our Location</h2>
+          <p>Find us at</p>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-lg-6 mb-4">
+            <div class="location-info p-4 bg-white rounded shadow">
+              <h3>Address</h3>
+              <p><i class="bi bi-geo-alt me-2"></i>Purok 6, Brgy. Poblacion, Madridejos, Cebu</p>
+              
+              <h3 class="mt-4">Contact Information</h3>
+              <p><i class="bi bi-telephone me-2"></i>+63 912 345 6789</p>
+              <p><i class="bi bi-envelope me-2"></i>lanmarresort89xzy@gmail.com</p>
+              
+              <h3 class="mt-4">Operating Hours</h3>
+              <p><i class="bi bi-clock me-2"></i>Open 24/7</p>
+            </div>
+          </div>
+          
+          <div class="col-lg-6">
+            <div class="map-container rounded shadow">
+            <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7730.660502155013!2d120.77971866572528!3d14.350289715941608!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33962bafffffffff%3A0xf5abf31d416b2a5!2sLanmar%20Resort!5e0!3m2!1sen!2sph!4v1737045490238!5m2!1sen!2sph"
+            width="650"
+            height="410"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      .location {
+        padding: 60px 0;
+        background-color: #f8f9fa;
+      }
+      .location .section-title {
+        margin-bottom: 30px;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      
+      .location-info {
+        height: 100%;
+      }
+
+      .location-info h3 {
+        color: #19315D;
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .location-info p {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+      }
+
+      .location-info i {
+        color: #19315D;
+        
+      }
+
+      .map-container {
+        height: 100%;
+      }
+
+      .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .map-container {
+          margin-top: 20px;
+          min-height: 410px;
+        }
+      }
+    </style>
+  
+
+
 
   </main>
 

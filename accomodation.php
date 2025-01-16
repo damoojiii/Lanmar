@@ -527,7 +527,7 @@ include 'connection.php';
                         </ul>
                         <div class="room-actions">
                             <button class="btn-view-details">View Details</button>
-                            <button class="btn-book-now" onclick="window.location.href='index1.php'">Book Now</button>
+                        
                         </div>
                     </div>
                 </div>
