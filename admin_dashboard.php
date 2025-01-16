@@ -16,12 +16,34 @@
         $pending_stmt->execute();
         $pending_data = $pending_stmt->fetch(PDO::FETCH_ASSOC);
         $pending_reservations = $pending_data['pending_reservations'];
-    
+
+        $pending_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS pending_reservations_prev FROM booking_tbl WHERE status = 'Pending' AND MONTH(created_at) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)");
+        $pending_stmt_prev->execute();
+        $pending_data_prev = $pending_stmt_prev->fetch(PDO::FETCH_ASSOC);
+        $pending_reservations_prev = $pending_data_prev['pending_reservations_prev'];
+
+        if ($pending_reservations_prev != 0) {
+            $pending_percentage_change = (($pending_reservations - $pending_reservations_prev) / $pending_reservations_prev) * 100;
+        } else {
+            $pending_percentage_change = 0;
+        }
+
         $incoming_stmt = $pdo->prepare("SELECT COUNT(*) AS incoming_books FROM booking_tbl WHERE WEEK(dateIn) = WEEK(CURDATE()) AND YEAR(dateIn) = YEAR(CURDATE()) AND status = 'Approved'");
         $incoming_stmt->execute();
         $incoming_data = $incoming_stmt->fetch(PDO::FETCH_ASSOC);
         $incoming_books = $incoming_data['incoming_books'];
-    
+        
+        $incoming_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS incoming_books_prev FROM booking_tbl WHERE WEEK(created_at) = WEEK(CURDATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURDATE() - INTERVAL 1 MONTH) AND status = 'Approved'");
+        $incoming_stmt_prev->execute();
+        $incoming_data_prev = $incoming_stmt_prev->fetch(PDO::FETCH_ASSOC);
+        $incoming_books_prev = $incoming_data_prev['incoming_books_prev'];
+
+        if ($incoming_books_prev != 0) {
+            $incoming_percentage_change = (($incoming_books - $incoming_books_prev) / $incoming_books_prev) * 100;
+        } else {
+            $incoming_percentage_change = 0;
+        }
+
         $earnings_stmt = $pdo->prepare("
             SELECT SUM(bill_tbl.total_bill) AS weekly_earnings 
             FROM booking_tbl 
@@ -35,21 +57,54 @@
         $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
         $weekly_earnings = $earnings_data['weekly_earnings'];
 
+        $earnings_stmt_prev = $pdo->prepare("SELECT SUM(bill_tbl.total_bill) AS weekly_earnings_prev FROM booking_tbl LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id WHERE WEEK(booking_tbl.created_at) = WEEK(CURDATE() - INTERVAL 1 WEEK) AND YEAR(booking_tbl.created_at) = YEAR(CURDATE() - INTERVAL 1 WEEK) AND booking_tbl.status NOT IN ('Pending', 'Cancelled', 'Rejected')");
+        $earnings_stmt_prev->execute();
+        $earnings_data_prev = $earnings_stmt_prev->fetch(PDO::FETCH_ASSOC);
+        $weekly_earnings_prev = $earnings_data_prev['weekly_earnings_prev'];
+
+        if ($weekly_earnings_prev != 0) {
+            $weekly_earnings_percentage_change = (($weekly_earnings - $weekly_earnings_prev) / $weekly_earnings_prev) * 100;
+        } else {
+            $weekly_earnings_percentage_change = 0;
+        }
 
         $cancellation_stmt = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation FROM booking_tbl WHERE status = 'Cancellation2'");
         $cancellation_stmt->execute();
         $cancellation_data = $cancellation_stmt->fetch(PDO::FETCH_ASSOC);
         $cancellation_reservations = $cancellation_data['upcoming_cancellation'];
 
-        $sql = "SELECT YEAR(dateIn) AS year, MONTH(dateIn) AS month, SUM(p.adult + p.child + p.pwd) AS totalPax
+        $cancellation_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation_prev FROM booking_tbl WHERE status = 'Cancellation2' AND MONTH(created_at) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)");
+        $cancellation_stmt_prev->execute();
+        $cancellation_data_prev = $cancellation_stmt_prev->fetch(PDO::FETCH_ASSOC);
+        $cancellation_reservations_prev = $cancellation_data_prev['upcoming_cancellation_prev'];
+
+        if ($cancellation_reservations_prev != 0) {
+            $cancellation_percentage_change = (($cancellation_reservations - $cancellation_reservations_prev) / $cancellation_reservations_prev) * 100;
+        } else {
+            $cancellation_percentage_change = 0;
+        }
+
+        $sql = "SELECT YEAR(dateIn) AS year, MONTH(dateIn) AS month, SUM(p.adult + p.child + p.pwd) AS totalPax, b.status
         FROM booking_tbl b
         JOIN pax_tbl p ON b.pax_id = p.pax_id
+        WHERE b.status NOT IN ('Pending', 'Cancelled', 'Rejected')
         GROUP BY year, month
         ORDER BY year, month";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         $bookingData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $sql3 = "SELECT DISTINCT YEAR(created_at) AS year FROM booking_tbl ORDER BY year DESC";
+        $stmt3 = $pdo->prepare($sql3);
+        $stmt3->execute();
+        $years = $stmt3->fetchAll(PDO::FETCH_ASSOC);
+
+        $sql4 = "SELECT DISTINCT YEAR(created_at) AS year FROM feedback_tbl ORDER BY year DESC";
+        $stmt4 = $pdo->prepare($sql4);
+        $stmt4->execute();
+        $years1 = $stmt4->fetchAll(PDO::FETCH_ASSOC);
+
 
     
     } catch (PDOException $e) {
@@ -356,8 +411,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Homepage Settings</a></li>
                 </ul>
             </li>
         </ul>
@@ -383,28 +438,28 @@
                 <div class="stats-card">
                     <h5>Pending Reservations</h5>
                     <h2><?php echo number_format($pending_reservations); ?></h2>
-                    <p>-2.65% Less booking than usual</p>
+                    <p><?php echo ($pending_percentage_change >= 0 ? '+' : '-') . number_format(abs($pending_percentage_change), 2) . '% compared to last month'; ?></p>
                 </div>
             </div>
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
-                    <h5>Incoming Books this Week</h5>
+                    <h5>Incoming Confirmed Books this Week</h5>
                     <h3><?php echo number_format($incoming_books); ?></h3>
-                    <p>+8.35% More incoming books than usual</p>
+                    <p><?php echo ($incoming_percentage_change >= 0 ? '+' : '-') . number_format(abs($incoming_percentage_change), 2) . '% compared to last month'; ?></p>
                 </div>
             </div>
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Weekly Earnings</h5>
                     <h3>₱ <?php echo number_format($weekly_earnings); ?></h3>
-                    <p>+8.35% More earnings than usual</p>
+                    <p><?php echo ($weekly_earnings_percentage_change >= 0 ? '+' : '-') . number_format(abs($weekly_earnings_percentage_change), 2) . '% compared to last week'; ?></p>
                 </div>
             </div>
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Upcoming Cancellations</h5>
                     <h2><?php echo number_format($cancellation_reservations);  ?></h2>
-                    <p>+5.50% More cancellation than usual</p>
+                    <p><?php echo ($cancellation_percentage_change >= 0 ? '+' : '-') . number_format(abs($cancellation_percentage_change), 2) . '% compared to last month'; ?></p>
                 </div>
             </div>
         </div>
@@ -415,7 +470,7 @@
                 <div class="chart-container d-flex flex-column">
                     <div class="chart-header mb-3">
                         <h5 id="chart-title" class="mb-0">Monthly Earnings</h5>
-                        <select id="earnings-filter" class="form-select form-select-sm w-25" onchange="updateChart()">
+                        <select id="earnings-filter" class="form-select form-select-sm w-25">
                             <option value="yearly">Yearly</option>
                             <option value="monthly" selected>Monthly</option>
                         </select>
@@ -435,6 +490,59 @@
                     </div>
                     <div class="chart-body flex-grow-1">
                         <canvas id="paxChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-4 col-12 mb-4">
+                <div class="chart-container d-flex flex-column">
+                    <div class="d-flex justify-content-end">
+                        <select id="yearSelectorRoom" class="form-select mb-4">
+                            <?php 
+                            foreach ($years as $year) {
+                                echo "<option value='{$year['year']}'>{$year['year']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="chart-body flex-grow-1">
+                        <canvas id="revenueChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 col-12 mb-4">
+                <div class="chart-container d-flex flex-column">
+                    <div class="chart-header mb-3">
+                        <h5 class="mb-0">Feedback Rating</h5>
+                        <div class="d-flex justify-content-end">
+                            <select id="yearSelectorFeedback" class="form-control">
+                                <?php 
+                                foreach ($years1 as $year) {
+                                    echo "<option value='{$year['year']}'>{$year['year']}</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-body flex-grow-1">
+                        <canvas id="feedbackPieChart" width="200px" height="100px"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 col-12 mb-4">
+                <div class="chart-container d-flex flex-column">
+                    <div class="d-flex justify-content-end">
+                        <select id="yearSelectorBook" class="form-select mb-4">
+                            <?php 
+                            foreach ($years as $year) {
+                                echo "<option value='{$year['year']}'>{$year['year']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="chart-body flex-grow-1">
+                        <canvas id="bookingsChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -544,7 +652,6 @@
             yearSelect.add(option);
         });
 
-        // Function to create or update the bar chart
         function createPaxChart(year) {
             const chartData = {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -564,7 +671,6 @@
                 chartData.datasets[0].data[month] += booking.totalPax;
             });
 
-            // Destroy the existing chart instance if it exists
             if (paxChart) {
                 paxChart.destroy();
             }
@@ -596,6 +702,330 @@
             const selectedYear = yearSelect.value;
             createPaxChart(selectedYear);
         });
+
+        document.getElementById('yearSelectorRoom').addEventListener('change', function() {
+            var selectedYear = this.value;
+            fetchRevenueData(selectedYear);  // Use the correct function name here
+        });
+
+        // Function to fetch revenue data based on the selected year
+        function fetchRevenueData(year) {
+            var rtx = document.getElementById('revenueChart').getContext('2d');
+            var gradient = rtx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(54, 162, 235, 0.8)');
+            gradient.addColorStop(1, 'rgba(54, 162, 235, 0.3)');
+
+            // Perform an AJAX request to fetch data for the selected year
+            fetch('get_room_revenue.php?year=' + year)
+                .then(response => response.json())
+                .then(data => {
+                    // Check if data is valid before creating the chart
+                    if (data.room_names && data.total_revenues) {
+                        // Destroy the previous chart if it exists
+                        if (window.chart) {
+                            window.chart.destroy();
+                        }
+
+                        // Create the new chart with the fetched data
+                        window.chart = new Chart(rtx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.room_names, // Room names
+                                datasets: [{
+                                    label: 'Room Revenue',
+                                    data: data.total_revenues, 
+                                    backgroundColor: gradient,
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 2,
+                                    borderRadius: 8,
+                                    hoverBackgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                    hoverBorderColor: 'rgba(54, 162, 235, 1)',
+                                    hoverBorderWidth: 3
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Total Revenue (PHP)',
+                                            font: {
+                                                family: 'Arial, sans-serif',
+                                                size: 14,
+                                                weight: 'bold'
+                                            },
+                                            color: '#333'
+                                        },
+                                        ticks: {
+                                            color: '#333',
+                                            font: {
+                                                family: 'Arial, sans-serif',
+                                                size: 12
+                                            }
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Room Name',
+                                            font: {
+                                                family: 'Arial, sans-serif',
+                                                size: 14,
+                                                weight: 'bold'
+                                            },
+                                            color: '#333'
+                                        },
+                                        ticks: {
+                                            color: '#333',
+                                            font: {
+                                                family: 'Arial, sans-serif',
+                                                size: 12
+                                            }
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#fff',
+                                        bodyColor: '#fff',
+                                        bodyFont: {
+                                            size: 14
+                                        },
+                                        displayColors: false
+                                    },
+                                    legend: {
+                                        labels: {
+                                            font: {
+                                                family: 'Arial, sans-serif',
+                                                size: 14
+                                            },
+                                            color: '#333'
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 1000,
+                                    easing: 'easeOutBounce'
+                                }
+                            }
+                        });
+                    } else {
+                        console.error('Invalid data received:', data);
+                    }
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+        var defaultYearBook = document.getElementById('yearSelectorRoom').value;
+        fetchRevenueData(defaultYearBook);
+
+        document.getElementById('yearSelectorFeedback').addEventListener('change', function() {
+            var selectedYear = this.value;
+            fetchRatingsData(selectedYear);
+        });
+
+        function fetchRatingsData(year) {
+            var ctx = document.getElementById('feedbackPieChart').getContext('2d');
+            
+            fetch('get_ratings.php?year=' + year)
+                .then(response => response.json())
+                .then(data => {
+                    if (window.feedbackChart) {
+                        window.feedbackChart.destroy();
+                    }
+
+                    window.feedbackChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: data.ratings, 
+                            datasets: [{
+                                label: 'Feedback Ratings',
+                                data: data.rating_counts, 
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.6)',  // Red
+                                    'rgba(54, 162, 235, 0.6)',  // Blue
+                                    'rgba(255, 206, 86, 0.6)',  // Yellow
+                                    'rgba(75, 192, 192, 0.6)',  // Green
+                                    'rgba(153, 102, 255, 0.6)', // Purple
+                                    'rgba(255, 159, 64, 0.6)'   // Orange
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',  // Red
+                                    'rgba(54, 162, 235, 1)',  // Blue
+                                    'rgba(255, 206, 86, 1)',  // Yellow
+                                    'rgba(75, 192, 192, 1)',  // Green
+                                    'rgba(153, 102, 255, 1)', // Purple
+                                    'rgba(255, 159, 64, 1)'   // Orange
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    titleColor: '#fff',
+                                    bodyColor: '#fff',
+                                    bodyFont: {
+                                        size: 14
+                                    }
+                                },
+                                legend: {
+                                    labels: {
+                                        font: {
+                                            family: 'Arial, sans-serif',
+                                            size: 14
+                                        },
+                                        color: '#333'
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 1000,  
+                                easing: 'easeOutBounce'  
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        var defaultYearFeedback = document.getElementById('yearSelectorFeedback').value;
+        fetchRatingsData(defaultYearFeedback);
+
+
+        var atx = document.getElementById('bookingsChart').getContext('2d');
+
+        // Function to fetch the data based on the selected year
+        function fetchBookingsData(year) {
+            $.ajax({
+                url: 'fetch-dash-book.php', 
+                method: 'GET',
+                data: { year: year },
+                success: function(response) {
+                    var data = JSON.parse(response);
+                    var bookings = data.bookings_count;
+
+                    updateChartBook(bookings);
+                }
+            });
+        }
+
+        // Function to update the chart
+        function updateChartBook(bookings) {
+            var gradientLine = atx.createLinearGradient(0, 0, 0, 400);
+            gradientLine.addColorStop(0, 'rgba(75, 192, 192, 1)');
+            gradientLine.addColorStop(1, 'rgba(75, 192, 192, 0.3)');
+
+            book.data.datasets[0].data = bookings;
+            book.data.datasets[0].borderColor = gradientLine;
+
+            // Update the chart
+            book.update();
+        }
+
+        var defaultYear = $('#yearSelectorBook').val();
+        fetchBookingsData(defaultYear); 
+
+        $('#yearSelectorBook').change(function() {
+            var selectedYear = $(this).val();
+            fetchBookingsData(selectedYear);  
+        });
+ 
+
+        // Create the chart
+        var book = new Chart(atx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Bookings Count',
+                    data: [],  
+                    borderColor: [],
+                    borderWidth: 3, 
+                    fill: false,  // Don't fill the area under the line
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)', 
+                    pointRadius: 6,  // Size of the points on the line
+                    pointHoverRadius: 8,  // Hover size of the points
+                    tension: 0.4,  // Smoothing for the line
+                    hoverBackgroundColor: 'rgba(75, 192, 192, 0.8)', 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Bookings',
+                            font: {
+                                family: 'Arial, sans-serif', 
+                                size: 14,
+                                weight: 'bold',
+                            },
+                            color: '#333',  
+                        },
+                        ticks: {
+                            color: '#333',  
+                            font: {
+                                family: 'Arial, sans-serif',
+                                size: 12,
+                            },
+                        },
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month',
+                            font: {
+                                family: 'Arial, sans-serif',
+                                size: 14,
+                                weight: 'bold',
+                            },
+                            color: '#333',
+                        },
+                        ticks: {
+                            color: '#333',
+                            font: {
+                                family: 'Arial, sans-serif',
+                                size: 12,
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',  // Darker background for tooltips
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        bodyFont: {
+                            size: 14,
+                        },
+                        displayColors: false,  // Hide the color box in the tooltip
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.raw + ' bookings'; 
+                            },
+                        },
+                    },
+                    legend: {
+                        display: false,  
+                    },
+                },
+                animation: {
+                    duration: 1000,  // Smooth animation
+                    easing: 'easeOutElastic',  // Elegant easing effect
+                },
+            }
+        });
+
+
 
 
         document.getElementById('hamburger').addEventListener('click', function() {

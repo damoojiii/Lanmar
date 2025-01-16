@@ -276,6 +276,7 @@
         #main-content {
             margin-inline: 10px; 
             padding: 0;
+            margin: 60px 10px;
         }
 
         #hamburger {
@@ -309,7 +310,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header id="header">
+    <header id="header" class="bg-light shadow-sm">
         <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
@@ -370,12 +371,14 @@
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
     
     <div id="main-content" class="">
         <div class="">
-            <div class="main-container my-5">
+            <div class="main-container my-1">
                 <h2 class="text-center mb-4"><strong>Edit Reservation</strong></h2>
                 <form action="update_reservation.php" method="POST">
                     <?php 
@@ -611,6 +614,14 @@
                                                     <button class="btn btn-danger" type="button" id="deduct-button">Deduct</button>
                                                 </div>
                                             </div>
+                                            <div class="col-sm-12 col-md-3">
+                                                <label class="form-label">Deduct from Balance</label>
+                                                <div class="input-group">
+                                                    <input type="number" id="deduct-balance" class="form-control" value="0" min="0">
+                                                    <!-- Deduct Button -->
+                                                    <button class="btn btn-danger" type="button" id="deduct-balance-button">Deduct</button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -639,21 +650,16 @@
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
 
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {
@@ -680,7 +686,7 @@
     // Deduct from Total Bill functionality
         $('#deduct-button').on('click', function() {
             let deductAmount = parseInt($('#deduct-total-bill').val()) || 0;
-            let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;
+            let currentTotalBill = parseInt($('##total-bill-input').val()) || 0;
 
             // Update total bill
             let updatedTotalBill = currentTotalBill - deductAmount;
@@ -688,6 +694,15 @@
 
             // Recalculate balance
             updateBalance(updatedTotalBill);
+        });
+
+        $('#deduct-balance-button').on('click', function() {
+            let deductAmount = parseInt($('#deduct-balance').val()) || 0;
+            let currentTotalBill = parseInt($('#balance-input').val()) || 0;
+
+            // Update total bill
+            let updatedTotalBill = currentTotalBill - deductAmount;
+            $('#balance-input').val(updatedTotalBill);
         });
 
         const priceForBalance = <?= $priceForBalance; ?>;
@@ -702,12 +717,15 @@
         function fetchBaseRate() {
             let dateIn = $('#date-in').val();
             let dateOut = $('#date-out').val();
+            let checkOut = $('#checkout-time').val();
+            let adults = parseInt($('input[name="adult"]').val()) || 0;
+            let totalPax = adults;
 
             if (dateIn && dateOut) {
                 $.ajax({
-                    url: 'fetch_rate.php',
+                    url: 'fetch_rate_user.php',
                     type: 'POST',
-                    data: { dateIn: dateIn, dateOut: dateOut },
+                    data: { dateIn: dateIn, dateOut: dateOut, checkOut: checkOut, totalPax: totalPax },
                     success: function(response) {
                         let result = JSON.parse(response);
                         let baseRate = result.baseRate;
@@ -812,8 +830,9 @@
 
 
 
-        $('#date-in, #date-out').on('change', function() {
+        $('#date-in, #date-out, #checkin-time, #checkout-time' ).on('change', function() {
             fetchBaseRate();
+            recomputeTotalBill();
         });
 
         $('input[name="adult"], input[name="child"], input[name="pwd"]').on('input', function() {
@@ -859,8 +878,28 @@
             const roomPrice = parseInt($(this).closest('.room-item').data('price')) || 0;
             const offered = parseInt($(this).closest('.room-item').data('offered')) || 0;
 
-            $(this).closest('.room-item').remove();
-            $(`#hidden-rooms input[value="${roomId}"]`).remove();
+            let countOffered = 0;
+            let dateIn = $('input[name="dateIn"]').val();
+            let dateOut = $('input[name="dateOut"]').val();
+            let isOvernight = dateIn !== dateOut;
+
+            // Count rooms with data-offered = 1
+            $('#selected-rooms .room-item').each(function() {
+                const roomOffered = parseInt($(this).data('offered')) || 0;
+                if (roomOffered === 1) {
+                    countOffered++;
+                }
+            });
+
+            console.log(offered, countOffered, isOvernight);
+
+            // Adjust the amount for the first offered room during an overnight stay
+            if (offered === 1 && (countOffered === 1 || countOffered === 0 ) && isOvernight) {
+                alert('Offered Rooms cannot be remove.');
+            }else{
+                $(this).closest('.room-item').remove();
+                $(`#hidden-rooms input[value="${roomId}"]`).remove();
+            }
 
             if ($('#selected-rooms .room-item').length === 0) {
                 $('#no-rooms-message').show();
@@ -1396,6 +1435,7 @@ function initializeFlatpickr() {
       minDate: formattedToday,
       showMonths: 1, 
       defaultDate: dateInValue,  
+      disableMobile: "true",
       onChange: function (selectedDates, dateStr, instance) {
         document.querySelector("#date-in").value = dateStr;
   
@@ -1411,7 +1451,8 @@ function initializeFlatpickr() {
       enableTime: false,
       dateFormat: "Y-m-d",
       minDate: dateInValue,
-      defaultDate: dateOutValue,  
+      defaultDate: dateOutValue,
+      disableMobile: "true",
       onChange: function (selectedDates, dateStr, instance) {
         document.querySelector("#date-out").value = dateStr;
         populateCheckInTimes(document.querySelector("#date-in").value, dateStr);

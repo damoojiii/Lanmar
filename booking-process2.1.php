@@ -473,7 +473,7 @@
     $origPrice = $_SESSION['rate'] ?? '';
     $grandTotal = $_SESSION['grandTotal']  ?? '';
     $roomTotal = $_SESSION['roomTotal'] ?? '';
-    $roomIds = $_SESSION['roomIds'] ?? '';
+    $roomIds = $_SESSION['roomIds'] ?? [];
     $paymode = $_SESSION['payment_method'] ?? '';
     $status = 'Pending';
 
@@ -549,38 +549,36 @@
         // Insert into room_tbl
         if(!empty($roomIds)){
             foreach ($roomIds as $roomId) {
-                // Prepare the SQL to fetch room details based on room_id
+                // Fetch room details based on room_id
                 $sql = "SELECT room_name FROM rooms WHERE room_id = :roomId";
                 $stmt = $pdo->prepare($sql);
-            
-                // Execute the statement with parameter binding
                 $stmt->execute([':roomId' => $roomId]);
-            
-                // Fetch the room data
+        
+                // Fetch room data
                 $room = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+                if ($room) {
+                    $room_name = $room['room_name']; 
+        
+                    // Insert the data into room_tbl
+                    $room_sql = "INSERT INTO room_tbl (room_Id, room_name, bill_id) 
+                                 VALUES (:roomId, :room_name, :billId)";
+                    $stmt = $pdo->prepare($room_sql);
+                    $stmt->execute([
+                        ':roomId' => $roomId,
+                        ':billId' => $bill_id, 
+                        ':room_name' => $room_name
+                    ]);
+                    
+                    // Optionally check the last inserted ID (if you need it)
+                    $last_room_id = $pdo->lastInsertId(); 
+                    //echo "New room_id inserted: $last_room_id<br>";
+                } else {
+                    // Handle the case where no room is found
+                    echo "No room found with room_id: $roomId<br>";
+                }
+            }
         }
-         
-    if ($room) {
-        $room_name = $room['room_name']; // Extract the room name from the result
-        
-        // Insert the data into room_tbl with parameter binding
-        $room_sql = "INSERT INTO room_tbl (room_Id, room_name, bill_id) 
-                     VALUES (:roomId, :room_name, :billId)";
-        $stmt = $pdo->prepare($room_sql);
-        $stmt->execute([
-            ':roomId' => $roomId,
-            ':billId' => $bill_id,
-            ':room_name' => $room_name
-        ]);
-        
-        // Get the last inserted room_id
-        $last_room_id = $pdo->lastInsertId();  
-        //echo "New record created successfully in room_tbl with room_id: $last_room_id<br>";
-    } else {
-        // Handle the case where no room was found for the roomId
-        echo "No room found with room_id: $roomId<br>";
-    }
-    }
 
     
         // Insert into booking_tbl last

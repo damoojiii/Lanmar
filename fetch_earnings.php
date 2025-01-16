@@ -12,6 +12,7 @@ if (isset($_GET['type'])) {
                    SUM(CASE WHEN booking_tbl.dateIn != booking_tbl.dateOut THEN bill_tbl.total_bill ELSE 0 END) as overnightEarnings
             FROM bill_tbl
             JOIN booking_tbl ON bill_tbl.bill_id = booking_tbl.bill_id
+            WHERE booking_tbl.status NOT IN ('Pending','Cancelled','Rejected')
             GROUP BY year
         ");
     } else {
@@ -22,6 +23,7 @@ if (isset($_GET['type'])) {
                    SUM(CASE WHEN booking_tbl.dateIn != booking_tbl.dateOut THEN bill_tbl.total_bill ELSE 0 END) as overnightEarnings
             FROM bill_tbl
             JOIN booking_tbl ON bill_tbl.bill_id = booking_tbl.bill_id
+            WHERE booking_tbl.status NOT IN ('Pending','Cancelled','Rejected')
             GROUP BY month
             ORDER BY MONTH(booking_tbl.dateIn)
         ");
