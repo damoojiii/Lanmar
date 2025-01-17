@@ -1,7 +1,6 @@
 <?php
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('admin');
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' ) {
@@ -87,7 +86,7 @@
             background-color: #f8f9fa;
         }
 
-        #sidebar span .font-logo{
+        #sidebar .font-logo {
             font-family: 'nautigal';
             font-size: 50px !important;
         }
@@ -118,7 +117,7 @@
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for header */
         }
 
         #hamburger {
@@ -420,6 +419,37 @@
         .modal-mobile-add{
           background-color: transparent;
         }
+        #proofpicture {
+          max-width: 419px;
+          max-height: 900px;
+          overflow: hidden;
+        }
+        #proofpicture img{
+          width: 100%; /* Make the image responsive to the container's width */
+          height: auto; /* Maintain the aspect ratio */
+          object-fit: contain;
+        }
+        #sidebar .badge-notif, .badge-chat{
+            border-radius: 20px;
+            width: auto;
+            
+            background-color: #fff !important;
+        }
+        #sidebar .badge-chat, #sidebar .badge-notif {
+            display: inline-block; 
+            width: 15px; 
+            height: 5px; 
+            border-radius: 5px; 
+            text-align: center;
+            align-content: center;
+            background-color: #fff !important;
+            margin-left: 5px;
+        }
+    
+        #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+        }
+
         @media (max-width: 768px){
             #sidebar {
                 position: fixed;
@@ -549,10 +579,10 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -575,7 +605,7 @@
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="nav-link text-white" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -611,7 +641,7 @@
 
                                     <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                                     <td><?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['contact_number']); ?></td>
+                                    <td class="d-none d-sm-table-cell"><?php echo htmlspecialchars($row['contact_number']); ?></td>
                                     <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
                                     echo date("F j, Y" , strtotime($row["dateIn"])) . " to " . date("F j, Y" , strtotime($row["dateOut"]));
                                     } else {
@@ -749,10 +779,10 @@
             </div>
           </div>
           <div class="row g-2">
-                <div class="col-6 col-md-4 modal-mobile">
+                <div class="col-6 col-md-4 modal-mobile-add">
                 <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
                 </div>
-                <div class="col-6 col-md-4 modal-mobile">
+                <div class="col-6 col-md-4 modal-mobile-add">
                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
                     View Proof
                 </button>
@@ -1016,6 +1046,56 @@ const rejectedButton = document.querySelector('.btnReject');
               .catch(error => console.error('Error fetching data:', error));
     }
 });
+
+$(document).ready(function() {
+    function updateNotificationCount(){
+      $.ajax({
+            url: 'admin_notification_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var notificationCount = data;
+                // Update the notification counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.target');
+                if (notificationCount >= 1) {
+                    notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Notification');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving notification count.');
+            }
+        });  
+    }
+     
+    function updateChatPopup() {
+        $.ajax({
+            url: 'admin_chat_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var counter = data;
+                // Update the chat counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.chat');
+                
+                if (counter >= 1) {
+                    notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Chat with Lanmar');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving chat count.');
+            }
+        });
+    }
+    updateNotificationCount();
+    updateChatPopup();
+    setInterval(updateNotificationCount, 5000);
+    setInterval(updateChatPopup, 5000);
+});
+
 
 
 </script>

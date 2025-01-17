@@ -1,7 +1,6 @@
 <?php 
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('admin');
     
 ?>
@@ -22,7 +21,7 @@
             src: url(font/TheNautigal-Regular.ttf);
         }
 
-        #sidebar span {
+        #sidebar .font-logo {
             font-family: 'nautigal';
             font-size: 50px !important;
         }
@@ -52,7 +51,7 @@
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease;
         }
 
         #hamburger {
@@ -271,6 +270,31 @@
     .search-suggestion:hover {
         background-color: #f5f5f5;
     }
+
+    #sidebar .badge-notif, .badge-chat{
+        border-radius: 20px;
+        width: auto;
+        
+        background-color: #fff !important;
+    }
+    #sidebar .badge-chat, #sidebar .badge-notif {
+        display: inline-block; 
+        width: 15px; 
+        height: 5px; 
+        border-radius: 5px; 
+        text-align: center;
+        align-content: center;
+        background-color: #fff !important;
+        margin-left: 5px;
+    }
+
+    #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+    }
+
+    #sidebar .badge-chat{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+    }
     @media (max-width: 768px) {
         #sidebar {
             position: fixed;
@@ -331,9 +355,20 @@
         #header.shifted .font-logo-mobile{
             display: none;
         }
-        #main-content{
+        .contact-container{
             margin-top: 60px;
+        }
+        #main-content{
             padding-inline: 10px;
+        }
+        #userModal{
+            margin-top: 25px;
+            height: 80vh;
+        }
+    }
+    @media (max-width: 576px) {
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
         }
     }
     </style>
@@ -350,7 +385,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="fs-4 font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -370,10 +405,10 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link active text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link active text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -395,13 +430,15 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div class="contact-container">
@@ -444,6 +481,14 @@
             <?php
         }
         ?>
+            <div class="user-link-more" data-bs-toggle="modal" data-bs-target="#userModal">
+                <div class="user">
+                    <div class="user-pic">
+                        <img src="profile/default_photo.jpg" alt="More">
+                    </div>
+                    <div class="user-name">More Users+</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -456,6 +501,23 @@
             </div>
             <div class="search-suggestions" id="searchSuggestions" style="display: none;">
                 <!-- Search suggestions will be populated here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- User List Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Contact List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="userList" class="list-group">
+                        <!-- User items will be injected here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -484,6 +546,29 @@
             collapse.addEventListener('hidden.bs.collapse', () => {
                 collapse.style.height = '0px';
             });
+        });
+        document.querySelector('.user-link-more').addEventListener('click', function() {
+            fetch('getUserList.php')
+                .then(response => response.json())
+                .then(users => {
+                    const userListContainer = document.getElementById('userList');
+                    userListContainer.innerHTML = ''; // Clear existing content
+        
+                    users.forEach(user => {
+                        const userItem = document.createElement('div');
+                        userItem.classList.add('list-group-item', 'd-flex', 'align-items-center');
+        
+                        userItem.innerHTML = `
+                            <img src="${user.profile ? user.profile : 'profile/default_photo.jpg'}" alt="${user.firstname} ${user.lastname}" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                            <div>
+                                <a href="admin_chats.php?user_id=${user.user_id}" style="text-decoration: none; color: inherit;"><h5 class="mb-0 text-capitalize">${user.firstname} ${user.lastname}</h5>
+                                <p class="mb-0 text-muted">${user.latest_msg ? user.latest_msg : 'No messages yet'}</p>
+                                <span class="badge bg-primary">${user.unread_count} unread</span></a>
+                            </div>
+                        `;
+                        userListContainer.appendChild(userItem);
+                    });
+                });
         });
 
         $(document).ready(function () {
@@ -528,6 +613,53 @@
             const userId = $(this).data('id'); // Get the user ID from the data-id attribute
             window.location.href = `admin_chats.php?user_id=${userId}`; // Redirect with the user ID
         });
+
+        function updateNotificationCount(){
+        $.ajax({
+                url: 'admin_notification_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var notificationCount = data;
+                    // Update the notification counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.target');
+                    if (notificationCount >= 1) {
+                        notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                    } else {
+                        notificationLink.html('Notification');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving notification count.');
+                }
+            });  
+        }
+        
+        function updateChatPopup() {
+            $.ajax({
+                url: 'admin_chat_count.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var counter = data;
+                    // Update the chat counter in the sidebar
+                    var notificationLink = $('.nav-link.text-white.chat');
+                    
+                    if (counter >= 1) {
+                        notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                    } else {
+                        notificationLink.html('Chat with Lanmar');
+                    }
+                },
+                error: function() {
+                    console.log('Error retrieving chat count.');
+                }
+            });
+        }
+        updateNotificationCount();
+        updateChatPopup();
+        setInterval(updateNotificationCount, 5000);
+        setInterval(updateChatPopup, 5000);
     });
 
 

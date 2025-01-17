@@ -1,7 +1,6 @@
 <?php
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('admin');
 
 ?>
@@ -33,7 +32,7 @@
             background-color: #f8f9fa;
         }
 
-        #sidebar span {
+        #sidebar .font-logo {
             font-family: 'nautigal';
             font-size: 50px !important;
         }
@@ -64,7 +63,7 @@
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for header */
         }
 
         #hamburger {
@@ -256,6 +255,26 @@
         text-align: center;
         margin-top: 20px;
     }
+    #sidebar .badge-notif, .badge-chat{
+        border-radius: 20px;
+        width: auto;
+        
+        background-color: #fff !important;
+    }
+    #sidebar .badge-chat, #sidebar .badge-notif {
+        display: inline-block; 
+        width: 15px; 
+        height: 5px; 
+        border-radius: 5px; 
+        text-align: center;
+        align-content: center;
+        background-color: #fff !important;
+        margin-left: 5px;
+    }
+
+    #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+    }
 
     @media (max-width: 768px) {
         #sidebar {
@@ -320,7 +339,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="fs-4 font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -340,10 +359,10 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -365,8 +384,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -580,7 +599,7 @@
                                             <input type="text" id="total-bill-input" class="form-control" name="totalbill" value="<?= (int)$reservation['total_bill']; ?>" readonly>
                                             <!-- Collapse button -->
                                             <button class="btn btn-link" type="button" data-bs-toggle="collapse" data-bs-target="#totalBillCollapse" aria-expanded="false" aria-controls="totalBillCollapse">
-                                                Adjust Total Bill
+                                                Adjust Total Bill & Balance
                                             </button>
                                         </div>
 
@@ -671,6 +690,53 @@
     });
 
     $(document).ready(function() {
+        function updateNotificationCount(){
+            $.ajax({
+                    url: 'admin_notification_count.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var notificationCount = data;
+                        // Update the notification counter in the sidebar
+                        var notificationLink = $('.nav-link.text-white.target');
+                        if (notificationCount >= 1) {
+                            notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                        } else {
+                            notificationLink.html('Notification');
+                        }
+                    },
+                    error: function() {
+                        console.log('Error retrieving notification count.');
+                    }
+                });  
+            }
+            
+            function updateChatPopup() {
+                $.ajax({
+                    url: 'admin_chat_count.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var counter = data;
+                        // Update the chat counter in the sidebar
+                        var notificationLink = $('.nav-link.text-white.chat');
+                        
+                        if (counter >= 1) {
+                            notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                        } else {
+                            notificationLink.html('Chat with Lanmar');
+                        }
+                    },
+                    error: function() {
+                        console.log('Error retrieving chat count.');
+                    }
+                });
+            }
+            updateNotificationCount();
+            updateChatPopup();
+            setInterval(updateNotificationCount, 5000);
+            setInterval(updateChatPopup, 5000);
+
         $('#add-button').on('click', function() {
             let addAmount = parseInt($('#add-total-bill').val()) || 0;
             let currentTotalBill = parseInt($('#total-bill-input').val()) || 0;

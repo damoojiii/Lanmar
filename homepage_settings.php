@@ -1,19 +1,18 @@
 <?php
-session_start();
-include("connection.php");
 include "role_access.php";
+include("connection.php");
 checkAccess('admin');
 
 $success_message = "";
 $error_message = "";
-$gallery_success_message = "";
-$gallery_error_message = "";
+$desc_success_message = "";
+$desc_error_message = "";
 
 // Define the target directory for uploads
 $targetDir = "uploads/"; 
 
 // Handle background image upload
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) {
+if (isset($_POST['background']) && isset($_FILES['background_image'])) {
     $image = $_FILES['background_image'];
     $imageName = basename($image['name']);
     $targetFilePath = $targetDir . $imageName;
@@ -41,6 +40,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
         $error_message = "Error uploading the file.";
     }
 }
+
+if (isset($_POST['submit_desc'])) {
+    var_dump($_POST);
+    $description = $_POST['description'] ?? '';
+    $description2 = $_POST['description2'] ?? ''; 
+
+    // Validate the descriptions
+    if (empty($description) || empty($description2)) {
+        $desc_error_message = "Both descriptions are required.";
+    } else {
+        $conn->query("DELETE FROM about");
+
+        $sql = "INSERT INTO about (description, description_2) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ss', $description, $description2);
+
+        if ($stmt->execute()) {
+            $desc_success_message = "Descriptions updated successfully.";
+        } else {
+            $desc_error_message = "Error updating descriptions: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -82,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 199; /* Ensure sidebar is above other content */
+            z-index: 199;
         }
 
         header {
@@ -95,9 +119,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease;
         }
-
         #hamburger {
             border: none;
             background: none;
@@ -356,6 +379,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
         cursor: pointer;
         color: white;
     }
+    .head-title{
+        font-size: 2.5rem;
+    }
 
     @media (max-width: 768px){
         #sidebar {
@@ -457,7 +483,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="nav-link text-white" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -470,17 +496,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
+                <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
                         <div class="tab active" id="roomInfoTab">
-                            Homescreen
-                        </div>
-                    </a>
-                    <a href="homepage_section3.php">
-                        <div class="tab " id="archiveInfoTab">
-                            About
+                            Homepage
                         </div>
                     </a>
                     <a href="homepage_section2.php">
@@ -495,12 +516,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                     </a>
                     <a href="homepage_section5.php">
                         <div class="tab " id="facilityInfoTab">
-                            Prices
-                        </div>
-                    </a>
-                    <a href="homepage_section6.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Booking Processes
+                            Reservation Config
                         </div>
                     </a>
                 </div>
@@ -575,33 +591,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['background_image'])) 
                         }
                     }
                 </style>
+                <?php 
+                    $sql = "SELECT * FROM about";
+                    $sql = $pdo->prepare($sql);
+                    $sql->execute();
+                    $descriptData = $sql->fetch(PDO::FETCH_ASSOC);
+                ?>
                 <div class="flex-container">
                     <div class="main-content">
-                        <!-- Main content goes here -->
                         <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Change Background Image</h2>
-                            <?php if ($success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
-                            <?php endif; ?>
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12">'
+                                    <h2 class="text-center mb-4"><strong>Change Background Image</strong></h2>
+                                    <?php if ($success_message): ?>
+                                        <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($error_message): ?>
+                                        <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
+                                    <?php endif; ?>
 
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="background_image" class="mb-2">Upload New Background Image:</label>
-                                    <input type="file" name="background_image" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
+                                    <form class="settings-form" method="POST" enctype="multipart/form-data">
+                                        <div class="form-group">
+                                            <label for="background_image" class="mb-2">Upload New Background Image:</label>
+                                            <input type="file" name="background_image" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
+                                        </div>
+                                        <div class="button-container">
+                                            <button type="submit" class="update-button" aria-label="Update Background"  name="background">Update Background</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Update Background">Update Background</button>
+                                <div class="col-md-6 col-sm-12">'
+                                <h2 class="text-center mb-4"><strong>About</strong></h2>
+                                <?php if ($desc_success_message): ?>
+                                    <div class="alert alert-success text-center"><?php echo $desc_success_message; ?></div>
+                                <?php endif; ?>
+                                <?php if ($desc_error_message): ?>
+                                    <div class="alert alert-danger text-center"><?php echo $desc_error_message; ?></div>
+                                <?php endif; 
+                                ?>
+
+                                <form class="settings-form" method="POST">
+                                    <div class="form-group">
+                                        <label for="description" class="mb-2">Subtitle: </label>
+                                        <textarea name="description" id="description" required class="form-control" rows="4" cols="50"><?php echo htmlspecialchars($descriptData['description'] ?? ''); ?></textarea>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <label for="description2" class="mb-2">Description: </label>
+                                        <textarea type="text" name="description2" id="description2" required class="form-control" rows="4" cols="50"><?php echo htmlspecialchars($descriptData['description_2'] ?? ''); ?></textarea>
+                                    </div>
+                                    <div class="button-container">
+                                        <button type="submit" name="submit_desc" id="submit_desc">Update Description</button>
+                                    </div>
+                                </form>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-
-
             </div>
         </div>
     </div>

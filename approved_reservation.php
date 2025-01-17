@@ -1,7 +1,6 @@
 <?php
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('admin');
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -79,7 +78,7 @@
             background-color: #f8f9fa;
         }
 
-        #sidebar span {
+        #sidebar .font-logo {
             font-family: 'nautigal';
             font-size: 50px !important;
         }
@@ -111,7 +110,7 @@
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for header */
         }
 
         #hamburger {
@@ -432,6 +431,27 @@
           object-fit: contain;
         }
 
+        #sidebar .badge-notif, .badge-chat{
+            border-radius: 20px;
+            width: auto;
+            
+            background-color: #fff !important;
+        }
+        #sidebar .badge-chat, #sidebar .badge-notif {
+            display: inline-block; 
+            width: 15px; 
+            height: 5px; 
+            border-radius: 5px; 
+            text-align: center;
+            align-content: center;
+            background-color: #fff !important;
+            margin-left: 5px;
+        }
+    
+        #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+        }
+
 
         @media (max-width: 768px){
             #sidebar {
@@ -518,7 +538,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="fs-4 font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -538,10 +558,10 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -563,8 +583,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -620,7 +640,7 @@
 
                                     <td><?php echo htmlspecialchars($row['booking_id']); ?></td>
                                     <td><?php echo htmlspecialchars($row['firstname'] . " " . $row['lastname']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['contact_number']); ?></td>
+                                    <td class="d-none d-sm-table-cell"><?php echo htmlspecialchars($row['contact_number']); ?></td>
                                     <td><?php if ($row["dateIn"] != $row["dateOut"] ) {
                                     echo date("F j, Y" , strtotime($row["dateIn"])) . " to " . date("F j, Y" , strtotime($row["dateOut"]));
                                     } else {
@@ -813,61 +833,6 @@
         const mainContent = document.getElementById('main-content');
         mainContent.classList.toggle('shifted');
     });
-    document.addEventListener('DOMContentLoaded', function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const bookingId = urlParams.get('booking_id');
-
-    if (bookingId) {
-        fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error('Booking not found');
-                    return;
-                }
-
-                // Populate the modal with the fetched data
-                document.getElementById('modalBookingId').textContent = data.bookingId;
-                document.getElementById('modalName').textContent = data.name;
-                document.getElementById('modalContact').textContent = data.contact;
-                document.getElementById('modalGender').textContent = data.gender;
-                document.getElementById('modalDateRange').textContent = data.dateRange;
-                document.getElementById('modalTimeRange').textContent = data.timeRange;
-                document.getElementById('modalHours').textContent = data.hours;
-                document.getElementById('modalAdults').textContent = data.adult;
-                document.getElementById('modalChild').textContent = data.child;
-                document.getElementById('modalPwd').textContent = data.pwds;
-                document.getElementById('modalTotalPax').textContent = data.totalPax;
-                document.getElementById('modalRoomType').textContent = data.type;
-
-                // Populate rooms
-                const roomsContainer = document.getElementById('modalRooms');
-                roomsContainer.innerHTML = '';
-                let ronum = 1;
-                data.roomName.forEach(room => {
-                    const roomElement = document.createElement('div');
-                    roomElement.classList.add('room-detail', 'col-3', 'col-md-3');
-                    roomElement.innerHTML = `<strong>Room ${ronum}:</strong> ${room.roomName}<br>`;
-                    roomsContainer.appendChild(roomElement);
-                    ronum++;
-                });
-
-                document.getElementById('modalAdds').textContent = data.additional;
-                document.getElementById('modalPaymode').textContent = data.paymode;
-                document.getElementById('modalTotalBill').textContent = data.totalBill;
-                document.getElementById('modalBalance').textContent = data.balance;
-                document.getElementById('modalrefNum').textContent = data.refNumber;
-                const modalBody = document.getElementById('modalProof');
-                modalBody.innerHTML = `<a href="${data.imageProof}" target="_blank">View image</a>`;
-
-                // Show the modal
-                $('#reservationModal').modal('show');
-            })
-            .catch(error => console.error('Error fetching data:', error));
-        }
-    });
-    
-
     document.addEventListener('DOMContentLoaded', () => {
         function jsRenderCOL(data, type, row, meta) {
             var dataRender;
@@ -879,44 +844,145 @@
         
         const tableIndex = new DataTable('#example', {
         columnDefs: [
-            {
-                searchable: false,
-                orderable: false
-            }
-        ],
-        order: [],
-        paging: true,
-        scrollY: '100%'
-    });
+                {
+                    searchable: false,
+                    orderable: false
+                }
+            ],
+            order: [],
+            paging: true,
+            scrollY: '100%'
+        });
 
- tableIndex.on('mouseenter', 'td', function () {
-     let colIdx = tableIndex.cell(this).index().column;
-  
-     tableIndex
-         .cells()
-         .nodes()
-         .each((el) => el.classList.remove('highlight'));
-  
-     tableIndex
-         .column(colIdx)
-         .nodes()
-         .each((el) => el.classList.add('highlight'));
-    });
-        
+        tableIndex.on('mouseenter', 'td', function () {
+            let colIdx = tableIndex.cell(this).index().column;
+
+            tableIndex
+                .cells()
+                .nodes()
+                .each((el) => el.classList.remove('highlight'));
+
+            tableIndex
+                .column(colIdx)
+                .nodes()
+                .each((el) => el.classList.add('highlight'));
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookingId1 = urlParams.get('booking_id');
+
+        if(bookingId1){
+            modal(bookingId1);
+        }
+            
         let bookingIds;
         let userID;
-    // Event delegation to handle row click events
-    document.querySelector('tbody').addEventListener('click', function (event) {
-        // Ensure the clicked element is a table row
-        const row = event.target.closest('.table-row');
-        if (row) {
-            const bookingId = row.dataset.bookingId;
-            bookingIds = bookingId; // Get the booking ID
-            userID = row.dataset.userId;
 
-            //window.location.href = `my-reservation-fetch.php?booking_id=${bookingId}`;
-            
-            // Fetch the booking details from the server
+        document.querySelector('tbody').addEventListener('click', function (event) {
+            // Ensure the clicked element is a table row
+            const row = event.target.closest('.table-row');
+            if (row) {
+                const bookingId = row.dataset.bookingId;
+                bookingIds = bookingId; // Get the booking ID
+                userID = row.dataset.userId;
+
+                modal(bookingId);
+            }
+        });
+
+        document.getElementById("chatsbutton").onclick = function() {
+            const newUrl = `admin_chats.php?user_id=${userID}`;
+            window.location.href = newUrl;
+        };
+        const viewReceiptButton = document.getElementById('modalProof');
+        if (viewReceiptButton) {
+        viewReceiptButton.addEventListener('click', function () {
+            const gcashModal = document.getElementById('gcashReceiptModal');
+            const modal = new bootstrap.Modal(gcashModal);
+            modal.show();
+        });
+        }
+        // Add event listener for closing the GCash Receipt modal and show Reservation modal
+        const gcashModal = document.getElementById('gcashReceiptModal');
+        if (gcashModal) {
+        gcashModal.addEventListener('hidden.bs.modal', function () {
+            const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
+            reservationModal.show();
+        });
+        }
+        function editBooking() {
+            if (bookingIds) {
+                window.location.href = `edit_reservation.php?id=${bookingIds}`;
+            } else {
+                console.log("No bookingId found!");
+            }
+        }
+        document.getElementById('editButton').addEventListener('click', editBooking);
+
+        const approvedButton = document.querySelector('.btnCompleted');
+        const cancelButton = document.querySelector('.btnCancel');
+        const bookingIdElement = document.getElementById('modalBookingId');
+
+        if (approvedButton && bookingIdElement) {
+            approvedButton.addEventListener('click', function () {
+                event.preventDefault();
+                const bookingId = bookingIdElement.textContent.trim();
+                const isConfirmed = confirm("Please review booking details before proceeding.");
+
+                // Create the form element
+                if(isConfirmed){
+                const form = document.createElement('form');
+                form.method = 'POST'; 
+                form.action = '';  
+
+                // Create a hidden input field for the bookingId
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'bookingId';
+                input.value = bookingId;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+                } else {
+                    console.log('Booking approval canceled');
+                }
+            });
+        } else {
+            console.error('Error: The modal elements are not found.');
+        }
+
+        if (cancelButton && bookingIdElement) {
+        // Function to handle the rejection action
+            cancelButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                const bookingId = bookingIdElement.textContent.trim();
+
+                const isConfirmed = confirm("Are you sure you want to cancel this booking?");
+
+                if (isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST'; 
+                    form.action = '';  
+
+                    // Create a hidden input field for the bookingId
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'bookingIdCancel';
+                    input.value = bookingId;
+
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    console.log('Booking rejection canceled');
+                }
+            });
+        } else {
+            console.error('Error: The modal elements are not found.');
+        }
+
+        function modal(bookingId){
             fetch(`my-reservation-fetch.php?booking_id=${bookingId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -941,14 +1007,15 @@
                     // Optionally, loop over the rooms and display them in the modal (if needed)
                     const roomsContainer = document.getElementById('modalRooms');
                     roomsContainer.innerHTML = ''; // Clear existing rooms
-
+                    let ronum = 1;
                     data.roomName.forEach(room => {
                         const roomElement = document.createElement('div');
                         roomElement.classList.add('room-detail','col-3','col-md-3');
                         roomElement.innerHTML = `
-                            <strong>Room :</strong> ${room.roomName}<br>
+                            <strong>Room ${ronum}:</strong> ${room.roomName}<br>
                         `;
                         roomsContainer.appendChild(roomElement);
+                        ronum++;
                     });
                     document.getElementById('modalAdds').textContent = data.additional;
                     document.getElementById('modalPaymode').textContent = data.paymode;
@@ -956,120 +1023,62 @@
                     document.getElementById('modalBalance').textContent = data.balance;
                     document.getElementById('modalrefNum').textContent = data.refNumber;
                     const modalBody = document.getElementById('modal-IMAGE');
-                    modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
+                        modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
+
                     // Show the modal
                     $('#reservationModal').modal('show');
                 })
                 .catch(error => console.error('Error fetching data:', error));
-                alert(`An error occurred: ${error.message}`);
         }
     });
-    document.getElementById("chatsbutton").onclick = function() {
-        // Replace with your dynamic user_id value
-        const newUrl = `admin_chats.php?user_id=${userID}`;
-        window.location.href = newUrl; // Redirects to the new URL
-    };
-    const viewReceiptButton = document.getElementById('modalProof');
-    if (viewReceiptButton) {
-      viewReceiptButton.addEventListener('click', function () {
-          // Check if the modal exists before opening
-          const gcashModal = document.getElementById('gcashReceiptModal');
-          const modal = new bootstrap.Modal(gcashModal);
-          modal.show();
-      });
+
+$(document).ready(function() {
+    function updateNotificationCount(){
+      $.ajax({
+            url: 'admin_notification_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var notificationCount = data;
+                // Update the notification counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.target');
+                if (notificationCount >= 1) {
+                    notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Notification');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving notification count.');
+            }
+        });  
     }
-    // Add event listener for closing the GCash Receipt modal and show Reservation modal
-    const gcashModal = document.getElementById('gcashReceiptModal');
-    if (gcashModal) {
-      gcashModal.addEventListener('hidden.bs.modal', function () {
-          const reservationModal = new bootstrap.Modal(document.getElementById('reservationModal'));
-          reservationModal.show();
-      });
+     
+    function updateChatPopup() {
+        $.ajax({
+            url: 'admin_chat_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var counter = data;
+                // Update the chat counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.chat');
+                
+                if (counter >= 1) {
+                    notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Chat with Lanmar');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving chat count.');
+            }
+        });
     }
-    function editBooking() {
-        if (bookingIds) { // Make sure bookingId is set
-            // Navigate to the cancellation page with the bookingId
-            window.location.href = `edit_reservation.php?id=${bookingIds}`;
-        } else {
-            console.log("No bookingId found!");
-        }
-    }
-    document.getElementById('editButton').addEventListener('click', editBooking);
-
-const approvedButton = document.querySelector('.btnCompleted');
-const cancelButton = document.querySelector('.btnCancel');
-const bookingIdElement = document.getElementById('modalBookingId');
-
-if (approvedButton && bookingIdElement) {
-  // Function to handle the approval action
-  approvedButton.addEventListener('click', function () {
-      event.preventDefault();
-    const bookingId = bookingIdElement.textContent.trim();
-    
-    const isConfirmed = confirm("Please review booking details before proceeding.");
-
-    // Create the form element
-    if(isConfirmed){
-    const form = document.createElement('form');
-    form.method = 'POST';  // Use POST method
-    form.action = '';  // Submitting to the same page
-
-    // Create a hidden input field for the bookingId
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'bookingId';
-    input.value = bookingId;
-    // Append the input field to the form
-    form.appendChild(input);
-    // Append the form to the body
-    document.body.appendChild(form);
-    // Submit the form
-    form.submit();
-  } else {
-      // If the user cancels (clicks "Cancel"), do nothing
-      console.log('Booking approval canceled');
-    }
-  });
-} else {
-  console.error('Error: The modal elements are not found.');
-}
-
-if (cancelButton && bookingIdElement) {
-  // Function to handle the rejection action
-  cancelButton.addEventListener('click', function (event) {
-    event.preventDefault();
-    const bookingId = bookingIdElement.textContent.trim();
-
-    const isConfirmed = confirm("Are you sure you want to cancel this booking?");
-
-    // Create the form element if confirmed
-    if (isConfirmed) {
-      const form = document.createElement('form');
-      form.method = 'POST';  // Use POST method
-      form.action = '';  // Submitting to the same page
-
-      // Create a hidden input field for the bookingId
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'bookingIdCancel';
-      input.value = bookingId;
-
-      // Append the input field to the form
-      form.appendChild(input);
-
-      // Append the form to the body
-      document.body.appendChild(form);
-
-      // Submit the form
-      form.submit();
-    } else {
-      // If the user cancels (clicks "Cancel"), do nothing
-      console.log('Booking rejection canceled');
-    }
-  });
-} else {
-  console.error('Error: The modal elements are not found.');
-}
+    updateNotificationCount();
+    updateChatPopup();
+    setInterval(updateNotificationCount, 5000);
+    setInterval(updateChatPopup, 5000);
 });
 </script>
 </body>

@@ -1,21 +1,13 @@
 <?php
-session_start();
-include("connection.php");
 include "role_access.php";
+include("connection.php");
 checkAccess('admin');
 
-
-$success_message = "";
-$error_message = "";
 $gallery_success_message = "";
 $gallery_error_message = "";
 
 // Define the target directory for uploads
-$targetDir = "uploads/"; 
-
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+$targetDir = "uploads/gallery/"; 
 
 // Handle gallery image upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['gallery_image'])) {
@@ -99,7 +91,7 @@ if (isset($_POST['delete_id'])) {
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for header */
         }
 
         #hamburger {
@@ -441,6 +433,10 @@ if (isset($_POST['delete_id'])) {
             background-color: #0175FE;
         }
 
+        .head-title{
+            font-size: 2.5rem;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .tab-container {
@@ -639,29 +635,26 @@ if (isset($_POST['delete_id'])) {
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
+                <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
                         <div class="tab" id="roomInfoTab">
                             Homescreen
-                        </div>
-                    </a>
-                    <a href="homepage_section3.php">
-                        <div class="tab " id="archiveInfoTab">
-                            About
                         </div>
                     </a>
                     <a href="homepage_section2.php">
@@ -676,12 +669,7 @@ if (isset($_POST['delete_id'])) {
                     </a>
                     <a href="homepage_section5.php">
                         <div class="tab " id="facilityInfoTab">
-                            Prices
-                        </div>
-                    </a>
-                    <a href="homepage_section6.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Booking Processes
+                            Reservation Config
                         </div>
                     </a>
                 </div>
@@ -775,21 +763,16 @@ if (isset($_POST['delete_id'])) {
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
     
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {

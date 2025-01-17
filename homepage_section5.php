@@ -1,9 +1,48 @@
 <?php
-session_start();
-include("connection.php");
 include "role_access.php";
+include("connection.php");
 checkAccess('admin');
 
+$success_message = "";
+$error_message = "";
+
+$targetDir = "uploads/qr/"; 
+
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage'])) {
+    $image = $_FILES['QRimage'];
+    $targetDir = "uploads/qr/"; 
+    $imageName = "G_image.jpg"; 
+    $targetFilePath = $targetDir . $imageName;
+
+    // Ensure the target directory exists
+    if (!is_dir($targetDir)) {
+        mkdir($targetDir, 0755, true);
+    }
+
+    if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
+        $success_message = "QR code for Gcash uploaded successfully!.";
+    } else {
+        $error_message = "Error uploading the file.";
+    }
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
+    $image = $_FILES['QRimage1'];
+    $targetDir = "uploads/qr/"; 
+    $imageName = "P_image.jpg"; 
+    $targetFilePath = $targetDir . $imageName;
+
+    // Ensure the target directory exists
+    if (!is_dir($targetDir)) {
+        mkdir($targetDir, 0755, true);
+    }
+
+    if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
+        $success_message = "QR code for PayMaya uploaded successfully !.";
+    } else {
+        $error_message = "Error uploading the file.";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -59,7 +98,7 @@ checkAccess('admin');
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for header */
         }
 
         #hamburger {
@@ -393,6 +432,9 @@ checkAccess('admin');
         .tab:hover {
             background-color: #0175FE;
         }
+        .head-title{
+            font-size: 2.5rem;
+        }
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
@@ -520,8 +562,8 @@ checkAccess('admin');
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -531,20 +573,15 @@ checkAccess('admin');
         </div>
     </div>
 
-    <div id="main-content" class="p-3">
+    <div id="main-content" class="p-2">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
+                <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
                         <div class="tab" id="roomInfoTab">
                             Homescreen
-                        </div>
-                    </a>
-                    <a href="homepage_section3.php">
-                        <div class="tab " id="archiveInfoTab">
-                            About
                         </div>
                     </a>
                     <a href="homepage_section2.php">
@@ -559,12 +596,7 @@ checkAccess('admin');
                     </a>
                     <a href="homepage_section5.php">
                         <div class="tab active" id="facilityInfoTab">
-                            Prices
-                        </div>
-                    </a>
-                    <a href="homepage_section6.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Booking Processes
+                            Reservation Config
                         </div>
                     </a>
                 </div>
@@ -599,54 +631,84 @@ checkAccess('admin');
                     }
                 </style>
 
-    <div class="flex-container">
-        <div class="main-content">
-            <div class="row">
-                <!-- Price Form -->
-                <div class="col-md-6 col-sm-12">
-                    <form id="update-price-form">
-                        <div class="mb-3">
-                            <label for="price-selector" class="form-label" id="">Select Price</label>
-                            <div id="dropdown-container">
-                                <select id="price-selector" class="form-select">
+    <div class="settings-form-container mt-4">
+        <div class="row">
+            <!-- Price Form -->
+            <div class="col-md-6 col-sm-12">
+                <div id="response-message"></div>
+                <form id="update-price-form">
+                    <div class="mb-3">
+                        <label for="price-selector" class="form-label" id="">Select Price</label>
+                        <div id="dropdown-container">
+                            <select id="price-selector" class="form-select">
 
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="price-input" class="form-label">Edit Price</label>
-                            <input type="number" id="price-input" class="form-control" placeholder="Enter new price">
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="save-btn btn btn-primary">Update Price</button>
-                        </div>
-                    </form>
-                    <div id="response-message"></div>
-                </div>
-
-                <!-- Booking Hour Form -->
-                <div class="col-md-6 col-sm-12">
-                    <form id="update-booking-hour-form">
-                        <div class="mb-3">
-                            <label for="booking-selector" class="form-label">Edit Booking Time</label>
-                            <select id="booking-selector" class="form-control">
-                                <option value="1">Starting Time</option>
-                                <option value="2">Closing Time</option>
-                                <option value="3">Cleanup Time</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label for="value-input" class="form-label">Edit Hours</label>
-                            <input type="number" step="0.1" id="value-input" class="form-control" placeholder="Enter new value">
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="save-btn btn btn-primary">Update Hour</button>
-                        </div>
-                    </form>
-                    <div id="response-message-hour"></div>
-                </div>
-            </div>    
+                    </div>
+                    <div class="mb-3">
+                        <label for="price-input" class="form-label">Edit Price</label>
+                        <input type="number" id="price-input" class="form-control" placeholder="Enter new price">
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="save-btn btn btn-primary">Update Price</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Booking Hour Form -->
+            <div class="col-md-6 col-sm-12">
+                <div id="response-message-hour"></div>
+                <form id="update-booking-hour-form">
+                    <div class="mb-3">
+                        <label for="booking-selector" class="form-label">Edit Booking Time</label>
+                        <select id="booking-selector" class="form-control">
+                            <option value="1">Starting Time</option>
+                            <option value="2">Closing Time</option>
+                            <option value="3">Cleanup Time</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="value-input" class="form-label">Edit Hours</label>
+                        <input type="number" step="0.1" id="value-input" class="form-control" placeholder="Enter new value">
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="save-btn btn btn-primary">Update Hour</button>
+                    </div>
+                </form>
+                
+            </div>
         </div>
+            <hr class="my-5">
+        <div class="row mt-3">
+            <div class="col-md-12">
+            <h2 class="text-center mb-4"><strong>Change QR Payment</strong></h2>
+            <?php if ($success_message): ?>
+                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
+            <?php endif; ?>
+            <?php if ($error_message): ?>
+                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
+            <?php endif; ?>
+
+            <form class="settings-form" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="background_image" class="mb-2">LANMAR GCASH QRCode:</label>
+                    <input type="file" name="QRimage" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
+                </div>
+                <div class="button-container">
+                    <button type="submit" class="update-button" aria-label="Update Background">Update</button>
+                </div>
+            </form>
+            <form class="settings-form" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="background_image" class="mb-2">LANMAR PayMaya QRCode:</label>
+                    <input type="file" name="QRimage1" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
+                </div>
+                <div class="button-container">
+                    <button type="submit" class="update-button" aria-label="Update Background">Update</button>
+                </div>
+            </form>
+            </div>
+        </div>    
     </div>
 
 

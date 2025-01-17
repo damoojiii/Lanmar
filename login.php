@@ -2,6 +2,16 @@
 session_start();
 include("connection.php");
 
+if(isset($_SESSION['role'])){
+    if($_SESSION['role'] === 'admin'){
+        header("Location: admin_dashboard.php");
+        exit();
+    }else{
+        header("Location: index1.php");
+        exit();
+    }
+}
+
 $error = "";
 if(isset($_GET['dateIn']) && isset($_GET['dateOut'])){
     $_SESSION['preDateIn'] = $_GET['dateIn'];

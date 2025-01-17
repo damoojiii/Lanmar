@@ -21,12 +21,6 @@ if ($resultGallery->num_rows > 0) {
         $galleryImages[] = $row['image'];
     }
 }
-try {
-  $pdo = new PDO("mysql:host=$servername;dbname=$dbname", "$username", "");
-  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
-}
 
   // Fetch descriptions from the database
 $sqlDescriptions = "SELECT description, description_2 FROM about LIMIT 1"; 

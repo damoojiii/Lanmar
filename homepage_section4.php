@@ -1,7 +1,6 @@
 <?php
-session_start();
-include("connection.php");
 include "role_access.php";
+include("connection.php");
 checkAccess('admin');
 
 
@@ -59,7 +58,7 @@ checkAccess('admin');
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for header */
         }
 
         #hamburger {
@@ -398,6 +397,9 @@ checkAccess('admin');
         .tab:hover {
             background-color: #0175FE;
         }
+        .head-title{
+            font-size: 2.5rem;
+        }
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
@@ -532,29 +534,26 @@ checkAccess('admin');
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
+                <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
                         <div class="tab" id="roomInfoTab">
                             Homescreen
-                        </div>
-                    </a>
-                    <a href="homepage_section3.php">
-                        <div class="tab " id="archiveInfoTab">
-                            About
                         </div>
                     </a>
                     <a href="homepage_section2.php">
@@ -569,12 +568,7 @@ checkAccess('admin');
                     </a>
                     <a href="homepage_section5.php">
                         <div class="tab " id="facilityInfoTab">
-                            Prices
-                        </div>
-                    </a>
-                    <a href="homepage_section6.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Booking Processes
+                            Reservation Config
                         </div>
                     </a>
                 </div>

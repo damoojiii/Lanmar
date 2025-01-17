@@ -1,7 +1,6 @@
 <?php
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('admin');
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -71,9 +70,9 @@
             background-color: #f8f9fa;
         }
 
-        #sidebar span {
+        #sidebar .font-logo {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
         }
         .font-logo-mobile{
             font-family: 'nautigal';
@@ -101,7 +100,7 @@
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease;/* Smooth transition for header */
         }
 
         #hamburger {
@@ -392,6 +391,26 @@
         .modal-mobile-add{
             background-color: transparent;
         }
+        #sidebar .badge-notif, .badge-chat{
+            border-radius: 20px;
+            width: auto;
+            
+            background-color: #fff !important;
+        }
+        #sidebar .badge-chat, #sidebar .badge-notif {
+            display: inline-block; 
+            width: 15px; 
+            height: 5px; 
+            border-radius: 5px; 
+            text-align: center;
+            align-content: center;
+            background-color: #fff !important;
+            margin-left: 5px;
+        }
+    
+        #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+        }
 
         @media (max-width: 768px){
             #sidebar {
@@ -464,7 +483,7 @@
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="fs-4 font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -484,10 +503,10 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -509,8 +528,8 @@
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -527,13 +546,10 @@
                 cancel_tbl.cancel_id, cancel_tbl.booking_id, cancel_tbl.cancellation_reason,
                 booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours,
                 users.firstname, users.lastname, users.contact_number, users.user_id
-            FROM booking_tbl
-            LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
-            LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
-            LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
-            LEFT JOIN users ON booking_tbl.user_Id = users.user_id
-            LEFT JOIN cancel_tbl ON booking_tbl.booking_id = cancel_tbl.booking_id
-            WHERE booking_tbl.status = 'Approved' ORDER BY booking_id DESC
+            FROM cancel_tbl
+            LEFT JOIN booking_tbl ON cancel_tbl.booking_id = booking_tbl.booking_id
+            LEFT JOIN users ON booking_tbl.user_id = users.user_id
+            WHERE booking_tbl.status = 'Cancellation2' ORDER BY timestamp DESC
         ";
         $stmt = $pdo->prepare($sql_solo);
         $stmt->execute();
@@ -584,26 +600,25 @@
   
 <div class="modal fade" id="reservationModal" tabindex="-1" aria-labelledby="reservationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
-  <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reservationModalLabel">Cancellation Details</h5>
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold" id="reservationModalLabel">Cancellation Details</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- Reservation ID -->
-        <div class="mb-4" >
-          <h6 class="fw-bold">Cancellation ID:</h6>
-          <p id="reservation-id" class="py-1" style="background-color: #d6d6d6;"> #<span id="modalCId"></span> </p>
+        <div class="mb-4">
+          <h6 class="fw-bold text-secondary">Cancellation ID:</h6>
+          <p id="reservation-id" class="px-3 rounded">#<span id="modalCId"></span></p>
         </div>
 
         <!-- Personal Information Section -->
         <div class="mb-4">
-          <h6 class="fw-bold">Personal Information</h6>
-          <div class="row g-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-4">
+          <h6 class="fw-bold text-secondary">Personal Information</h6>
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
           </div>
@@ -611,35 +626,36 @@
 
         <!-- Booking Details Section -->
         <div class="mb-4">
-          <h6 class="fw-bold">Booking Details</h6>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-5">
+          <h6 class="fw-bold text-secondary">Booking Details</h6>
+          <div class="row g-3 mb-2">
+            <div class="col-12 col-md-6">
               <p><strong>Date:</strong> <span id="modalDateRange"></span></p>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
               <p><strong>Time:</strong> <span id="modalTimeRange"></span></p>
             </div>
           </div>
-          <div class="row g-2 mb-2" style="background-color: #d6d6d6;">
-            <div class="col-12 col-md-3">
-              <p><strong>Reason:</strong> <span id="modalReason"></span></p>
-            </div>
+        </div>
+
+        <!-- Reason Section with Emphasis -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-secondary">Reason for Cancellation</h6>
+          <div class="bg-light p-3 rounded border border-secondary">
+            <p id="modalReason" class="mb-0 text-dark"></p>
           </div>
         </div>
-
-
+      </div>
       <div class="modal-footer d-flex justify-content-end">
-            <!-- Check Button -->
-            <button type="button" class="btn btnCancelled" style="width:auto; background-color: #1daa2d; border-color: #1daa2d; color: #ffffff;">
-                <i class="fa-solid fa-check" style="color: #ffffff;"></i> Approve Cancellation
-            </button>
+        <!-- Approve Button -->
+        <button type="button" class="btn btnCancelled btn-success me-2">
+          <i class="fa-solid fa-check me-1"></i> Approve Cancellation
+        </button>
 
-            <!-- Cancel Button -->
-            <button type="button" class="btn btnPendingBack" style="width:auto; background-color: #ee1717; border-color: #ee1717; color: #ffffff;">
-                <i class="fa-solid fa-xmark" style="color: #ffffff;"></i> Reject
-            </button>
-        </div>
-
+        <!-- Reject Button -->
+        <button type="button" class="btn btnPendingBack btn-danger">
+          <i class="fa-solid fa-xmark me-1"></i> Reject
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -698,7 +714,6 @@ document.addEventListener('DOMContentLoaded', () => {
             bookingId = row.dataset.bookingId;
 
             //window.location.href = `cancellationfetch.php?cancel_id=${bookingId}`;
-            //window.location.href = `cancellationfetch.php?cancel_id=${bookingId}`;
             
             // Fetch the booking details from the server
             fetch(`cancellationfetch.php?cancel_id=${cancelId}`)
@@ -711,12 +726,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Populate the modal with the fetched data
                     document.getElementById('modalCId').textContent = data.cancelId;
-                    document.getElementById('modalCId').textContent = data.cancelId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
-                    document.getElementById('modalReason').textContent = data.reason;
                     document.getElementById('modalReason').textContent = data.reason;
 
                     // Show the modal
@@ -789,7 +802,54 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error: The modal or buttons are not found.');
     }
 });
-
+$(document).ready(function() {
+    function updateNotificationCount(){
+      $.ajax({
+            url: 'admin_notification_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var notificationCount = data;
+                // Update the notification counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.target');
+                if (notificationCount >= 1) {
+                    notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Notification');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving notification count.');
+            }
+        });  
+    }
+     
+    function updateChatPopup() {
+        $.ajax({
+            url: 'admin_chat_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var counter = data;
+                // Update the chat counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.chat');
+                
+                if (counter >= 1) {
+                    notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Chat with Lanmar');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving chat count.');
+            }
+        });
+    }
+    updateNotificationCount();
+    updateChatPopup();
+    setInterval(updateNotificationCount, 5000);
+    setInterval(updateChatPopup, 5000);
+});
 </script>
 </body>
 </html>

@@ -1,38 +1,12 @@
 <?php
-session_start();
-include("connection.php");
 include "role_access.php";
+include("connection.php");
 checkAccess('admin');
 
 $success_message = "";
 $error_message = "";
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get the description from the form
-    $description = isset($_POST['description']) ? $_POST['description'] : '';
-    $description2 = isset($_POST['description2']) ? $_POST['description2'] : ''; 
 
-    $conn->query("DELETE FROM about");
-
-    if ($description === '' || $description2 === '') {
-        $error_message = "Both descriptions are required.";
-    } else {
-        // Prepare the SQL statement
-        $sql = "INSERT INTO about (description, description_2) VALUES (?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('ss', $description, $description2); // Bind parameters
-
-        // Execute the statement
-        if ($stmt->execute()) {
-            $success_message = "Descriptions updated successfully.";
-        } else {
-            $error_message = "Error updating descriptions: " . $stmt->error;
-        }
-
-        // Close the statement
-        $stmt->close();
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -580,7 +554,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-                <h1 class="text-center mb-5 mt-4">Homepage Settings</h1>
+            <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
@@ -650,27 +624,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="main-content">
                         <!-- Main content goes here -->
                         <div class="settings-form-container">
-                        <h2 class="text-center mb-4">About</h2>
-                            <?php if ($success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="description" class="mb-2">Description 1: </label>
-                                    <input type="text" name="description" id="description" required class="form-control-file mx-auto d-block">
-                                </div>
-                                <div class="form-group">
-                                    <label for="description2" class="mb-2">Description 2: </label>
-                                    <input type="text" name="description2" id="description2" required class="form-control-file mx-auto d-block">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit">Update Description</button>
-                                </div>
-                            </form>
+                        
                         </div>
                     </div>
                 </div>

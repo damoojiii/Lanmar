@@ -1,4 +1,6 @@
 <?php
+ini_set('session.gc_maxlifetime', 3600);
+session_set_cookie_params(3600);
 session_start();
 include("connection.php");
 
@@ -97,6 +99,13 @@ if (isset($_POST["verify_email"])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        setInterval(function() {
+            fetch('keep_session.php')
+                .then(response => response.text())
+                .catch(error => console.error('Error keeping session alive:', error));
+        }, 300000);
+    </script>
 </body>
 </html>
 

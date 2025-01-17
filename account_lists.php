@@ -1,7 +1,6 @@
 <?php
-session_start();
-include("connection.php");
 include "role_access.php";
+include("connection.php");
 checkAccess('admin');
 
 function executeQuery($sql, $param, $successMessage, $errorMessage) {
@@ -41,7 +40,6 @@ if (isset($_GET['delid'])) {
 }
 
 ?>
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -65,11 +63,14 @@ if (isset($_GET['delid'])) {
         background-color: #f8f9fa;
         }
 
-        #sidebar span {
+        #sidebar .font-logo {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
         }
-
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
+        }
         #sidebar {
             width: 250px;
             position: fixed;
@@ -78,21 +79,20 @@ if (isset($_GET['delid'])) {
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199; /* Ensure sidebar is above other content */
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
             z-index: 1000;
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease;
         }
 
         #hamburger {
@@ -208,8 +208,8 @@ if (isset($_GET['delid'])) {
         }
         button {
             border-radius: 50px;
-            padding: 13px 30px;
-            background-color: #03045e;
+            padding: 10px 15px;
+            background-color: rgb(29, 69, 104);
             border: none;
             cursor: pointer;
             color: white;
@@ -218,49 +218,6 @@ if (isset($_GET['delid'])) {
         .flex-container {
         display: flex;
         gap: 20px;
-    }
-
-    .sidebar-settings {
-        display: flex;
-        flex-direction: column;
-        width: 230px;
-        background-color: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 35px 15px 15px 15px;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .settings-links {
-        width: 100%
-    }
-
-    .settings-links ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .settings-links li {
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .settings-links a {
-        text-decoration: none;
-        color: #333;
-        padding: 10px 15px;
-        border-radius: 2px;
-        transition: 0.3s;
-    }
-
-    .settings-links a:hover {
-        background-color: #ddd;
-    }
-
-    .settings-links .links {
-        margin-bottom: 30px;
     }
 
     .main-content {
@@ -273,20 +230,6 @@ if (isset($_GET['delid'])) {
 
     .form-group input {
         margin-bottom: 10px;
-    }
-
-    .settings-form .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: bold;
-        font-size: 17px;
-    }
-
-    .settings-form .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 0px;
     }
 
     .breadcrumb {
@@ -340,76 +283,147 @@ if (isset($_GET['delid'])) {
         justify-content: end;
     }
 
-    .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
+    .table-full-width {
+        width: 100%;
+    }
+
+    .table-full-width th, .table-full-width td {
+        padding: 8px; /* Optional: for spacing */
+        text-align: left; /* Optional: for text alignment */
+    }
+    thead.custom-header, thead.custom-header th {
+        background: linear-gradient(25deg,rgb(29, 69, 104),#19315D) !important;
+        color: white !important;
+    }
+    button.delete:hover{
+        background: #ef5353;
+    }
+    button.blocks:hover{
+        background: grey;
+    }
+    #sidebar .badge-notif, .badge-chat{
+        border-radius: 20px;
+        width: auto;
+        
+        background-color: #fff !important;
+    }
+    #sidebar .badge-chat, #sidebar .badge-notif {
+        display: inline-block; 
+        width: 15px; 
+        height: 5px; 
+        border-radius: 5px; 
+        text-align: center;
+        align-content: center;
+        background-color: #fff !important;
+        margin-left: 5px;
+    }
+
+    #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+    }
+
+    @media (max-width: 768px){
+        #sidebar {
+            position: fixed;
+            transform: translateX(-100%);
+            z-index: 199;
         }
 
-        .table-full-width {
+        #sidebar.show {
+            transform: translateX(0); /* Show sidebar */
+        }
+
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
             width: 100%;
+            position: fixed;
         }
+        #header span{
+            display: block;
+        }
+        #header.shifted .font-logo-mobile{
+            display: none;
+        }
+        #main-content{
+            margin-top: 60px;
+            padding-inline: 10px;
+        }
+        .modal-body h6 {
+            font-size: 16px; /* Slightly larger headers for readability */
+        }
+        .table thead th {
+            font-size: 0.8rem;
+            padding: 0.5rem;
+        }
+        .table tbody td {
+            font-size: 0.8rem;
+            padding: 0.5rem;
+        }
+        .logout{
+            margin-bottom: 3rem;
+        }
+    }
+        /* Styles for devices with a maximum width of 576px */
+@media (max-width: 576px) {
 
-        .table-full-width th, .table-full-width td {
-            padding: 8px; /* Optional: for spacing */
-            text-align: left; /* Optional: for text alignment */
-        }
-        thead.custom-header, thead.custom-header th {
-            background: linear-gradient(25deg,rgb(29, 69, 104),#19315D) !important;
-            color: white !important;
-        }
+    .flex-container {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+    }
 
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
+    .main-content {
+        text-align: center;
+        padding: 0;
+        max-height: 100%;
+    }
+
+    .table-responsive {
+        overflow-x: auto; /* Enable horizontal scrolling for tables */
+    }
+
+    .table {
+        width: 100%;
+        font-size: 12px; /* Reduce font size for better readability on small screens */
+    }
+
+    .table-row td {
+        padding: 0.3rem; /* Adjust padding for compact layout */
+    }
+
+    .blocks,
+    .delete {
+        font-size: 10px;
+        padding: 0.2rem 0.5rem; /* Smaller button size */
+    }
+
+    .fa-user,
+    .fa-user-slash,
+    .fa-trash-can {
+        margin-right: 0; /* Adjust spacing between icons and text */
+    }
+}
+
     </style>
 </head>
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
+        <button id="hamburger" class="btn btn-primary">
             ☰
         </button>
-        <span class="text-white ms-3">Navbar</span>
+        <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
     </header>
 
     <!-- Sidebar -->
     <div id="sidebar" class="d-flex flex-column p-3 text-white vh-100">
         <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-            <span class="fs-4">Lanmar Resort</span>
+            <span class="fs-4 font-logo">Lanmar Resort</span>
         </a>
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
@@ -429,10 +443,10 @@ if (isset($_GET['delid'])) {
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -454,16 +468,18 @@ if (isset($_GET['delid'])) {
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
     <?php
-        $query = "SELECT user_id, CONCAT(firstname, ' ', lastname) AS full_name, email, contact_number , email_verify, status FROM users";
+        $query = "SELECT user_id, CONCAT(firstname, ' ', lastname) AS full_name, email, contact_number , email_verify, status FROM users order by created_at desc";
         $stmt = $pdo->prepare($query);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -473,11 +489,7 @@ if (isset($_GET['delid'])) {
         <div class="flex-container">
             <div class="main-content">
                 <h2 class="text-center mb-3 mt-4"><strong>Account List</strong></h2>
-                <div class="" style="display: flex; justify-content:flex-end;">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#blockedUsersModal">
-                        See Blocked Users
-                    </button>
-                </div>
+            <div class="table-responsive">
                 <table class="table table-full-width mt-4" id="example" style="width:100%">
                     <thead class="custom-header">
                         <tr>
@@ -499,12 +511,12 @@ if (isset($_GET['delid'])) {
                                     <td>
                                         
                                          
-                                        <?php if($row['status'] == 1):?>
+                                        <?php if($row['status'] == 0):?>
                                             <button class="blocks" onclick="if (confirm('Are you sure you want to unblock this user?')) { window.location.href='?bloid=<?php echo $row['user_id']; ?>&status=<?php echo $row['status']; ?>'; }">
                                         <?php else: ?>
                                             <button class="blocks" onclick="if (confirm('Are you sure you want to block this user?')) { window.location.href='?bloid=<?php echo $row['user_id']; ?>&status=<?php echo $row['status']; ?>'; }">
                                         <?php endif ?>
-                                            <?php if($row['status'] == 1):?>
+                                            <?php if($row['status'] == 0):?>
                                             <i class="fa-regular fa-user"></i>
                                             <?php else: ?>
                                                 <i class="fa-solid fa-user-slash"></i>
@@ -520,7 +532,7 @@ if (isset($_GET['delid'])) {
                         <?php endif ?>
                     </tbody>
                 </table>
-                
+               </div>
             </div>
         </div>
     </div>
@@ -533,21 +545,16 @@ if (isset($_GET['delid'])) {
 <script src="assets/DataTables/datatables.min.js"></script>
 
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
-
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
-        }
-    }
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
 
     document.querySelectorAll('.collapse').forEach(collapse => {
         collapse.addEventListener('show.bs.collapse', () => {
@@ -592,7 +599,54 @@ if (isset($_GET['delid'])) {
             .each((el) => el.classList.add('highlight'));
     });
 });
-
+$(document).ready(function() {
+    function updateNotificationCount(){
+      $.ajax({
+            url: 'admin_notification_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var notificationCount = data;
+                // Update the notification counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.target');
+                if (notificationCount >= 1) {
+                    notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Notification');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving notification count.');
+            }
+        });  
+    }
+     
+    function updateChatPopup() {
+        $.ajax({
+            url: 'admin_chat_count.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var counter = data;
+                // Update the chat counter in the sidebar
+                var notificationLink = $('.nav-link.text-white.chat');
+                
+                if (counter >= 1) {
+                    notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                } else {
+                    notificationLink.html('Chat with Lanmar');
+                }
+            },
+            error: function() {
+                console.log('Error retrieving chat count.');
+            }
+        });
+    }
+    updateNotificationCount();
+    updateChatPopup();
+    setInterval(updateNotificationCount, 5000);
+    setInterval(updateChatPopup, 5000);
+});
 </script>
 </body>
 </html>

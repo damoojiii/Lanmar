@@ -7,21 +7,15 @@ checkAccess('admin');
 
 $success_message = "";
 $error_message = "";
-$gallery_success_message = "";
-$gallery_error_message = "";
 
 // Define the target directory for uploads
 $targetDir = "uploads/qr/"; 
 
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
-// Handle background image upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage'])) {
     $image = $_FILES['QRimage'];
-    $targetDir = "uploads/qr/"; // Set your target directory here
-    $imageName = "G_image.jpg"; // Fixed identifier name for the uploaded file
+    $targetDir = "uploads/qr/"; 
+    $imageName = "G_image.jpg"; 
     $targetFilePath = $targetDir . $imageName;
 
     // Ensure the target directory exists
@@ -29,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage'])) {
         mkdir($targetDir, 0755, true);
     }
 
-    // Move the uploaded file to the target directory with the fixed name
     if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
         $success_message = "QR code for Gcash uploaded successfully!.";
     } else {
@@ -38,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage'])) {
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
     $image = $_FILES['QRimage1'];
-    $targetDir = "uploads/qr/"; // Set your target directory here
-    $imageName = "P_image.jpg"; // Fixed identifier name for the uploaded file
+    $targetDir = "uploads/qr/"; 
+    $imageName = "P_image.jpg"; 
     $targetFilePath = $targetDir . $imageName;
 
     // Ensure the target directory exists
@@ -47,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
         mkdir($targetDir, 0755, true);
     }
 
-    // Move the uploaded file to the target directory with the fixed name
     if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
         $success_message = "QR code for PayMaya uploaded successfully !.";
     } else {
@@ -581,32 +573,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
                     <div class="main-content">
                         <!-- Main content goes here -->
                         <div class="settings-form-container">
-                            <h2 class="text-center mb-4">Change Background Image</h2>
-                            <?php if ($success_message): ?>
-                                <div class="alert alert-success text-center"><?php echo $success_message; ?></div>
-                            <?php endif; ?>
-                            <?php if ($error_message): ?>
-                                <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
-                            <?php endif; ?>
-
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="background_image" class="mb-2">LANMAR GCASH QRCode:</label>
-                                    <input type="file" name="QRimage" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Update Background">Update</button>
-                                </div>
-                            </form>
-                            <form class="settings-form" method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label for="background_image" class="mb-2">LANMAR PayMaya QRCode:</label>
-                                    <input type="file" name="QRimage1" id="background_image" accept="image/*" required class="form-control-file mx-auto d-block" aria-label="Upload New Background Image">
-                                </div>
-                                <div class="button-container">
-                                    <button type="submit" class="update-button" aria-label="Update Background">Update</button>
-                                </div>
-                            </form>
+                            
                         </div>
                     </div>
                 </div>

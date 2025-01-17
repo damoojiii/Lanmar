@@ -1,7 +1,7 @@
 <?php
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
+    
     checkAccess('admin');
 
     $id = $_SESSION['user_id'];
@@ -559,6 +559,12 @@
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
+        setInterval(function() {
+            fetch('keep_session.php')
+                .then(response => response.text())
+                .catch(error => console.error('Error keeping session alive:', error));
+        }, 300000);
+
         document.addEventListener('DOMContentLoaded', function () {
             let chart;
 
