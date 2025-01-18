@@ -12,12 +12,20 @@
         $name_data = $name_sql->fetch(PDO::FETCH_ASSOC);
         $name = $name_data['firstname'];
 
-        $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations FROM booking_tbl WHERE status = 'Pending'");
+        $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations 
+        FROM booking_tbl 
+        WHERE status = 'Pending' 
+        AND MONTH(created_at) = MONTH(CURRENT_DATE) 
+        AND YEAR(created_at) = YEAR(CURRENT_DATE)");
         $pending_stmt->execute();
         $pending_data = $pending_stmt->fetch(PDO::FETCH_ASSOC);
         $pending_reservations = $pending_data['pending_reservations'];
 
-        $pending_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS pending_reservations_prev FROM booking_tbl WHERE status = 'Pending' AND MONTH(created_at) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)");
+        $pending_stmt_prev = $pdo->prepare("
+            SELECT COUNT(*) AS pending_reservations_prev 
+            FROM booking_tbl 
+            WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH), '%Y-%m')
+        ");
         $pending_stmt_prev->execute();
         $pending_data_prev = $pending_stmt_prev->fetch(PDO::FETCH_ASSOC);
         $pending_reservations_prev = $pending_data_prev['pending_reservations_prev'];
@@ -33,7 +41,12 @@
         $incoming_data = $incoming_stmt->fetch(PDO::FETCH_ASSOC);
         $incoming_books = $incoming_data['incoming_books'];
         
-        $incoming_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS incoming_books_prev FROM booking_tbl WHERE WEEK(created_at) = WEEK(CURDATE() - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURDATE() - INTERVAL 1 MONTH) AND status = 'Approved'");
+        $incoming_stmt_prev = $pdo->prepare("
+            SELECT COUNT(*) AS incoming_books_prev 
+            FROM booking_tbl 
+            WHERE YEARWEEK(dateIn, 1) = YEARWEEK(DATE_SUB(CURDATE(), INTERVAL 1 WEEK), 1) 
+            AND status = 'Approved'
+        ");
         $incoming_stmt_prev->execute();
         $incoming_data_prev = $incoming_stmt_prev->fetch(PDO::FETCH_ASSOC);
         $incoming_books_prev = $incoming_data_prev['incoming_books_prev'];
@@ -51,13 +64,13 @@
             ON booking_tbl.bill_id = bill_tbl.bill_id 
             WHERE WEEK(booking_tbl.dateIn) = WEEK(CURDATE()) 
             AND YEAR(booking_tbl.dateIn) = YEAR(CURDATE()) 
-            AND booking_tbl.status NOT IN ('Pending', 'Cancelled', 'Rejected')
+            AND booking_tbl.status = 'Completed'
         ");
         $earnings_stmt->execute();
         $earnings_data = $earnings_stmt->fetch(PDO::FETCH_ASSOC);
         $weekly_earnings = $earnings_data['weekly_earnings'];
 
-        $earnings_stmt_prev = $pdo->prepare("SELECT SUM(bill_tbl.total_bill) AS weekly_earnings_prev FROM booking_tbl LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id WHERE WEEK(booking_tbl.created_at) = WEEK(CURDATE() - INTERVAL 1 WEEK) AND YEAR(booking_tbl.created_at) = YEAR(CURDATE() - INTERVAL 1 WEEK) AND booking_tbl.status NOT IN ('Pending', 'Cancelled', 'Rejected')");
+        $earnings_stmt_prev = $pdo->prepare("SELECT SUM(bill_tbl.total_bill) AS weekly_earnings_prev FROM booking_tbl LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id WHERE WEEK(booking_tbl.dateIn) = WEEK(CURDATE() - INTERVAL 1 WEEK) AND YEAR(booking_tbl.dateIn) = YEAR(CURDATE() - INTERVAL 1 WEEK) AND booking_tbl.status = 'Completed'");
         $earnings_stmt_prev->execute();
         $earnings_data_prev = $earnings_stmt_prev->fetch(PDO::FETCH_ASSOC);
         $weekly_earnings_prev = $earnings_data_prev['weekly_earnings_prev'];
@@ -68,12 +81,12 @@
             $weekly_earnings_percentage_change = 0;
         }
 
-        $cancellation_stmt = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation FROM booking_tbl WHERE status = 'Cancellation2'");
+        $cancellation_stmt = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation FROM cancel_tbl WHERE MONTH(timestamp) = MONTH(CURRENT_DATE) AND YEAR(timestamp) = YEAR(CURRENT_DATE)");
         $cancellation_stmt->execute();
         $cancellation_data = $cancellation_stmt->fetch(PDO::FETCH_ASSOC);
         $cancellation_reservations = $cancellation_data['upcoming_cancellation'];
 
-        $cancellation_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation_prev FROM booking_tbl WHERE status = 'Cancellation2' AND MONTH(created_at) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(created_at) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)");
+        $cancellation_stmt_prev = $pdo->prepare("SELECT COUNT(*) AS upcoming_cancellation_prev FROM cancel_tbl WHERE MONTH(timestamp) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(timestamp) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)");
         $cancellation_stmt_prev->execute();
         $cancellation_data_prev = $cancellation_stmt_prev->fetch(PDO::FETCH_ASSOC);
         $cancellation_reservations_prev = $cancellation_data_prev['upcoming_cancellation_prev'];
@@ -412,7 +425,7 @@
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
                     <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="nav-link text-white" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
@@ -438,7 +451,7 @@
                 <div class="stats-card">
                     <h5>Pending Reservations</h5>
                     <h2><?php echo number_format($pending_reservations); ?></h2>
-                    <p><?php echo ($pending_percentage_change >= 0 ? '+' : '-') . number_format(abs($pending_percentage_change), 2) . '% compared to last month'; ?></p>
+                    <p><?php echo ($pending_percentage_change >= 0 ? '+' : '') . number_format($pending_percentage_change, 2) . '% compared to last month';  ?></p>
                 </div>
             </div>
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">

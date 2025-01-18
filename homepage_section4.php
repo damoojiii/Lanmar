@@ -605,7 +605,11 @@ checkAccess('admin');
                     <div class="flex-container">
                     <div class="main-content">
                         <?php
-                            $sql = "SELECT room_id, room_name, image_path, description, minpax, maxpax, price, is_featured, is_offered FROM rooms";
+                            $sql = "SELECT r.room_id, r.room_name, r.image_path, r.description, r.minpax, r.maxpax, r.price, r.is_offered, GROUP_CONCAT(i.inclusion_id) as inclusions, GROUP_CONCAT(i.inclusion_name) as inclusion
+                            FROM rooms r
+                            LEFT JOIN room_inclusions ri ON r.room_id = ri.room_id
+                            LEFT JOIN inclusion_tbl i ON ri.inclusion_id = i.inclusion_id
+                            GROUP BY r.room_id";
                             $result = $conn->query($sql);
                         ?>
                         <div class="settings-form-container">
@@ -613,6 +617,9 @@ checkAccess('admin');
                             <div class="mb-2">
                                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
                                     Add Room
+                                </button>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#inclusionModal">
+                                    Add Inclusion
                                 </button>
                             </div>
                             <div class="flex-container">
@@ -629,19 +636,23 @@ checkAccess('admin');
                                                     <p>Minpax: <?php echo $row['minpax']; ?></p>
                                                     <p>Maxpax: <?php echo $row['maxpax']; ?></p>
                                                     <p>Price: <?php echo $row['price']; ?></p>
-                                                    <p>Featured: <?php echo $row['is_featured'];?></p>
-                                                    <p>Offered: <?php echo $row['is_offered']; ?></p>
+                                                    <p>Offered: <?php echo ($row['is_offered'] === '1' ? 'Yes' : 'No'); ?></p>
+                                                    <p>Inclusions: <?php echo $row['inclusion']; ?></p>
                                                 </div>
                                                 <div class="action-buttons"> 
-                                                    <button type='button' class='openModal btn-modal' 
+                                                    <button type='button' class='openModal btn-modal btn' 
                                                         data-id='<?php echo $row['room_id']; ?>' 
                                                         data-name='<?php echo $row['room_name']; ?>' 
-                                                        data-capacity='<?php echo $row['description']; ?>' 
-                                                        data-price='<?php echo $row['price']; ?>' 
+                                                        data-description='<?php echo $row['description']; ?>' 
+                                                        data-price='<?php echo $row['price']; ?>'
+                                                        data-offered='<?php echo $row['is_offered'] ?>' 
                                                         data-maxpax='<?php echo $row['maxpax']; ?>' 
-                                                        data-minpax='<?php echo $row['minpax']; ?>'>
+                                                        data-minpax='<?php echo $row['minpax']; ?>'
+                                                        data-inclusions='<?php echo $row['inclusions']; ?>'
+                                                        >
                                                         Edit
                                                     </button>
+                                                    <button type='button' class='btn btn-danger deleteRoom' data-rid='<?php echo $row['room_id']; ?>'>Delete</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -650,15 +661,104 @@ checkAccess('admin');
                                     <p>No rooms available.</p>
                                 <?php endif; ?>
                             </div>
-
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+<div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRoomModalLabel">Edit Room</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editRoomForm" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="room_id" id="room_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label for="room_name" class="form-label">Room Name</label>
+                            <input type="text" class="form-control form-control-sm" id="room_name" name="room_name" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control form-control-sm" id="price" name="price" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label for="minpax" class="form-label">Min Pax</label>
+                            <input type="number" class="form-control form-control-sm" id="minpax" name="minpax" required>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <label for="maxpax" class="form-label">Max Pax</label>
+                            <input type="number" class="form-control form-control-sm" id="maxpax" name="maxpax" required>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control form-control-sm" id="description" name="description" rows="2" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label for="photo" class="form-label">Room Image</label>
+                        <input type="file" class="form-control form-control-sm" id="photo" name="photo">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Is Offered (for Overnight)?</label>
+                        <div>
+                            <input type="radio" id="is_offered_yes" name="is_offered" value="1" required>
+                            <label for="is_offered_yes">Yes</label>
+                            <input type="radio" id="is_offered_no" name="is_offered" value="0" required>
+                            <label for="is_offered_no">No</label>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Inclusions</label>
+                            <div id="inclusions-container" class="row"></div>
+                    </div>
+
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-sm btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scrollable Inclusions Section -->
+<div class="modal fade" id="inclusionModal" tabindex="-1" aria-labelledby="inclusionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inclusionModalLabel">Manage Inclusions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="inclusionName" class="form-label">Add New Inclusion</label>
+                    <input type="text" class="form-control" id="inclusionName" name="inclusionName" required>
+                    <button type="button" class="btn btn-primary mt-2" id="addInclusionButton">Add Inclusion</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Current Inclusions</label>
+                    <div class="inclusions-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                        <!-- Inclusions will be dynamically loaded here -->
+                        <ul id="inclusionsList" class="list-group">
+                            <!-- Placeholder for inclusions -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
@@ -689,10 +789,18 @@ checkAccess('admin');
     $(document).on('click', '.openModal', function() {
         const roomId = $(this).data('id');
         const roomName = $(this).data('name');
-        const description = $(this).data('capacity');
+        const description = $(this).data('description');
         const price = $(this).data('price');
         const maxpax = $(this).data('maxpax');
         const minpax = $(this).data('minpax');
+        const is_offered = $(this).data('offered');
+        let inclusions = $(this).data('inclusions');
+
+        if (typeof inclusions === 'string') {
+            inclusions = inclusions.split(',');
+        } else if (!Array.isArray(inclusions)) {
+            inclusions = [];
+        }
 
         $('#room_id').val(roomId);
         $('#room_name').val(roomName);
@@ -700,6 +808,52 @@ checkAccess('admin');
         $('#price').val(price);
         $('#maxpax').val(maxpax);
         $('#minpax').val(minpax);
+        console.log(is_offered);
+        $(`#is_offered_${is_offered ? 'yes' : 'no'}`).prop('checked', true);
+        $('#inclusions-container').empty();
+
+        $.ajax({
+            url: 'fetch_inclusions.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                const col1 = $('<div class="col-md-6"></div>');
+                const col2 = $('<div class="col-md-6"></div>');
+                
+                data.forEach((inclusion, index) => {
+                    const checkbox = $('<div class="form-check">')
+                        .append($('<input>', {
+                            type: 'checkbox',
+                            id: `inclusion-${inclusion.inclusion_id}`,
+                            value: inclusion.inclusion_id,
+                            class: 'form-check-input',
+                            name: 'inclusions[]'
+                        }))
+                        .append($('<label>', {
+                            for: `inclusion-${inclusion.inclusion_id}`,
+                            text: inclusion.inclusion_name,
+                            class: 'form-check-label'
+                        }));
+                    
+                    if (index % 2 === 0) {
+                        col1.append(checkbox);
+                    } else {
+                        col2.append(checkbox);
+                    }
+                });
+
+                $('#inclusions-container').append(col1).append(col2);
+
+                $(`input[name="inclusions[]"]`).each(function() {
+                    if (inclusions.includes($(this).val())) {
+                        $(this).prop('checked', true);
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+            }
+        });
 
         $('#editRoomModal').modal('show');
     });
@@ -710,69 +864,132 @@ checkAccess('admin');
 
         $.ajax({
             type: 'POST',
-            url: 'update_room.php', // Create this file to handle the update
+            url: 'update_room.php',
             data: formData,
             contentType: false,
             processData: false,
             success: function(response) {
-                alert('Room updated successfully!');
-                location.reload(); // Reload the page to see changes
+                console.log('Response:', response);
+                alert(response);
+                if (response.includes('successfully')) {
+                    location.reload();
+                }
             },
-            error: function() {
-                alert('Error updating room.');
+            error: function(xhr, status, error) {
+                console.error('Error:', xhr.responseText);
+                alert('Error updating room: ' + xhr.responseText);
             }
         });
     });
+
+    $(document).on('click', '.deleteRoom', function() {
+        const roomId = $(this).data('rid');
+        
+        if (confirm('Are you sure you want to delete this room? This action cannot be undone.')) {
+            $.ajax({
+                url: 'delete_room.php',
+                type: 'POST',
+                data: { room_id: roomId },
+                success: function(response) {
+                    if (response) {
+                        console.log(response);
+                        alert('Room deleted successfully.');
+                        location.reload(); // Refresh the page to reflect the deletion
+                    } else {
+                        console.log(response);
+                        alert('Failed to delete the room. Please try again.');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while trying to delete the room.');
+                }
+            });
+        }
+    });
+
+    $(document).ready(function() {
+        // Load inclusions when the modal is opened
+        $('#inclusionModal').on('show.bs.modal', function() {
+            loadInclusions();
+        });
+
+        function loadInclusions() {
+            $.ajax({
+                url: 'fetch_inclusions.php',
+                type: 'GET',
+                dataType: 'json', // Expect JSON data from the server
+                success: function(data) {
+                    let inclusionsHtml = '';
+                    if (data.length > 0) {
+                        data.forEach(function(inclusion) {
+                            inclusionsHtml += `
+                            <li class='list-group-item d-flex justify-content-between align-items-center'>
+                            ${inclusion.inclusion_name}
+                            <button class='btn btn-sm btn-danger delete-inclusion' data-id='${inclusion.inclusion_id}'>Delete</button>
+                            </li>`;
+                        });
+                    } else {
+                        inclusionsHtml = "<li class='list-group-item'>No inclusions found.</li>";
+                    }
+                    $('#inclusionsList').html(inclusionsHtml);
+                },
+                error: function() {
+                    alert('Failed to load inclusions.');
+                }
+            });
+        }
+
+        $('#addInclusionButton').on('click', function() {
+            const inclusionName = $('#inclusionName').val();
+            $.ajax({
+                url: 'add_inclusion.php',
+                type: 'POST',
+                data: { name: inclusionName },
+                success: function(response) {
+                    if (response) {
+                        alert('Inclusion added successfully.');
+                        $('#inclusionName').val(''); // Clear the input
+                        loadInclusions(); // Refresh the inclusions list
+                    } else {
+                        alert('Failed to add inclusion.');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred.');
+                }
+            });
+        });
+
+        // Delete Inclusion
+        $(document).on('click', '.delete-inclusion', function() {
+            const inclusionId = $(this).data('id');
+            if (confirm('Are you sure you want to delete this inclusion?')) {
+                $.ajax({
+                    url: 'delete_inclusion.php',
+                    type: 'POST',
+                    data: { id: inclusionId },
+                    success: function(response) {
+                        if (response) {
+                            alert('Inclusion deleted successfully.');
+                            loadInclusions(); // Refresh the inclusions list
+                        } else {
+                            alert('Failed to delete inclusion.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            }
+        });
+    });
+
+
+
+
 </script>
 
-<!-- Modal -->
-<div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editRoomModalLabel">Edit Room</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editRoomForm" enctype="multipart/form-data">
-                    <input type="hidden" name="room_id" id="room_id">
-                    <div class="row">
-                        <div class="col-md-6 mb-2">
-                            <label for="room_name" class="form-label">Room Name</label>
-                            <input type="text" class="form-control form-control-sm" id="room_name" name="room_name" required>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label for="price" class="form-label">Price</label>
-                            <input type="number" class="form-control form-control-sm" id="price" name="price" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 mb-2">
-                            <label for="minpax" class="form-label">Min Pax</label>
-                            <input type="number" class="form-control form-control-sm" id="minpax" name="minpax" required>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <label for="maxpax" class="form-label">Max Pax</label>
-                            <input type="number" class="form-control form-control-sm" id="maxpax" name="maxpax" required>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control form-control-sm" id="description" name="description" rows="2" required></textarea>
-                    </div>
-                    <div class="mb-2">
-                        <label for="photo" class="form-label">Room Image</label>
-                        <input type="file" class="form-control form-control-sm" id="photo" name="photo">
-                    </div>
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-sm btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Save Changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <style>
 /* Add these styles */
@@ -862,16 +1079,7 @@ checkAccess('admin');
                         <input type="number" class="form-control" id="price" name="price" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">Is Featured?</label>
-                        <div>
-                            <input type="radio" id="is_featured_yes" name="is_featured" value="1" required>
-                            <label for="is_featured_yes">Yes</label>
-                            <input type="radio" id="is_featured_no" name="is_featured" value="0" required>
-                            <label for="is_featured_no">No</label>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Is Offered?</label>
+                        <label class="form-label">Is Offered (for Overnight)?</label>
                         <div>
                             <input type="radio" id="is_offered_yes" name="is_offered" value="1" required>
                             <label for="is_offered_yes">Yes</label>
@@ -879,6 +1087,29 @@ checkAccess('admin');
                             <label for="is_offered_no">No</label>
                         </div>
                     </div>
+                    <div class="mb-2">
+                        <label for="inclusions" class="form-label">Inclusions</label>
+                        <div id="inclusions" class="row">
+                            <?php
+                            $inclusionQuery = "SELECT * FROM inclusion_tbl ORDER BY inclusion_name ASC";
+                            $inclusionResult = mysqli_query($conn, $inclusionQuery);
+
+                            if ($inclusionResult) {
+                                while ($inclusion = mysqli_fetch_assoc($inclusionResult)) {
+                                    echo '<div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="inclusions[]" value="' . htmlspecialchars($inclusion['inclusion_id']) . '" id="inclusion_' . htmlspecialchars($inclusion['inclusion_id']) . '">
+                                                <label class="form-check-label" for="inclusion_' . htmlspecialchars($inclusion['inclusion_id']) . '">
+                                                    ' . htmlspecialchars($inclusion['inclusion_name']) . '
+                                                </label>
+                                            </div>
+                                        </div>';
+                                }
+                            }
+                            ?>
+                        </div>
+                    </div>
+
                     <div class="text-end mt-3">
                         <button type="button" class="btn btn-sm btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-sm btn-primary">Add Room</button>

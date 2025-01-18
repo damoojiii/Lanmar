@@ -13,15 +13,30 @@
     $featuredStmt = $pdo->query($featuredQuery);
     $featuredFeedbacks = $featuredStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $feedbacksPerPage = 9;
+    $offset = ($page - 1) * $feedbacksPerPage;
+
     // Query non-featured feedbacks
-    $nonFeaturedQuery = "SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
-    u.firstname, u.lastname 
+    $nonFeaturedQuery = "
+    SELECT f.feedback_id, f.comment, f.rating, f.is_featured, f.created_at, 
+           u.firstname, u.lastname 
     FROM feedback_tbl f
     JOIN users u ON f.user_id = u.user_id
     WHERE f.is_featured = 0
-    ORDER BY f.created_at DESC";
+    ORDER BY f.created_at DESC
+    LIMIT $offset, $feedbacksPerPage"; // Added LIMIT for pagination
+
     $nonFeaturedStmt = $pdo->query($nonFeaturedQuery);
     $nonFeaturedFeedbacks = $nonFeaturedStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Query to get the total number of non-featured feedbacks for pagination
+    $totalFeedbacksQuery = "SELECT COUNT(*) AS total_feedbacks FROM feedback_tbl WHERE is_featured = 0";
+    $totalFeedbacksStmt = $pdo->query($totalFeedbacksQuery);
+    $totalFeedbacks = $totalFeedbacksStmt->fetch(PDO::FETCH_ASSOC)['total_feedbacks'];
+
+    // Calculate the total number of pages
+    $totalPages = ceil($totalFeedbacks / $feedbacksPerPage);
 ?>
 
 <!DOCTYPE html>
@@ -195,33 +210,6 @@
         .settings-form-container {
             margin-bottom: 20px;
         }
-        .alert {
-            padding: 10px;
-            margin: 10px 0;
-        }
-        .alert-success {
-            color: green;
-        }
-        .alert-danger {
-            color: red;
-        }
-        .button-container {
-            display: flex;
-            justify-content: end;
-        }
-        button {
-            border-radius: 50px;
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
-        .flex-container {
-        display: flex;
-        gap: 20px;
-    }
 
     .sidebar-settings {
         display: flex;
@@ -235,71 +223,12 @@
         justify-content: center;
     }
 
-    .settings-links {
-        width: 100%
-    }
-
-    .settings-links ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .settings-links li {
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .settings-links a {
-        text-decoration: none;
-        color: #333;
-        padding: 10px 15px;
-        border-radius: 2px;
-        transition: 0.3s;
-    }
-
-    .settings-links a:hover {
-        background-color: #ddd;
-    }
-
-    .settings-links .links {
-        margin-bottom: 30px;
-    }
-
     .main-content {
         flex: 1;
         padding: 25px;
         background-color: #ffff;
         border-radius: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-group input {
-        margin-bottom: 10px;
-    }
-
-    .settings-form .form-group label {
-        display: block;
-        margin-bottom: 10px;
-        font-weight: bold;
-        font-size: 17px;
-    }
-
-    .settings-form .form-group input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 0px;
-    }
-
-    .breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-        float: right;
-        margin-left: 16%;
-        margin-bottom: 15px;
     }
 
     .four-box-container {
@@ -343,18 +272,6 @@
         justify-content: end;
     }
 
-    .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-        .feedback-page {
-        padding: 20px;
-    }
 
     .feedback-container {
         display: flex;
@@ -396,6 +313,9 @@
         justify-content: flex-end;
         margin-top: auto; /* Push the button to the bottom */
     }
+    .button-container .btn-primary{
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+    }
 
     .feedback-card button {
         margin: 0;
@@ -403,6 +323,32 @@
 
     .feedback-line {
         margin: 40px 0;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        text-decoration: none;
+        padding: 5px 10px;
+        background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+        color: white;
+        border-radius: 5px;
+    }
+
+    .pagination a:hover {
+        background-color: #007bff;
+    }
+
+    .pagination .prev, .pagination .next {
+        font-weight: bold;
+    }
+
+    .pagination span {
+        align-self: center;
     }
 
     /* Responsiveness for mobile devices */
@@ -549,6 +495,7 @@
             <hr class="feedback-line"/>
 
             <!-- Non-Featured Feedbacks Section -->
+            
             <h2><strong>Feedbacks</strong></h2>
             <div class="feedback-container">
                 <?php if (!empty($nonFeaturedFeedbacks)): ?>
@@ -569,6 +516,19 @@
                     <?php endforeach; ?>
                 <?php else: ?>
                     <p>No feedbacks found.</p>
+                <?php endif; ?>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                <?php if ($page > 1): ?>
+                    <a href="?page=<?= $page - 1; ?>" class="prev">Previous</a>
+                <?php endif; ?>
+
+                <span>Page <?= $page; ?> of <?= $totalPages; ?></span>
+
+                <?php if ($page < $totalPages): ?>
+                    <a href="?page=<?= $page + 1; ?>" class="next">Next</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -603,22 +563,32 @@
     });
     
     function updateFeature(feedbackId, isFeatured) {
-        fetch('update-feature.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ feedback_id: feedbackId, is_featured: isFeatured })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Feedback updated successfully!');
-                location.reload(); // Reload the page to reflect changes
-            } else {
-                alert('Failed to update feedback. Please try again.');
-            }
-        })
-        .catch(error => console.error('Error:', error));
+        fetch('get-featured-count.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count >= 3 && isFeatured === 1) {
+                    alert('You can only feature up to three feedbacks at a time.');
+                } else {
+                    fetch('update-feature.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ feedback_id: feedbackId, is_featured: isFeatured })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Feedback updated successfully!');
+                            location.reload(); // Reload the page to reflect changes
+                        } else {
+                            alert('Failed to update feedback. Please try again.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            })
+            .catch(error => console.error('Error fetching featured count:', error));
     }
+
 
     $(document).ready(function() {
         function updateNotificationCount(){

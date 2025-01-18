@@ -124,7 +124,7 @@
         }
 
         .box.not-available {
-            background-color: darkgray;
+            background-color: #d9534f;
         }
 
         .continue-btn-container {
@@ -234,7 +234,7 @@
             display: none;
         }
         .day.not-available {
-            background-color: darkgray;
+            background-color: #d9534f;
             color: white;
         }
         .day.booked {
