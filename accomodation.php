@@ -40,7 +40,6 @@ include 'connection.php';
         font-family: 'nautigal';
         font-size: 40px;
         color: white;
-        letter-spacing: 2px;
         margin-left: 20px;
     }
     
@@ -355,6 +354,9 @@ include 'connection.php';
         margin-bottom: 2rem;
         line-height: 1.6;
     }
+    .container-fluid{
+        padding-inline: 5rem;
+    }
 
     @media (max-width: 768px) {
         .room-container:nth-child(even) .room-card-full,
@@ -414,6 +416,9 @@ include 'connection.php';
             font-size: 2rem;
             padding-bottom: 15px;
         }
+        .container-fluid{
+            padding-inline: 0px;
+        }
     }
 
     @media (max-width: 480px) {
@@ -437,7 +442,6 @@ include 'connection.php';
     .section-title {
         text-align: center;
         color: #19315D;
-        margin-bottom: 3rem;
     }
 
     .section-title h2 {
@@ -466,7 +470,7 @@ include 'connection.php';
 
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid d-flex align-items-center justify-content-between">
-      <a href="index.php" class="sitename d-flex align-items-center me-auto me-lg-0" style="color: white; letter-spacing: 2px;">
+      <a href="index.php" class="sitename d-flex align-items-center me-auto me-lg-0" style="color: white;">
         Lanmar Resort
       </a>
 
@@ -501,39 +505,46 @@ include 'connection.php';
             <h2>Our Rooms</h2>
         </div>
         <?php
-        // Fetch all rooms
-        $query = "SELECT * FROM rooms ORDER BY room_id ASC";
+        // Updated query to fetch rooms with inclusions
+        $query = "
+            SELECT r.room_id, r.image_path, r.room_name, r.description, r.minpax, r.maxpax,
+                GROUP_CONCAT(i.inclusion_name SEPARATOR ', ') AS inclusions
+            FROM rooms r
+            LEFT JOIN room_inclusions ri ON ri.room_id = r.room_id
+            LEFT JOIN inclusion_tbl i ON i.inclusion_id = ri.inclusion_id
+            GROUP BY r.room_id
+            ORDER BY r.room_id ASC";
+        
         $result = mysqli_query($conn, $query);
-
+        
         if (!$result) {
             die('Query Error: ' . mysqli_error($conn));
         }
-
+        
         while ($row = mysqli_fetch_assoc($result)) {
+            $inclusions = $row['inclusions'] ? explode(', ', $row['inclusions']) : [];
         ?>
             <div class="room-container">
                 <div class="room-card-full">
                     <div class="room-image-full">
                         <img src="<?php echo htmlspecialchars($row['image_path']); ?>" 
-                             alt="<?php echo htmlspecialchars($row['room_name']); ?>">
+                            alt="<?php echo htmlspecialchars($row['room_name']); ?>">
                     </div>
                     <div class="room-details-full">
                         <h3><?php echo htmlspecialchars($row['room_name']); ?></h3>
                         <p class="room-description"><?php echo htmlspecialchars($row['description']); ?></p>
                         <ul class="room-features">
                             <li><i class="bi bi-people"></i> <?php echo htmlspecialchars($row['minpax']); ?>-<?php echo htmlspecialchars($row['maxpax']); ?> Persons</li>
-                            <li><i class="bi bi-wifi"></i> Free WiFi</li>
-                            <li><i class="bi bi-snow"></i> Air Conditioning</li>
+                            <?php foreach ($inclusions as $inclusion) : ?>
+                                <li><i class="bi bi-check-circle"></i> <?php echo htmlspecialchars($inclusion); ?></li>
+                            <?php endforeach; ?>
                         </ul>
-                        <div class="room-actions">
-                            <button class="btn-view-details">View Details</button>
-                        
-                        </div>
                     </div>
                 </div>
             </div>
         <?php } ?>
     </div>
+
   </section>
 
   <!-- Vendor JS Files -->

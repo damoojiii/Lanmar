@@ -183,17 +183,28 @@ $descriptions = [];
         overflow: hidden;
     }
 
-    .slideshow-container {
-      position: relative;
-      max-width: 100%;
-      margin: auto;
-      overflow: hidden;
-    }
-
     .mySlides {
-      display: none;
+        display: none;
+        position: absolute;
+        width: 100%;
+        height: 70vh;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out;
     }
 
+    .slideshow-container {
+        position: relative;
+        max-width: 100%;
+        height: 70vh;
+        margin-inline: -50vw;
+        overflow: hidden;
+    }
+    .mySlides img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 2s ease-in-out, opacity 2s ease-in-out;
+    }
     .prev, .next {
       cursor: pointer;
       position: absolute;
@@ -243,26 +254,43 @@ $descriptions = [];
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
-    .room-slide {
-        display: none;
-        padding: 5px;
-    }
-
-    .room-prev, .room-next {
+    .prev, .next {
         cursor: pointer;
         position: absolute;
         top: 50%;
         width: auto;
         padding: 16px;
-        margin-top: -22px;
-        color: #333;
+        color: white;
         font-weight: bold;
-        font-size: 24px;
+        font-size: 18px;
+        transition: background-color 0.3s ease;
         border-radius: 0 3px 3px 0;
         user-select: none;
-        background-color: rgba(255,255,255,0.8);
-        transition: 0.3s ease;
+        transform: translateY(-50%);
+    }
+
+    .next {
+        right: 0;
+        border-radius: 3px 0 0 3px;
+    }
+
+    .prev:hover, .next:hover {
+        background-color: rgba(0,0,0,0.8);
+    }
+
+    .fade {
+        animation: fade 2s ease-in-out forwards;
+    }
+
+    @keyframes fade {
+        0% { opacity: 0; transform: scale(1.1); }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    .room-slide {
+        display: none;
+        padding: 5px;
     }
 
     .room-next {
@@ -290,36 +318,60 @@ $descriptions = [];
         background-color: #717171;
     }
 
-    .fade {
-        animation-name: fade;
-        animation-duration: 5s;
-    }
-
-    @keyframes fade {
-        from {opacity: .1}
-        to {opacity: 1}
-    }
-
     .room-description {
         padding: 0 10px;
     }
 
     .room-description h3 {
-        margin: 0 0 5px 0;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
     }
 
     .room-description p {
-        margin: 0 0 5px 0;
+        margin-bottom: 1rem;
     }
 
     .room-features {
-        margin: 5px 0;
-        padding: 0;
+        list-style: none;
+        padding-left: 0;
     }
 
-    .room-dots {
-        margin-top: 5px;
+    .round{
+      background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background */
+      border-radius: 50%; /* Make the buttons circular */
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        width: 30px;
+        height: 30px;
+        position: relative; /* Ensure relative positioning for icon placement */
+    }
+
+    .carousel-control-prev-icon::before,
+    .carousel-control-next-icon::before {
+        content: '';
+        display: block;
+        background-size: 70%; /* Adjust icon size relative to the button */
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+    }
+
+    .carousel-control-prev-icon::before {
+        background-image: url('font/chevron-left-solid.svg'); /* Path to your left arrow icon */
+    }
+
+    .carousel-control-next-icon::before {
+        background-image: url('font/angle-right-solid.svg'); /* Path to your right arrow icon */
+    }
+
     .feedback-page {
         padding: 20px;
     }
@@ -408,12 +460,55 @@ $descriptions = [];
         font-size: 0.9rem;
         margin: 0;
       }
+      .location {
+        padding: 60px 0;
+        background-color: #f8f9fa;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      
+      .location-info {
+        height: 100%;
+      }
+
+      .location-info h3 {
+        color: #19315D;
+        font-size: 1.5rem;
+      }
+
+      .location-info p {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+      }
+
+      .location-info i {
+        color: #19315D;
+        
+      }
+
+      .map-container {
+        height: 100%;
+      }
+
+      .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 10px;
+      }
     @media (max-width: 768px) {
         .feedback-card {
             width: calc(50% - 20px); 
         }
         .hero{
           min-height: 50vh;
+        }
+        .map-container {
+          margin-top: 20px;
+          min-height: 410px;
         }
     }
 
@@ -501,7 +596,7 @@ $descriptions = [];
     </section><!-- /Booking and About Section -->
 
     <!-- Gallery Section -->
-    <section id="gallery" class="gallery section py-2">
+    <section id="gallery" class="gallery section py-2" data-aos="fade-right">
       <div class="container-fluid px-0">
         <div class="section-header text-center mb-4">
           <h2>Our Gallery</h2>
@@ -525,61 +620,86 @@ $descriptions = [];
     <!-- End Gallery Section -->
 
     <!-- Room Showcase Section -->
-    <section id="room-showcase" class="room-showcase section">
-        <div class="container">
-            <div class="section-header text-center">  
-                <h2>Featured Rooms</h2>
-                <p>Experience luxury and comfort in our signature accommodations</p>
-            </div>
-            
-            <div class="room-slideshow-container">
+    <section id="room-showcase" class="room-showcase section" data-aos="fade-left">
+    <div class="container">
+        <div class="section-header text-center">
+            <h2>Featured Rooms</h2>
+            <p>Experience luxury and comfort in our signature accommodations</p>
+        </div>
+
+        <div id="roomCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
                 <?php
-                // Fetch all rooms
-                $query = "SELECT * FROM rooms ORDER BY room_id ASC";
+                // Updated query to group inclusions by room_id
+                $query = "
+                    SELECT r.room_id, r.image_path, r.room_name, r.description, r.minpax, r.maxpax,
+                           GROUP_CONCAT(i.inclusion_name SEPARATOR ', ') AS inclusions
+                    FROM rooms r
+                    LEFT JOIN room_inclusions ri ON ri.room_id = r.room_id
+                    LEFT JOIN inclusion_tbl i ON i.inclusion_id = ri.inclusion_id
+                    GROUP BY r.room_id
+                    ORDER BY r.room_id ASC";
                 $result = mysqli_query($conn, $query);
 
                 if (!$result) {
                     die('Query Error: ' . mysqli_error($conn));
                 }
 
+                $first = true;
                 while ($row = mysqli_fetch_assoc($result)) {
                     ?>
-                    <div class="room-slide fade">
+                    <div class="carousel-item <?php echo $first ? 'active' : ''; ?>">
                         <div class="row">
                             <div class="col-lg-6">
-                                <img src="<?php echo htmlspecialchars($row['image_path']); ?>" 
-                                     class="img-fluid" 
+                                <img src="<?php echo htmlspecialchars($row['image_path']); ?>"
+                                     class="d-block w-100 img-fluid"
                                      alt="<?php echo htmlspecialchars($row['room_name']); ?>">
                             </div>
                             <div class="col-lg-6">
                                 <div class="room-description">
                                     <h3><?php echo htmlspecialchars($row['room_name']); ?></h3>
                                     <p><?php echo htmlspecialchars($row['description']); ?></p>
-                                    <ul class="room-features list-unstyled">
-                                        <li><i class="bi bi-check-circle"></i> Minimum Capacity: <?php echo htmlspecialchars($row['minpax']); ?> persons</li>
-                                        <li><i class="bi bi-check-circle"></i> Maximum Capacity: <?php echo htmlspecialchars($row['maxpax']); ?> persons</li>
+                                    <ul>
+                                        <li>Minimum Capacity: <?php echo htmlspecialchars($row['minpax']); ?> persons</li>
+                                        <li>Maximum Capacity: <?php echo htmlspecialchars($row['maxpax']); ?> persons</li>
                                     </ul>
+                                    <div class="inclusions">
+                                        <strong>Inclusions:</strong>
+                                        <ul class="room-features list-unstyled">
+                                            <?php
+                                            $inclusions = explode(', ', $row['inclusions']);
+                                            foreach ($inclusions as $inclusion) {
+                                                echo "<li><i class='bi bi-check-circle'></i> " . htmlspecialchars($inclusion) . "</li>";
+                                            }
+                                            ?>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                <?php } ?>
-                
-            </div>
-
-            <!-- Dots indicator -->
-            <div class="room-dots text-center">
-                <?php
-                mysqli_data_seek($result, 0); // Reset result pointer
-                $index = 0;
-                while ($row = mysqli_fetch_assoc($result)) {
-                    echo '<span class="room-dot" onclick="currentRoomSlide(' . ($index + 1) . ')"></span>';
-                    $index++;
+                    <?php
+                    $first = false;
                 }
                 ?>
             </div>
+            <a class="carousel-control-prev" href="#roomCarousel" role="button" data-bs-slide="prev">
+                <div class="round">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </div>
+            </a>
+            <a class="carousel-control-next" href="#roomCarousel" role="button" data-bs-slide="next">
+                <div class="round">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </div>
+            </a>
         </div>
-    </section>
+    </div>
+</section>
+
+
 
     <section id="feedback" class="feedback">
       <div class="container">
@@ -591,7 +711,7 @@ $descriptions = [];
             <div class="feedback-container">
                 <?php if (!empty($featuredFeedbacks)): ?>
                     <?php foreach ($featuredFeedbacks as $feedback): ?>
-                        <div class="feedback-card selected">
+                        <div class="feedback-card selected" data-aos="fade-bottom">
                             <h4><?= htmlspecialchars(ucwords($feedback['firstname'] . ' ' . $feedback['lastname'])); ?></h4>
                             <div class="rating">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -685,9 +805,9 @@ $descriptions = [];
     
 
     <!-- Location Section -->
-    <section id="location" class="location section">
+    <section id="location" class="location section" data-aos="fade-up">
       <div class="container">
-        <div class="section-title text-center mb-5">
+        <div class="section-title text-center">
           <h2>Our Location</h2>
           <p>Find us at</p>
         </div>
@@ -698,11 +818,11 @@ $descriptions = [];
               <h3>Address</h3>
               <p><i class="bi bi-geo-alt me-2"></i>Purok 6, Brgy. Poblacion, Madridejos, Cebu</p>
               
-              <h3 class="mt-4">Contact Information</h3>
+              <h3 class="">Contact Information</h3>
               <p><i class="bi bi-telephone me-2"></i>+63 912 345 6789</p>
               <p><i class="bi bi-envelope me-2"></i>lanmarresort89xzy@gmail.com</p>
               
-              <h3 class="mt-4">Operating Hours</h3>
+              <h3 class="">Operating Hours</h3>
               <p><i class="bi bi-clock me-2"></i>Open 24/7</p>
             </div>
           </div>
@@ -723,63 +843,6 @@ $descriptions = [];
         </div>
       </div>
     </section>
-
-    <style>
-      .location {
-        padding: 60px 0;
-        background-color: #f8f9fa;
-      }
-      .location .section-title {
-        margin-bottom: 30px;
-      }
-
-      .row {
-        display: flex;
-        flex-wrap: wrap;
-      }
-      
-      .location-info {
-        height: 100%;
-      }
-
-      .location-info h3 {
-        color: #19315D;
-        font-size: 1.5rem;
-        margin-bottom: 2rem;
-      }
-
-      .location-info p {
-        color: #6c757d;
-        margin-bottom: 0.5rem;
-      }
-
-      .location-info i {
-        color: #19315D;
-        
-      }
-
-      .map-container {
-        height: 100%;
-      }
-
-      .map-container iframe {
-        width: 100%;
-        height: 100%;
-        border: 0;
-        border-radius: 10px;
-      }
-
-      @media (max-width: 768px) {
-        .map-container {
-          margin-top: 20px;
-          min-height: 410px;
-        }
-      }
-    </style>
-  
-
-
-
   </main>
 
   <footer id="footer" class="footer dark-background">
@@ -830,41 +893,28 @@ $descriptions = [];
 
 
   <script>
-  let slideIndex = 1;
-  showSlides(slideIndex);
+  let slideIndex = 0;
+  showSlides();
 
   function moveSlide(n) {
-    showSlides(slideIndex += n);
+      slideIndex += n;
+      showSlides();
   }
 
-  function currentSlide(n) {
-    showSlides(slideIndex = n);
+  function showSlides() {
+      let slides = document.getElementsByClassName("mySlides");
+      for (let i = 0; i < slides.length; i++) {
+          slides[i].style.display = "none";  
+      }
+
+      slideIndex++;
+      if (slideIndex > slides.length) { slideIndex = 1 }
+      slides[slideIndex - 1].style.display = "block";  
+      slides[slideIndex - 1].classList.add('fade');
+
+      setTimeout(() => {
+      }, 6000);
   }
-
-  function showSlides(n) {
-    let i;
-    const slides = document.getElementsByClassName("mySlides");
-    const dots = document.getElementsByClassName("dot");
-    
-    if (n > slides.length) { slideIndex = 1 }
-    if (n < 1) { slideIndex = slides.length }
-    
-    for (i = 0; i < slides.length; i++) {
-      slides[i].style.display = "none";  
-    }
-    for (i = 0; i < dots.length; i++) {
-      dots[i].className = dots[i].className.replace(" active", "");
-    }
-    
-    slides[slideIndex - 1].style.display = "block";  
-    dots[slideIndex - 1].className += " active";
-  }
-
-
-  // Optional: Automatic slideshow
-  setInterval(() => {
-    moveSlide(1);
-  }, 4000); // Show each slide for 4 seconds total
   </script>
 
   <script>
