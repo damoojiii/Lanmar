@@ -82,6 +82,8 @@ $descriptions = [];
   <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
+  <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
@@ -380,7 +382,7 @@ $descriptions = [];
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
-        justify-content: start;
+        justify-content: center;
         word-wrap: break-word; 
         word-break: break-word;
     }
@@ -799,6 +801,39 @@ $descriptions = [];
               <p>Always available to assist with your needs</p>
             </div>
           </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="amenity-card text-center">
+              <i class="fa-solid fa-basketball fs-1" style="color: #19315D;"></i>
+              <h4>Open Court</h4>
+              <p>Always available to assist with your needs</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="amenity-card text-center">
+            <i class="fa-solid fa-child-reaching fs-1" style="color: #19315D;"></i>
+              <h4>Playground</h4>
+              <p>Fun outdoor play area for children's entertainment</p>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="amenity-card text-center">
+            <i class="fa-solid fa-umbrella-beach fs-1" style="color: #19315D;"></i>
+              <h4>Access To Beach</h4>
+              <p>Direct access to pristine beachfront for swimming and relaxation</p>
+            </div>
+          </div>
+          
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+            <div class="amenity-card text-center">
+            <i class="fa-solid fa-fire-burner fs-1" style="color: #19315D;"></i>
+              <h4>Access In Kitchen</h4>
+              <p>Free access to the gas stove and grills</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -847,25 +882,95 @@ $descriptions = [];
 
   <footer id="footer" class="footer dark-background">
     <div class="container">
-      <h3 class="sitename">Lanmar Resort</h3>
-      <p>A Premuim Private Resort</p>
-      <div class="social-links d-flex justify-content-center">
-        <a href="https://www.facebook.com/lanmarresort"><i class="bi bi-facebook"></i></a>
-        
-      </div>
-      <div class="container">
-        <div class="copyright">
-          <span>Copyright</span> <strong class="px-1 sitename">Lanmar</strong> <span>All Rights Reserved</span>
+        <div class="text-centerd-md-flex justify-content-between align-items-center">
+          <h3 class="sitename">Lanmar Resort</h3>
+          <p>A Premium Private Resort</p>
+          <div class="social-links">
+            <a href="https://www.facebook.com/lanmarresort"><i class="bi bi-facebook" ></i></a>
+          </div>
         </div>
-        <div class="credits">
-          <!-- All the links in the footer should remain intact. -->
-          <!-- You can delete the links only if you've purchased the pro version. -->
-          <!-- Licensing information: https://bootstrapmade.com/license/ -->
-          <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+
+        <!-- Contact Info Column -->
+        <div class="text-center">
+          <div class="contact-info row">
+            <div class="col-md-6">
+              <p><i class="bi bi-geo-alt me-2"></i>Purok 6, Brgy. Poblacion, Madridejos, Cebu</p>
+              <p><i class="bi bi-telephone me-2"></i>+63 912 345 6789</p>
+            </div>
+            <div class="col-md-6">
+              <p><i class="bi bi-envelope me-2"></i>lanmarresort89xzy@gmail.com</p>
+              <p><i class="bi bi-clock me-2"></i>Open 24/7</p>
+            </div>
+          </div>
         </div>
       </div>
+      <!-- Copyright Column -->
+      <div class="md-4 text-center">
+          <div class="copyright"> 
+            <span>2024 All Rights Reserved</span>
+          </div>
+        </div>
     </div>
   </footer>
+  <style>
+    .footer {
+    background-color: #19315D;
+    padding: 10px 0 10px;
+    color: #fff;
+    position: relative;
+    }
+
+    .footer .sitename {
+        font-size: 30px;
+        margin-bottom: 5px;
+        color: #fff;
+    }
+
+    .footer p {
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+
+    .footer .social-links {
+        margin: 2px 0 2px 0;
+    }
+
+    .footer .social-links a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        color: #fff;
+        font-size: 20px;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .footer .social-links a:hover {
+        background: #fff;
+        color: #19315D;
+        transform: translateY(-3px);
+    }
+
+    .footer .contact-info p {
+        margin-bottom: 2px;
+        font-size: 12px;
+    }
+
+    .footer .contact-info i {
+        width: 30px;
+        color: #fff;
+    }
+
+    .footer .copyright {
+        margin-top: 10px;
+        padding-top: 5px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 14px;
+    }
+  </style>
+
 
 
   <!-- Scroll Top -->
@@ -887,6 +992,8 @@ $descriptions = [];
   <script src="assets/vendor/bootstrap/js/all.min.js"></script>
   <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="assets/vendor/bootstrap/js/all.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
