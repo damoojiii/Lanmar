@@ -765,23 +765,27 @@ function isTimeAvailableForCheckIn(date, time) {
   }
 
   // Check if the time is available
-  //console.log(date, time);
-  //console.log(isTimeAvailableCheckIn(date, time));
   if (!isTimeAvailableCheckIn(date, time)) {
     return false;
   }
 
-  // Find the first booking slot after the selected check-in time
   if (bookedTimeSlots[date]) {
+    console.log(bookedTimeSlots[date], time);
     const futureSlots = bookedTimeSlots[date].filter(slot => timeToMinutes(slot.start) > time * 60);
-    
-    if (futureSlots.length > 0) {
-      // Get the start time of the first booking slot after the check-in time
-      const firstFutureSlotStart = timeToMinutes(futureSlots[0].start);
 
-      // Check if the gap between the selected check-in time and the next booking is less than 12 hours
-      if (firstFutureSlotStart - (time * 60) < minimumStayMinutes) {
-        return false; // Gap is too small, doesnt allow a minimum stay of 12 hours
+    // If there are no future slots on the selected date, check the next day's start time
+    if (futureSlots.length === 0) {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const nextDayString = nextDay.toISOString().split('T')[0];
+
+      if (bookedTimeSlots[nextDayString]) {
+        const nextDayStartTime = timeToMinutes(bookedTimeSlots[nextDayString][0].start);
+        //console.log((time * 60) - nextDayStartTime < minimumStayMinutes, bookedTimeSlots[nextDayString][0].start, time);
+        // Check if the gap between the selected time and the next day's start time respects the minimum stay
+        if ((time * 60) - nextDayStartTime > minimumStayMinutes && nextDayStartTime - (time * 60) < minimumStayMinutes) {
+          return false; // Gap is too small, doesn't allow a minimum stay of 12 hours
+        }
       }
     }
   }

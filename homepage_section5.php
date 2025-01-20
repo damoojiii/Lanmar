@@ -435,6 +435,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
         .head-title{
             font-size: 2.5rem;
         }
+        .scrollable-list {
+            max-height: 200px; 
+            overflow-y: auto; 
+            border-radius: 10px;
+            border: 1px solid #ccc; 
+            padding: 0; 
+            margin-top: 10px; 
+        }
+        .scrollable-list .list-group {
+            margin: 0;  
+            padding: 0;
+        }
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
@@ -532,8 +544,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="manageReservations">
-                    <li><a class="nav-link text-white" href="pending_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Pending Reservations</a></li>
-                    <li><a class="nav-link text-white" href="approved_reservation.php"><i class="fa-solid fa-circle navcircle"></i> Approved Reservations</a></li>
+                    <li><a class="nav-link text-white" href="pending_reservation.php">Pending Reservations</a></li>
+                    <li><a class="nav-link text-white" href="approved_reservation.php">Approved Reservations</a></li>
                 </ul>
             </li>
             <li>
@@ -634,7 +646,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
     <div class="settings-form-container mt-4">
         <div class="row">
             <!-- Price Form -->
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div id="response-message"></div>
                 <form id="update-price-form">
                     <div class="mb-3">
@@ -656,7 +668,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
             </div>
 
             <!-- Booking Hour Form -->
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-4 col-sm-12">
                 <div id="response-message-hour"></div>
                 <form id="update-booking-hour-form">
                     <div class="mb-3">
@@ -674,8 +686,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
                     <div class="text-end">
                         <button type="submit" class="save-btn btn btn-primary">Update Hour</button>
                     </div>
+                </form>    
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div id="reservation-type-message"></div>
+                <form id="add-reservation-type-form" class="mb-3">
+                    <div class="mb-3">
+                        <label for="reservation-type-input" class="form-label">Add Reservation Type</label>
+                        <input type="text" id="reservation-type-input" class="form-control" placeholder="Enter new reservation type">
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="save-btn btn btn-success">Add Type</button>
+                    </div>
                 </form>
-                
+
+                <div class="scrollable-list">
+                    <ul id="reservation-type-list" class="list-group">
+                        <!-- Reservation types will be dynamically added here -->
+                    </ul>
+                </div>
             </div>
         </div>
             <hr class="my-5">
@@ -847,6 +876,83 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
 
         // Trigger change event to load initial value
         $('#booking-selector').trigger('change');
+
+        loadReservationTypes();
+        function loadReservationTypes() {
+            $.ajax({
+                url: 'fetch_reservation_types.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    let reservationHtml = '';
+                    if (data.length > 0) {
+                        data.forEach(function(type) {
+                            reservationHtml += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+                                                    ${type.reservation_type}
+                                                    <button class='btn btn-sm btn-danger delete-reservation-type' data-id='${type.id}'>Delete</button>
+                                            </li>`;
+                        });
+                    } else {
+                        reservationHtml = "<li class='list-group-item'>No reservation types found.</li>";
+                    }
+                    $('#reservation-type-list').html(reservationHtml);
+                },
+                error: function() {
+                    alert('Failed to load reservation types.');
+                }
+            });
+        }
+
+        // Add Reservation Type
+        $('#add-reservation-type-form').on('submit', function(e) {
+            e.preventDefault();
+            const reservationType = $('#reservation-type-input').val();
+            if (reservationType) {
+                $.ajax({
+                    url: 'add_reservation_type.php',
+                    type: 'POST',
+                    data: { reservation_type: reservationType },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response) {
+                            $('#reservation-type-message').text(response.message).addClass('text-success').removeClass('text-danger');
+                            loadReservationTypes(); // Refresh the list
+                        } else {
+                            $('#reservation-type-message').text(response.message).addClass('text-danger').removeClass('text-success');
+                        }
+                    },
+                    error: function() {
+                        alert('Failed to add reservation type.');
+                    }
+                });
+            } else {
+                alert('Please enter a reservation type.');
+            }
+        });
+
+        // Delete Reservation Type
+        $(document).on('click', '.delete-reservation-type', function() {
+            const reservationTypeId = $(this).data('id');
+            if (confirm('Are you sure you want to delete this reservation type?')) {
+                $.ajax({
+                    url: 'delete_reservation_type.php',
+                    type: 'POST',
+                    data: { id: reservationTypeId },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response) {
+                            alert('Reservation type deleted successfully.');
+                            loadReservationTypes(); // Refresh the list
+                        } else {
+                            alert('Failed to delete reservation type.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            }
+        });
 });
 
 </script>
