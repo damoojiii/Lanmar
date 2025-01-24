@@ -63,6 +63,7 @@ function getBookingDetailsById($bookingId) {
 }
 
         // Add rooms to the booking details
+        //$bookingResult['dateIn'] = $bookingResult['dateIn'];
         $bookingResult['dateRange'] = $dateRange;
         $bookingResult['timeRange'] = $timeRange;
         $bookingResult['rooms'] = $rooms;
@@ -89,6 +90,7 @@ if (isset($_GET['booking_id'])) {
             'name' => $bookingDetails['fullname'],
             'contact' => $bookingDetails['contact_number'],
             'gender' => $bookingDetails['gender'],
+            'dateIn' => $bookingDetails['dateIn'],
             'dateRange' => $bookingDetails['dateRange'],
             'timeRange' => $bookingDetails['timeRange'],
             'status' => $bookingDetails['status'],

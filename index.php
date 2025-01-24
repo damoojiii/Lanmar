@@ -67,7 +67,7 @@ $descriptions = [];
   <meta name="keywords" content="">
 
   <!-- Favicons -->
-  <link href="assets/img/" rel="icon">
+  <link href="favicon/favicon-16x16.png" rel="icon">
   <link href="assets/img/" rel="apple-touch-icon">
 
   <!-- Fonts -->
@@ -1112,11 +1112,37 @@ const disabledDates = {
   checkOut: []
 };
 
-const earliestTime = 6; // 6:00 AM
-const earliestTime24hour = 0; // 12:00 AM
-const latestTime = 23.5; // 11:30 PM
+let earliestTime;
+let latestTime;
+let cleanupTime;
+const earliestTime24hour = 0;
 const minimumStay = 12;
-const cleanupTime = 2;
+
+fetch('fetchBookingProcess.php')
+  .then(response => response.json())
+  .then(data => {
+    // Dynamically assign values
+    earliestTime = convertTime(data['Starting Time']);
+    latestTime = convertTime(data['Closing Time']);
+    cleanupTime = convertTime(data['Cleanup Time']);
+  })
+  .catch(error => {
+    console.error('Error fetching booking process data:', error);
+  });
+
+function convertTime(time) {
+  const decimal = parseFloat(time);
+  const wholeNumber = Math.floor(decimal);
+  const fraction = decimal - wholeNumber;
+
+  if (fraction === 0) {
+    return wholeNumber;
+  } else if (fraction === 0.5) {
+    return decimal;
+  } else {
+    return fraction < 0.5 ? wholeNumber : wholeNumber + 1;
+  }
+}
 
 // Fetch todays date
 const today = new Date();

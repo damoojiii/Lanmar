@@ -582,6 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalGender').textContent = data.gender;
+                    const bookStartDate = data.dateIn;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;
@@ -592,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('modalRoomType').textContent = data.type;
                     // Optionally, loop over the rooms and display them in the modal (if needed)
                     const roomsContainer = document.getElementById('modalRooms');
-                    roomsContainer.innerHTML = ''; // Clear existing rooms
+                    roomsContainer.innerHTML = '';
                     let ronum = 1;
                     data.roomName.forEach(room => {
                         const roomElement = document.createElement('div');
@@ -653,6 +654,17 @@ document.addEventListener('DOMContentLoaded', () => {
                       cancelButton.style.display = 'block';
                       break; // All buttons remain visible
                 }
+
+                  const today = new Date();
+                  const dateIn = new Date(bookStartDate);
+
+                  if (dateIn < today) {
+                      editButton.disabled = true; // Disable the button
+                      editButton.title = 'Cannot edit bookings with a start date in the past.'; // Optional tooltip
+                  } else {
+                      editButton.disabled = false; // Enable the button
+                      editButton.title = ''; // Clear any previous tooltip
+                  }
 
                     // Show the modal
                     $('#reservationModal').modal('show');

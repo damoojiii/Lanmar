@@ -1,7 +1,6 @@
 <?php 
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('user');
 
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){

@@ -5,6 +5,11 @@
     $preDateIn = $_SESSION['preDateIn'] ?? ''; 
     $preDateOut = $_SESSION['preDateOut'] ?? ''; 
 
+    $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
+    $deletetemp->execute([$userId]); 
+    $deletetemptime = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE TIMESTAMPDIFF(MINUTE, created_at, NOW()) > 30;");
+    $deletetemptime->execute();
+
     unset($_SESSION['dateIn']);
     unset($_SESSION['dateOut']);
     unset($_SESSION['checkin']);
@@ -585,12 +590,37 @@ const disabledDates = {
   checkIn: [],
   checkOut: []
 };
-
-const earliestTime = 6; // 6:00 AM
-const earliestTime24hour = 0; // 12:00 AM
-const latestTime = 23.5; // 11:30 PM
+let earliestTime;
+let latestTime;
+let cleanupTime;
+const earliestTime24hour = 0;
 const minimumStay = 12;
-const cleanupTime = 2;
+
+fetch('fetchBookingProcess.php')
+  .then(response => response.json())
+  .then(data => {
+    // Dynamically assign values
+    earliestTime = convertTime(data['Starting Time']);
+    latestTime = convertTime(data['Closing Time']);
+    cleanupTime = convertTime(data['Cleanup Time']);
+  })
+  .catch(error => {
+    console.error('Error fetching booking process data:', error);
+  });
+
+function convertTime(time) {
+  const decimal = parseFloat(time);
+  const wholeNumber = Math.floor(decimal);
+  const fraction = decimal - wholeNumber;
+
+  if (fraction === 0) {
+    return wholeNumber;
+  } else if (fraction === 0.5) {
+    return decimal;
+  } else {
+    return fraction < 0.5 ? wholeNumber : wholeNumber + 1;
+  }
+}
 
 // Fetch todays date
 const today = new Date();
@@ -1003,12 +1033,14 @@ function populateCheckInTimes(checkInDate, checkOutDate) {
 
   // Populate check-in times up to maxCheckInTime
   for (let time = earliestTime; time <= maxCheckInTime; time += 0.5) {
+    console.log(!isTimeBlocked(checkInDate, time), time);
     if (!isTimeBlocked(checkInDate, time)) { // Only add options if time is not blocked and respects 12-hour stay
       const optionDate = new Date();
       optionDate.setHours(Math.floor(time), (time % 1) * 60, 0, 0);
       const optionText = optionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const optionValue = optionDate.getHours().toString().padStart(2, '0') + ':' + optionDate.getMinutes().toString().padStart(2, '0');
       checkInTimeSelect.add(new Option(optionText, optionValue));
+      
     }
   }
 

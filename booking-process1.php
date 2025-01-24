@@ -1,7 +1,6 @@
 <?php    
-    session_start();
-    include "connection.php";
     include "role_access.php";
+    include "connection.php";
     checkAccess('user');
     $userId = $_SESSION['user_id'];
     unset($_SESSION['preDateIn']);
@@ -13,13 +12,69 @@
         $_SESSION['checkin'] = $_GET['checkin'];
         $_SESSION['checkout'] = $_GET['checkout'];
         $_SESSION['numhours'] = $_GET['numhours'];
+
+        
     }
     
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
         echo '<script>
                     window.location="/lanmar/index1.php"; 
          </script>';
-    } 
+    }
+    $dIn = $_SESSION['dateIn'];
+    $dOut = $_SESSION['dateOut'];
+    $cIn = $_SESSION['checkin'];
+    $cOut = $_SESSION['checkout'];
+
+    $validateTemporary = $pdo->prepare("
+        SELECT * FROM temp_booking_tbl 
+        WHERE 
+            user_id != :userId 
+            AND (
+                (dateIn <= :dateOut AND dateOut >= :dateIn) -- Date ranges overlap
+                AND (
+                    (
+                        dateIn = :dateIn AND checkin <= :checkout -- Same date as dateIn
+                        AND checkout >= :checkin
+                    ) OR (
+                        dateOut = :dateOut AND checkin <= :checkout -- Same date as dateOut
+                        AND checkout >= :checkin
+                    ) OR (
+                        dateIn < :dateIn AND dateOut > :dateOut -- Fully covers the new booking range
+                    )
+                )
+            )
+    ");
+    $validateTemporary->execute([
+        'userId' => $userId,
+        'dateIn' => $dIn,
+        'dateOut' => $dOut,
+        'checkin' => $cIn,
+        'checkout' => $cOut,
+    ]);
+    $temporaryConflict = $validateTemporary->rowCount() > 0;
+    if($temporaryConflict){
+        echo '<script>
+                    alert("Someones Booking for this range of date or time, Please wait or choose another.");
+                    window.location="/lanmar/index1.php"; 
+         </script>';
+    }else{
+        $existingTempBooking = $pdo->prepare("
+            SELECT COUNT(*) as count 
+            FROM temp_booking_tbl 
+            WHERE user_id = :userId
+        ");
+        $existingTempBooking->execute(['userId' => $userId]);
+        $existingTempCount = $existingTempBooking->fetchColumn();
+
+        if ($existingTempCount === 0) {
+            $temporaryInsert = $pdo->prepare("
+                INSERT INTO temp_booking_tbl (user_id, dateIn, dateOut, checkin, checkout, created_at)
+                VALUES (?, ?, ?, ?, ?, NOW())
+            ");
+            $temporaryInsert->execute([$userId, $dIn, $dOut, $cIn, $cOut]);
+        }
+    }
 ?>
 
 <!DOCTYPE html>

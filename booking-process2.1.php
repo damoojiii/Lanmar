@@ -1,8 +1,7 @@
 <?php 
     date_default_timezone_set('Asia/Manila');
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('user');
 
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
@@ -598,6 +597,9 @@
             ':adds' => $_SESSION['additionals'],
             ':status' => $status
         ]);
+
+        $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
+        $deletetemp->execute([$userId]);
 
         $bookingId = $pdo->lastInsertId();
 
