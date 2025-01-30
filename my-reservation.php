@@ -135,6 +135,27 @@
               background-color: #d6d6d6;
             }
       }
+      @media print {
+        #main-content {
+            display: none;
+        }
+        #header{
+            display: none;
+        }
+        .proof{
+            display: none;
+        }
+        .btn{
+          display: none;
+        }
+        #modalFooter {
+            display: none !important; /* Hides the entire footer */
+        }
+        /* Ensure the content to print is visible */
+        .print-content {
+            display: block;
+        }
+      }
     </style>
 </head>
 
@@ -380,10 +401,13 @@
           </div>     
         </div>
       </div>
-      <div class="modal-footer d-flex justify-content-end">
-        
+      <div id="modalFooter" class="modal-footer d-flex justify-content-end">
             <button onclick="window.location.href='chats.php'" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
+            </button>
+
+            <button id="makePDF" onclick="printPage()" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
+                <i class="fa-solid fa-print" style="color: #ffffff;"></i>
             </button>
 
             <!-- Edit Button -->
@@ -395,7 +419,7 @@
             <button id="cancelButton" type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
                 <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
             </button>
-        </div>
+      </div>
 
     </div>
   </div>
@@ -615,43 +639,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const editButton = document.querySelector('#editButton');
                 const cancelButton = document.querySelector('#cancelButton');
+                const print = document.querySelector('#makePDF');
 
                 console.log(data.status);
                 switch (data.status) {
                     case 'Pending':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
-                      cancelButton.style.display = 'block';
+                      cancelButton.style.display = 'none';
+                      print.style.display = 'none';
                       break;
                     case 'Cancellation1':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'block';
+                      print.style.display = 'none';
                       break;
                     case 'Cancellation2':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'block';
+                      print.style.display = 'none';
                       break;
                     case 'Rejected':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'none';
+                      print.style.display = 'none';
                       break;
                     case 'Cancelled':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'none';
+                      print.style.display = 'none';
                       break;
                     case 'Completed':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'none';
                       cancelButton.style.display = 'none';
+                      print.style.display = 'block';
                       break;
                     case 'Approved':
                       chatButton.style.display = 'block';
                       editButton.style.display = 'block';
                       cancelButton.style.display = 'block';
+                      print.style.display = 'none';
                       break; // All buttons remain visible
                 }
 
@@ -673,5 +705,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+function printPage() {
+    var button = document.getElementById("makePDF");
+    if (button.id === "makePDF") {
+    window.print();
+    }
+}
 
 </script>

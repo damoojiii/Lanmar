@@ -557,6 +557,9 @@ $descriptions = [];
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         font-size: 14px;
     }
+    .faq{
+      padding-inline: 15rem;
+    }
     @media (max-width: 768px) {
         .feedback-card {
             width: calc(50% - 20px); 
@@ -934,6 +937,19 @@ $descriptions = [];
         </div>
       </div>
     </section>
+
+    <section id="faq" class="faq bg-light" data-aos="fade-up">
+      <div class="container faq-container">
+          <div class="faq-header text-center mb-4">
+              <h2 class="fw-bold">Frequently Asked Questions</h2>
+              <p class="text-muted">Find answers to the most common questions.</p>
+          </div>
+          <div class="accordion" id="faqAccordion">            
+              
+          </div>
+      </div>
+  </section>
+
   </main>
 
   <footer id="footer" class="footer dark-background">
@@ -978,7 +994,6 @@ $descriptions = [];
   <div id="preloader"></div>
 
   <!-- Vendor JS Files -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="assets/vendor/php-email-form/validate.js"></script>
   <script src="assets/vendor/aos/aos.js"></script>
   <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
@@ -990,8 +1005,7 @@ $descriptions = [];
   <script src="assets/vendor/bootstrap/js/all.min.js"></script>
   <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="assets/vendor/bootstrap/js/all.min.js"></script>
-  <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
@@ -1100,6 +1114,39 @@ $descriptions = [];
 
         slides[slideIndex1].style.display = "block";  
     }
+
+    $(document).ready(function () {
+        function loadFAQs() {
+            $.ajax({
+                url: 'fetch_faqs.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    let faqHTML = "";
+                    data.faqs.forEach((faq) => {
+                        faqHTML += `
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${faq.id}">
+                                        ${faq.question}
+                                    </button>
+                                </h2>
+                                <div id="collapse${faq.id}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        ${faq.answer}
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    $("#faqAccordion").html(faqHTML);
+                }
+            });
+        }
+
+        // Load FAQs on page load
+        loadFAQs();
+      });
+
 
   </script>
 <script>

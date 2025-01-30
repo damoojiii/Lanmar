@@ -672,6 +672,11 @@ if (isset($_POST['delete_id'])) {
                             Reservation Config
                         </div>
                     </a>
+                    <a href="homepage_section3.php">
+                        <div class="tab " id="facilityInfoTab">
+                            FAQ
+                        </div>
+                    </a>
                 </div>
                 <style>
                     .tab-container {

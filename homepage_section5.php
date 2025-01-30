@@ -611,6 +611,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['QRimage1'])) {
                             Reservation Config
                         </div>
                     </a>
+                    <a href="homepage_section3.php">
+                        <div class="tab " id="facilityInfoTab">
+                            FAQ
+                        </div>
+                    </a>
                 </div>
                 <style>
                     .tab-container {

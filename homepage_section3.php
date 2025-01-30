@@ -5,7 +5,65 @@ checkAccess('admin');
 
 $success_message = "";
 $error_message = "";
+$desc_success_message = "";
+$desc_error_message = "";
 
+// Define the target directory for uploads
+$targetDir = "uploads/"; 
+
+// Handle background image upload
+if (isset($_POST['background']) && isset($_FILES['background_image'])) {
+    $image = $_FILES['background_image'];
+    $imageName = basename($image['name']);
+    $targetFilePath = $targetDir . $imageName;
+    $imageType = $image['type'];
+
+    if (!is_dir($targetDir)) {
+        mkdir($targetDir, 0755, true);
+    }
+
+    // Clear existing settings
+    $conn->query("DELETE FROM settings_admin");
+
+    if (move_uploaded_file($image['tmp_name'], $targetFilePath)) {
+        $stmt = $conn->prepare("INSERT INTO settings_admin (image, image_type) VALUES (?, ?)");
+        $stmt->bind_param("ss", $targetFilePath, $imageType); 
+
+        if ($stmt->execute()) {
+            $success_message = "Background image updated successfully.";
+        } else {
+            $error_message = "Error updating background image in the database: " . $stmt->error;
+        }
+
+        $stmt->close();
+    } else {
+        $error_message = "Error uploading the file.";
+    }
+}
+
+if (isset($_POST['submit_desc'])) {
+    var_dump($_POST);
+    $description = $_POST['description'] ?? '';
+    $description2 = $_POST['description2'] ?? ''; 
+
+    // Validate the descriptions
+    if (empty($description) || empty($description2)) {
+        $desc_error_message = "Both descriptions are required.";
+    } else {
+        $conn->query("DELETE FROM about");
+
+        $sql = "INSERT INTO about (description, description_2) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('ss', $description, $description2);
+
+        if ($stmt->execute()) {
+            $desc_success_message = "Descriptions updated successfully.";
+        } else {
+            $desc_error_message = "Error updating descriptions: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+}
 
 ?>
 
@@ -27,13 +85,17 @@ $error_message = "";
         }
 
         body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
 
         #sidebar span {
             font-family: 'nautigal';
-            font-size: 30px !important;
+            font-size: 50px !important;
+        }
+        .font-logo-mobile{
+            font-family: 'nautigal';
+            font-size: 30px;
         }
 
         #sidebar {
@@ -44,23 +106,21 @@ $error_message = "";
             overflow-y: auto; 
             background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
             transition: transform 0.3s ease;
-            z-index: 1000; /* Ensure sidebar is above other content */
+            z-index: 199;
         }
 
         header {
-            position: fixed;
+            position: none;
             top: 0;
             left: 0;
             right: 0;
             height: 60px;
-            background-color: #001A3E;
-            z-index: 1000;
+            z-index: 199;
             display: flex;
             align-items: center;
             padding: 0 15px;
-            transition: margin-left 0.3s ease; /* Smooth transition for header */
+            transition: margin-left 0.3s ease, width 0.3s ease;
         }
-
         #hamburger {
             border: none;
             background: none;
@@ -92,6 +152,10 @@ $error_message = "";
         #sidebar .collapse {
             transition: height 0.3s ease-out, opacity 0.3s ease-out;
         }
+
+        #sidebar .drop{
+            height: 50px;
+        }
         #sidebar .collapse.show {
             height: auto !important;
             opacity: 1;
@@ -101,10 +165,6 @@ $error_message = "";
             opacity: 0;
             overflow: hidden;
         }
-        #sidebar .drop{
-            height: 50px;
-        }
-
         .caret-icon .fa-caret-down {
             display: inline-block;
             font-size: 20px;
@@ -114,7 +174,7 @@ $error_message = "";
             font-size: 7px;
             text-align: justify;
         }
-        
+
         #sidebar .nav-link:hover, #sidebar .nav-link.active {
             background-color: #fff !important;
             color: #000 !important;
@@ -145,7 +205,7 @@ $error_message = "";
             }
 
             #main-content {
-                margin-left: 0; /* Remove margin for smaller screens */
+                margin-left: 0;
             }
 
             #hamburger {
@@ -307,182 +367,62 @@ $error_message = "";
     .button-container {
         display: flex;
         justify-content: end;
+        margin-right: 5px;
     }
 
     .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;  /* Added !important to override Bootstrap */
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
+    .save-btn {
+        border-radius: 10px !important; 
+        padding: 10px 15px;
+        background-color: rgb(29, 69, 104);
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
+    .head-title{
+        font-size: 2.5rem;
+    }
+
+    @media (max-width: 768px){
+        #sidebar {
+            position: fixed;
+            transform: translateX(-100%);
+            z-index: 199;
         }
 
-        /* Main container styles */
-        .main-content {
-            flex: 1;
-            padding: 25px;
-            background-color: #ffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        #sidebar.show {
+            transform: translateX(0); /* Show sidebar */
         }
 
-        /* Form container styles */
-        .settings-form-container {
-            margin-bottom: 20px;
+        #header.shifted{
+            margin-left: 250px;
+            width: calc(100% - 250px);
         }
-
-        /* Form styles */
-        .settings-form .form-group label {
+        #header{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+            position: fixed;
+        }
+        #header span{
             display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            font-size: 17px;
         }
-
-        .settings-form .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 0px;
-            margin-bottom: 10px;
+        #header.shifted .font-logo-mobile{
+            display: none;
         }
-
-        /* Alert messages */
-        .alert {
-            padding: 10px;
-            margin: 10px 0;
+        #main-content{
+            margin-top: 60px;
+            padding-inline: 10px;
         }
-
-        .alert-success {
-            color: green;
+        .logout{
+            margin-bottom: 3rem;
         }
-
-        .alert-danger {
-            color: red;
+        .settings-form-container {
+            margin-top: 10px;
+            padding-inline: 10px;
         }
-
-        /* Button styles */
-        .button-container {
-            display: flex;
-            justify-content: end;
-        }
-
-        .settings-form button, 
-        .save-btn {
-            border-radius: 10px !important;
-            padding: 13px 30px;
-            background-color: #03045e;
-            border: none;
-            cursor: pointer;
-            color: white;
-        }
-
-        /* Tab container styles */
-        .tab-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .tab-container a {
-            text-decoration: none;
-            flex: 1 1 auto;
-            min-width: 140px;
-        }
-
-        .tab-container .tab {
-            padding: 8px 30px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: 0.3s;
-            font-size: 14px;
-            background-color: black;
-            color: white;
-            width: 100%;
-        }
-
-        .tab-container .tab.active {
-            background-color: #00968f;
-        }
-
-        .tab:hover {
-            background-color: #0175FE;
-        }
-
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            .tab-container {
-                gap: 8px;
-                padding: 0 10px;
-            }
-
-            .tab-container a {
-                min-width: 120px;
-            }
-
-            .tab-container .tab {
-                padding: 8px 15px;
-                font-size: 12px;
-            }
-            .main-content{
-                padding: 0;
-            }
-            .btn-modal{
-                width: 100%;
-            }
-            .room-info {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr); /* Three equal columns */
-                grid-template-rows: repeat(2, auto); /* Two rows, auto height */
-                gap: 10px; /* Optional: spacing between items */
-                padding: 10px; /* Optional: padding around the grid */
-            }
-        }
-
-        @media (max-width: 480px) {
-            .tab-container a {
-                min-width: 100px;
-                flex: 1 1 calc(50% - 8px);
-            }
-        }
-
-        @media (max-width: 768px){
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-        @media (max-width: 576px) {
-            #header{
-                background: linear-gradient(45deg,rgb(29, 69, 104),#19315D);
-            }
-            .modal-body h6 {
-                font-size: 16px; /* Slightly larger headers for readability */
-            }
-            .table thead th {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-            .table tbody td {
-                font-size: 0.8rem;
-                padding: 0.5rem;
-            }
-        }
-
+    }
     </style>
 </head>
 <body>
@@ -542,29 +482,26 @@ $error_message = "";
                     </span>
                 </a>
                 <ul class="collapse list-unstyled ms-3" id="settingsCollapse">
-                    <li><a class="dropdown-item" href="account_settings.php">Account Settings</a></li>
-                    <li><a class="dropdown-item" href="homepage_settings.php">Homepage Settings</a></li>
+                    <li><a class="nav-link text-white" href="account_settings.php">Account Settings</a></li>
+                    <li><a class="nav-link text-white" href="homepage_settings.php">Content Manager</a></li>
                 </ul>
             </li>
         </ul>
         <hr>
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <div class="logout">
+            <a href="logout.php" class="nav-link text-white">Log out</a>
+        </div>
     </div>
 
     <div id="main-content" class="p-3">
         <div class="flex-container">
             <div class="main-content">
-            <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
+                <h2 class="text-center mb-5 mt-4 head-title"><strong>Content Manager</strong></h2>
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
-                        <div class="tab" id="roomInfoTab">
-                            Homescreen
-                        </div>
-                    </a>
-                    <a href="homepage_section3.php">
-                        <div class="tab active" id="archiveInfoTab">
-                            About
+                        <div class="tab active" id="roomInfoTab">
+                            Homepage
                         </div>
                     </a>
                     <a href="homepage_section2.php">
@@ -579,58 +516,105 @@ $error_message = "";
                     </a>
                     <a href="homepage_section5.php">
                         <div class="tab " id="facilityInfoTab">
-                            Prices
+                            Reservation Config
                         </div>
                     </a>
-                    <a href="homepage_section6.php">
-                        <div class="tab" id="facilityInfoTab">
-                            Booking Processes
+                    <a href="homepage_section3.php">
+                        <div class="tab " id="facilityInfoTab">
+                            FAQ
                         </div>
                     </a>
                 </div>
                 <style>
                     .tab-container {
                         display: flex;
-                        margin-top: 5px;
-                        margin-bottom: 1px;
+                        justify-content: center;
+                        gap: 10px;
+                        flex-wrap: wrap;
                     }
-                    
+
+                    .tab-container a {
+                        text-decoration: none;
+                        flex: 1 1 auto;
+                        min-width: 140px;
+                    }
+
                     .tab-container .tab {
-                        background-color: black; /* Set background color to black */
-                        color: white; /* Set font color to white */
-                        padding: 8px 29.8px;
+                        padding: 8px 30px;
                         text-align: center;
                         cursor: pointer;
-                        border: 1px solid transparent;
-                        border-radius: 10px 10px 0 0;
-                        margin-right: 21px;
+                        border-radius: 5px;
                         transition: 0.3s;
-                        text-decoration: none;
+                        font-size: 14px;
+                        background-color: #1c2531;
+                        color: white;
+                        width: 100%;
                     }
 
                     .tab-container .tab.active {
-                        background-color: #19315D; /* Keep active tab color */
-                        color: white; /* Ensure active tab font color is white */
+                        background-color: #19315D;
                     }
 
                     .tab:hover {
-                        background-color: #0175FE; /* Hover effect */
-                        color: white; /* Ensure hover font color is white */
+                        background-color: #0175FE;
+                    }
+
+                    /* Mobile responsiveness */
+                    @media (max-width: 768px) {
+                        .tab-container {
+                            gap: 8px;
+                            padding: 0 10px;
+                        }
+
+                        .tab-container a {
+                            min-width: 120px;
+                        }
+
+                        .tab-container .tab {
+                            padding: 8px 15px;
+                            font-size: 12px;
+                        }
+                        .main-content{
+                            padding: 0;
+                        }
+                        .btn-modal{
+                            width: 100%;
+                        }
+                    }
+
+                    @media (max-width: 480px) {
+                        .tab-container a {
+                            min-width: 100px;
+                            flex: 1 1 calc(50% - 8px);
+                        }
                     }
                 </style>
                 <div class="flex-container">
-                    <!-- Sidebar -->
-                    <!-- Main Content -->
                     <div class="main-content">
-                        <!-- Main content goes here -->
                         <div class="settings-form-container">
-                        
+                            <div class="faq-header text-center">
+                                <h2><strong>FAQ</strong></h2>
+                            </div>
+                            
+                            <div class="accordion" id="faqAccordion"></div>
+                            
+                            <hr>
+                            <h6>Add New FAQ</h6>
+                            <p id="faqLimitWarning" class="text-danger"></p> 
+                            <form id="faqForm">
+                                <div class="mb-3">
+                                    <input type="text" id="faq-question" class="form-control" placeholder="Enter question" required>
+                                </div>
+                                <div class="mb-3">
+                                    <textarea id="faq-answer" class="form-control" placeholder="Enter answer" required></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="save-btn">Add FAQ</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-
-
-
             </div>
         </div>
     </div>
@@ -641,33 +625,118 @@ $error_message = "";
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
 <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
 <script>
-    function toggleSidebar() {
+    document.getElementById('hamburger').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const header = document.getElementById('header');
-
         sidebar.classList.toggle('show');
+        
+        const navbar = document.getElementById('header');
+        navbar.classList.toggle('shifted');
+        
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.toggle('shifted');
+    });
 
-        if (sidebar.classList.contains('show')) {
-            mainContent.style.marginLeft = '250px'; // Adjust the margin when sidebar is shown
-            header.style.marginLeft = '250px'; // Move the header when sidebar is shown
-        } else {
-            mainContent.style.marginLeft = '0'; // Reset margin when sidebar is hidden
-            header.style.marginLeft = '0'; // Reset header margin when sidebar is hidden
+    $(document).ready(function () {
+        function loadFAQs() {
+            $.ajax({
+                url: 'fetch_faqs.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    let faqHTML = "";
+                    data.faqs.forEach((faq) => {
+                        faqHTML += `
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${faq.id}">
+                                        ${faq.question}
+                                    </button>
+                                </h2>
+                                <div id="collapse${faq.id}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        ${faq.answer}
+                                        <button class="btn btn-danger btn-sm float-end delete-faq" data-id="${faq.id}">Delete</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    $("#faqAccordion").html(faqHTML);
+
+                    // Disable FAQ form if the limit is reached
+                    if (data.totalFAQs >= 5) {
+                        $("#faqForm input, #faqForm textarea, #faqForm button").prop("disabled", true);
+                        $("#faqLimitWarning").text("You have reached the FAQ limit (5). Delete an FAQ to add a new one.");
+                    } else {
+                        $("#faqForm input, #faqForm textarea, #faqForm button").prop("disabled", false);
+                        $("#faqLimitWarning").text("");
+                    }
+                }
+            });
         }
-    }
-    
-    document.querySelectorAll('.collapse').forEach(collapse => {
-        collapse.addEventListener('show.bs.collapse', () => {
-            collapse.style.height = collapse.scrollHeight + 'px';
+
+        // Load FAQs on page load
+        loadFAQs();
+
+        // Add new FAQ
+        $("#faqForm").submit(function (e) {
+            e.preventDefault();
+            let question = $("#faq-question").val();
+            let answer = $("#faq-answer").val();
+
+            $.post("add_faq.php", { question, answer }, function (response) {
+                alert(response);
+                $("#faqForm")[0].reset();
+                loadFAQs();
+            });
         });
-        collapse.addEventListener('hidden.bs.collapse', () => {
-            collapse.style.height = '0px';
+
+        // Delete FAQ
+        $(document).on("click", ".delete-faq", function () {
+            let faqId = $(this).data("id");
+            if (confirm("Are you sure you want to delete this FAQ?")) {
+                $.post("delete_faq.php", { id: faqId }, function (response) {
+                    alert(response);
+                    loadFAQs();
+                });
+            }
         });
     });
+
+
+
 </script>
 </body>
 <style>
-    
+      .tab-container {
+        display: flex;
+        margin-top: 5px;
+        margin-bottom: 1px;
+    }
+
+    .tab-container .tab.active {
+        background-color: #19315D;
+        color: white;
+    }
+
+    .tab-container .tab {
+        padding: 8px 29.8px;
+        text-align: center;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 10px 10px 0 0;
+        margin-right: 21px;
+        transition: 0.3s;
+        background-color: white;
+        font-size: 12px;
+        background-color: #1c2531;
+        color: white;
+        border-bottom: 1px solid white;
+        text-decoration: none;
+    }
+
+    .tab:hover {
+        background-color: #0175FE;
+        color: white;
+    }
 </style>
 </html>

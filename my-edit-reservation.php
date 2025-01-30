@@ -624,6 +624,39 @@
 let fp = '';
 let fp1 = '';
 
+const bookedTimeSlots = {}; // Store booked time slots
+let earliestTime;
+let latestTime;
+let cleanupTime;
+const earliestTime24hour = 0;
+const minimumStay = 12;
+
+fetch('fetchBookingProcess.php')
+  .then(response => response.json())
+  .then(data => {
+    // Dynamically assign values
+    earliestTime = convertTime(data['Starting Time']);
+    latestTime = convertTime(data['Closing Time']);
+    cleanupTime = convertTime(data['Cleanup Time']);
+  })
+  .catch(error => {
+    console.error('Error fetching booking process data:', error);
+  });
+
+function convertTime(time) {
+  const decimal = parseFloat(time);
+  const wholeNumber = Math.floor(decimal);
+  const fraction = decimal - wholeNumber;
+
+  if (fraction === 0) {
+    return wholeNumber;
+  } else if (fraction === 0.5) {
+    return decimal;
+  } else {
+    return fraction < 0.5 ? wholeNumber : wholeNumber + 1;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Get the values from the HTML inputs after DOM is loaded
   const dateIn = document.querySelector('#date-in').value;
@@ -707,22 +740,13 @@ fetch(`fetch-editbooking.php?id=${bookingId}`)
         initializeFlatpickr();
         // Disable Dates
         updateDisabledDates();
+        // Populate the check-in times
+        populateCheckInTimes(dateIn, dateOut, checkinTime);
+        populateCheckOutTimes(checkinTime, dateIn, dateOut, checkoutTime);
     })
     .catch(error => console.error('Error fetching bookings:', error));
-
-    // Populate the check-in times
-    populateCheckInTimes(dateIn, dateOut, checkinTime);
-    populateCheckOutTimes(checkinTime, dateIn, dateOut, checkoutTime);
 });
 
-
-
-const bookedTimeSlots = {}; // Store booked time slots
-const earliestTime = 6; // 6:00 AM
-const earliestTime24hour = 0; // 12:00 AM
-const latestTime = 23.5; // 11:30 PM
-const minimumStay = 12;
-const cleanupTime = 2;
 
 // Fetch today's date
 const today = new Date();
