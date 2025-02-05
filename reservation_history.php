@@ -396,18 +396,42 @@
     #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
         background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
     }
+    .charges{
+        display: none !important;
+    }
+    .logo-title{
+        display: none !important;
+        font-family:'nautigal' !important;
+        font-size: 30px !important;
+    }
     @media print {
-        #main-content {
-            display: none;
+        body {
+            overflow: hidden;
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+            font-size: 12px;
+          }
+        
+          /* Make sure the content fits within the printable area */
+          html, body {
+            width: 100%;
+            height: 100%;
+          }
+        #reservationModal {
+            width: 100%; /* Make sure it fits within the page */
+            overflow: hidden; /* Hide any potential scrollbars */
+            white-space: nowrap; /* Prevent wrapping if you don't want to break lines */
+            word-wrap: break-word; /* Break words if necessary */
+          }
+        #main-content, #header, #modalFooter, .proof, .btn-close, .title-detail {
+                display: none !important;
         }
-        #header{
-            display: none;
+        .charges, .logo-title{
+            display: block !important;
         }
-        #modalFooter button{
-            display: none;
-        }
-        .proof{
-            display: none;
+        @page {
+            size: 80mm auto; /* Width 80mm (typical receipt width), height adjusts dynamically */
+            margin: 0;
         }
 
         /* Ensure the content to print is visible */
@@ -658,7 +682,8 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
     <div class="modal-header">
-        <h5 class="modal-title" id="reservationModalLabel">Reservation Details</h5>
+        <h5 class="modal-title title-detail" id="reservationModalLabel">Reservation Details</h5>
+        <h5 class="modal-title logo-title" id="reservationModalLabel">Lanmar Resort</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -672,10 +697,10 @@
         <div class="mb-4">
           <h6 class="fw-bold">Personal Information</h6>
           <div class="row g-2">
-            <div class="col-12 col-md-4 modal-mobile">
+            <div class="col-6 col-md-4 modal-mobile">
               <p><strong>Name:</strong> <span id="modalName"></span></p>
             </div>
-            <div class="col-12 col-md-4 modal-mobile-remove">
+            <div class="col-6 col-md-4 modal-mobile-remove">
               <p><strong>Contact No.:</strong> <span id="modalContact"></span></p>
             </div>
             <div class="col-12 col-md-4 modal-mobile">
@@ -738,22 +763,39 @@
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
             <div class="col-6 col-md-4 modal-mobile-remove">
-              <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
+            <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
             </div>
             <div class="col-6 col-md-4 modal-mobile-remove">
-              <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
+            <button type="button" class="btn btn-sm btn-primary proof" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
+                View Proof
+            </button>
             </div>
           </div>
-          <div class="row g-2">
-                <div class="col-6 col-md-4 modal-mobile-add">
-                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-                </div>
-                <div class="col-6 col-md-4 modal-mobile-add">
-                <button type="button" class="btn btn-sm btn-primary proof" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
-                    View Proof
-                </button>
-                </div>
-            </div>     
+          <div class="charges">
+              <h6 class="fw-bold">Charges</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Original Rate:</strong> <span id="modalOriginal"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Additional Pax Rate:</strong> <span id="modalAddpax"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Additional Time Rate:</strong> <span id="modalAddtime"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Total of Room(s):</strong> <span id="modalRoomtotal"></span></p>
+            </div>
+            </div> 
+          </div>
+          <div class="row g-2 totalprice">
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
+            </div>
+            </div>
         </div>
       </div>
       <div id="modalFooter" class="modal-footer d-flex justify-content-end">
@@ -910,7 +952,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   let ronum = 1;
                   data.roomName.forEach(room => {
                       const roomElement = document.createElement('div');
-                      roomElement.classList.add('room-detail','col-3','col-md-3');
+                      roomElement.classList.add('room-detail','col-12','col-md-3');
                       roomElement.innerHTML = `
                           <strong>Room ${ronum}:</strong> ${room.roomName}<br>
                       `;
@@ -921,6 +963,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   document.getElementById('modalPaymode').textContent = data.paymode;
                   document.getElementById('modalTotalBill').textContent = data.totalBill;
                   document.getElementById('modalBalance').textContent = data.balance;
+                  document.getElementById('modalOriginal').textContent = data.originalprice;
+                  document.getElementById('modalAddpax').textContent = data.addpax;
+                  document.getElementById('modalAddtime').textContent = data.addtime;
+                  document.getElementById('modalRoomtotal').textContent = data.roomtotal;
                   document.getElementById('modalrefNum').textContent = data.refNumber;
                   const modalBody = document.getElementById('modal-IMAGE');
                     modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;

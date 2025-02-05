@@ -1,9 +1,11 @@
 <?php 
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
+    
+    $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
+    $deletetemp->execute([$userId]); 
 
 ?>
 <!DOCTYPE html>
@@ -105,6 +107,14 @@
           height: auto; /* Maintain the aspect ratio */
           object-fit: contain;
         }
+        .charges{
+            display: none !important;
+        }
+        .logo-title{
+            display: none !important;
+            font-family:'nautigal' !important;
+            font-size: 30px !important;
+        }
 
         @media (max-width: 768px) {
             #main-content {
@@ -124,6 +134,7 @@
             }
             .modal-dialog {
               max-width: 90vw;
+              margin-inline: auto;
             }
             .modal-mobile, .modal-mobile-remove{
               padding-block: 2px;
@@ -136,21 +147,39 @@
             }
       }
       @media print {
-        #main-content {
-            display: none;
+         body {
+            overflow: hidden;
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+            font-size: 12px;
+          }
+        
+          /* Make sure the content fits within the printable area */
+          html, body {
+            width: 100%;
+            height: 100%;
+          }
+        #reservationModal {
+            width: 50%; /* Make sure it fits within the page */
+            margin-inline: 25%;
+            display: flex !important;
+            justify-content: center !important;
+            align-content: center !important;
+            overflow: hidden; /* Hide any potential scrollbars */
+            white-space: nowrap; /* Prevent wrapping if you don't want to break lines */
+            word-wrap: break-word; /* Break words if necessary */
+          }
+        #main-content, #header, #modalFooter, .proof, .btn-close, .title-detail, .navbar {
+                display: none !important;
         }
-        #header{
-            display: none;
+        .charges, .logo-title{
+            display: block !important;
         }
-        .proof{
-            display: none;
+        @page {
+            size: 80mm auto !important; /* Width 80mm (typical receipt width), height adjusts dynamically */
+            margin: 0 !important;
         }
-        .btn{
-          display: none;
-        }
-        #modalFooter {
-            display: none !important; /* Hides the entire footer */
-        }
+
         /* Ensure the content to print is visible */
         .print-content {
             display: block;
@@ -178,7 +207,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -202,11 +233,11 @@
     $sql_solo = "
         SELECT 
             booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.status,
-            reservationType_tbl.reservation_type,
+            reservationtype_tbl.reservation_type,
             pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
             bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode
         FROM booking_tbl
-        LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+        LEFT JOIN reservationtype_tbl ON booking_tbl.reservation_id = reservationtype_tbl.id
         LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
         LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
         WHERE booking_tbl.user_id = :id ORDER BY booking_id DESC
@@ -289,10 +320,8 @@
                         ?>
                         <td><span class="status-badge <?php echo htmlspecialchars($class); ?> "><?php echo htmlspecialchars($textstatus); ?></span></td>
                         </span></td>
+                        </tr>
                   <?php endforeach; ?>
-                  <?php elseif(empty($results)):?>
-                    <td colspan="7" style="text-align: center;">No reservations</td>
-                    </tr>
                   <?php endif ?>
                 </tbody>
             </table>
@@ -303,7 +332,8 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="reservationModalLabel">Reservation Details</h5>
+        <h5 class="modal-title title-detail" id="reservationModalLabel">Reservation Details</h5>
+        <h5 class="modal-title logo-title" id="reservationModalLabel">Lanmar Resort</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -383,29 +413,47 @@
               <p><strong>Payment Method:</strong> <span id="modalPaymode"></span></p>
             </div>
             <div class="col-6 col-md-4 modal-mobile-remove">
-              <p><strong>Total Price:</strong> ₱ <span id="modalTotalBill"></span></p>
+            <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
             </div>
             <div class="col-6 col-md-4 modal-mobile-remove">
-              <p><strong>Balance Remaining:</strong> ₱ <span id="modalBalance"></span></p>
+            <button type="button" class="btn btn-sm btn-primary proof" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
+                View Proof
+            </button>
             </div>
           </div>
-          <div class="row g-2">
-                <div class="col-6 col-md-4">
-                <p><strong>Reference Number:</strong> <span id="modalrefNum"></span></p>
-                </div>
-                <div class="col-6 col-md-4">
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gcashReceiptModal">
-                    View Proof
-                </button>
-                </div>  
-          </div>     
+          <div class="charges">
+              <h6 class="fw-bold">Charges</h6>
+          <div class="row g-2 mb-2">
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Original Rate:</strong> <span id="modalOriginal"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Additional Pax Rate:</strong> <span id="modalAddpax"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Additional Time Rate:</strong> <span id="modalAddtime"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Total of Room(s):</strong> <span id="modalRoomtotal"></span></p>
+            </div>
+            </div> 
+          </div>
+          <div class="row g-2 totalprice">
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Total Price:</strong> <span id="modalTotalBill"></span></p>
+            </div>
+            <div class="col-12 col-md-4 modal-mobile-add">
+              <p><strong>Balance Remaining:</strong> <span id="modalBalance"></span></p>
+            </div>
+            </div>
         </div>
       </div>
       <div id="modalFooter" class="modal-footer d-flex justify-content-end">
+        
             <button onclick="window.location.href='chats.php'" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-message" style="color: #ffffff;"></i>
             </button>
-
+            
             <button id="makePDF" onclick="printPage()" type="button" class="btn" style="width:50px; background-color: #19315D; border-color: #19315D;">
                 <i class="fa-solid fa-print" style="color: #ffffff;"></i>
             </button>
@@ -419,7 +467,7 @@
             <button id="cancelButton" type="button" class="btn" style="width:50px; background-color: #ee1717; border-color: #ee1717;">
                 <i class="fa-solid fa-xmark" style="color: #ffffff;"></i>
             </button>
-      </div>
+        </div>
 
     </div>
   </div>
@@ -465,7 +513,6 @@ document.getElementById('hamburger').addEventListener('click', function() {
   document.getElementById('reservationModal').addEventListener('shown.bs.modal', function () {
     document.getElementById('modalBookingId').focus();
   });
-
 $(document).ready(function() {
         function updateNotificationCount() {
             $.ajax({
@@ -511,6 +558,13 @@ $(document).ready(function() {
     });
 
 document.addEventListener('DOMContentLoaded', () => {
+    function jsRenderCOL(data, type, row, meta) {
+            var dataRender;
+            if (data !== "dummy") {
+                dataRender = "you as dummy";
+            }
+            return dataRender;
+        }
   const tableIndex = new DataTable('#example', {
         columnDefs: [
             {
@@ -519,7 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 targets: 0
             }
         ],
-        order: [0, 'asc'],
+        order: [],
         paging: true,
         scrollY: '100%'
     });
@@ -602,11 +656,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     // Populate the modal with the fetched data
+                    const bookStartDate = data.dateIn;
                     document.getElementById('modalBookingId').textContent = data.bookingId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
                     document.getElementById('modalGender').textContent = data.gender;
-                    const bookStartDate = data.dateIn;
                     document.getElementById('modalDateRange').textContent = data.dateRange;
                     document.getElementById('modalTimeRange').textContent = data.timeRange;
                     document.getElementById('modalHours').textContent = data.hours;
@@ -617,11 +671,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('modalRoomType').textContent = data.type;
                     // Optionally, loop over the rooms and display them in the modal (if needed)
                     const roomsContainer = document.getElementById('modalRooms');
-                    roomsContainer.innerHTML = '';
+                    roomsContainer.innerHTML = ''; // Clear existing rooms
                     let ronum = 1;
                     data.roomName.forEach(room => {
                         const roomElement = document.createElement('div');
-                        roomElement.classList.add('room-detail','col-3','col-md-3');
+                        roomElement.classList.add('room-detail','col-12','col-md-3');
                         roomElement.innerHTML = `
                             <strong>Room ${ronum}:</strong> ${room.roomName}<br>
                         `;
@@ -632,6 +686,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('modalPaymode').textContent = data.paymode;
                     document.getElementById('modalTotalBill').textContent = data.totalBill;
                     document.getElementById('modalBalance').textContent = data.balance;
+                    document.getElementById('modalOriginal').textContent = data.originalprice;
+                    document.getElementById('modalAddpax').textContent = data.addpax;
+                    document.getElementById('modalAddtime').textContent = data.addtime;
+                    document.getElementById('modalRoomtotal').textContent = data.roomtotal;
                     document.getElementById('modalrefNum').textContent = data.refNumber;
                     const modalBody = document.getElementById('modal-IMAGE');
                     modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
@@ -686,17 +744,18 @@ document.addEventListener('DOMContentLoaded', () => {
                       print.style.display = 'none';
                       break; // All buttons remain visible
                 }
-
-                  const today = new Date();
-                  const dateIn = new Date(bookStartDate);
-
-                  if (dateIn < today) {
-                      editButton.disabled = true; // Disable the button
-                      editButton.title = 'Cannot edit bookings with a start date in the past.'; // Optional tooltip
-                  } else {
-                      editButton.disabled = false; // Enable the button
-                      editButton.title = ''; // Clear any previous tooltip
-                  }
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset time to midnight
+                const dateIn = new Date(bookStartDate);
+                dateIn.setHours(0, 0, 0, 0); // Reset time to midnight
+        
+                if (dateIn < today) {
+                    editButton.disabled = true; // Disable the button
+                    editButton.title = 'Cannot edit bookings with a start date in the past.'; // Optional tooltip
+                } else {
+                    editButton.disabled = false; // Enable the button
+                    editButton.title = ''; // Clear any previous tooltip
+                }
 
                     // Show the modal
                     $('#reservationModal').modal('show');
@@ -712,5 +771,4 @@ function printPage() {
     window.print();
     }
 }
-
 </script>

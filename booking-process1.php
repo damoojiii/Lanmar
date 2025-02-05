@@ -12,8 +12,6 @@
         $_SESSION['checkin'] = $_GET['checkin'];
         $_SESSION['checkout'] = $_GET['checkout'];
         $_SESSION['numhours'] = $_GET['numhours'];
-
-        
     }
     
     if(!isset($_SESSION['dateIn'])&&!isset($_SESSION['dateOut'])){
@@ -21,6 +19,7 @@
                     window.location="/lanmar/index1.php"; 
          </script>';
     }
+    
     $dIn = $_SESSION['dateIn'];
     $dOut = $_SESSION['dateOut'];
     $cIn = $_SESSION['checkin'];
@@ -31,16 +30,16 @@
         WHERE 
             user_id != :userId 
             AND (
-                (dateIn <= :dateOut AND dateOut >= :dateIn) -- Date ranges overlap
+                (dateIn <= :dateOut AND dateOut >= :dateIn) 
                 AND (
                     (
-                        dateIn = :dateIn AND checkin <= :checkout -- Same date as dateIn
+                        dateIn = :dateIn AND checkin <= :checkout
                         AND checkout >= :checkin
                     ) OR (
-                        dateOut = :dateOut AND checkin <= :checkout -- Same date as dateOut
+                        dateOut = :dateOut AND checkin <= :checkout 
                         AND checkout >= :checkin
                     ) OR (
-                        dateIn < :dateIn AND dateOut > :dateOut -- Fully covers the new booking range
+                        dateIn < :dateIn AND dateOut > :dateOut
                     )
                 )
             )
@@ -55,7 +54,7 @@
     $temporaryConflict = $validateTemporary->rowCount() > 0;
     if($temporaryConflict){
         echo '<script>
-                    alert("Someones Booking for this range of date or time, Please wait or choose another.");
+                    alert("Someones booking for this range of date or time, Please wait or choose another.");
                     window.location="/lanmar/index1.php"; 
          </script>';
     }else{
@@ -66,13 +65,14 @@
         ");
         $existingTempBooking->execute(['userId' => $userId]);
         $existingTempCount = $existingTempBooking->fetchColumn();
+        $currentDatetime = date('Y-m-d H:i:s');
 
         if ($existingTempCount === 0) {
             $temporaryInsert = $pdo->prepare("
                 INSERT INTO temp_booking_tbl (user_id, dateIn, dateOut, checkin, checkout, created_at)
-                VALUES (?, ?, ?, ?, ?, NOW())
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
-            $temporaryInsert->execute([$userId, $dIn, $dOut, $cIn, $cOut]);
+            $temporaryInsert->execute([$userId, $dIn, $dOut, $cIn, $cOut, $currentDatetime]);
         }
     }
 ?>
@@ -418,7 +418,11 @@
             .check{
                 width: 100%;
             }
-            
+            #booked-rooms {
+                max-height: 300px; /* Adjust height as needed */
+                overflow-y: auto;
+                padding: 10px;
+            }
         }
         @media (min-width: 768px) {
             #room-selection-dropdown {
@@ -448,6 +452,9 @@
                 max-height: 300px; /* Adjust height as needed */
                 overflow-y: auto;
                 padding: 5px;
+            }
+            #main-content{
+                margin-bottom: 50px;
             }
         }
         @media (max-height: 844px){
@@ -483,7 +490,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -601,13 +610,6 @@
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
-    <div class="d-flex justify-content-start p-1">
-        <div class="d-flex timer">
-            <div class="">Timer: </div>
-            <div id="timer-display">10:00</div>
-        </div>
-    </div>
-    
     <div class="container1">
         <div class="row whole">
             <div class="guest col-md-6" style="width: 75%;">
@@ -779,6 +781,11 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
+setInterval(function() {
+    fetch('keep_session.php')
+        .then(response => response.text())
+        .catch(error => console.error('Error keeping session alive:', error));
+}, 300000);
 document.getElementById('hamburger').addEventListener('click', function() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('show');
@@ -943,39 +950,6 @@ $(document).ready(function() {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Timer duration in seconds (10 minutes)
-    const timerDuration = 10 * 60;
-    const redirectUrl = 'index1.php'; 
-
-    // Function to start or resume the timer
-    function startTimer() {
-        let endTime = sessionStorage.getItem('bookingTimerEndTime');
-
-        if (!endTime) {
-            const currentTime = Date.now();
-            endTime = currentTime + timerDuration * 1000; // Set end time
-            sessionStorage.setItem('bookingTimerEndTime', endTime);
-        }
-
-        const interval = setInterval(() => {
-            const now = Date.now();
-            const timeLeft = Math.max(0, endTime - now);
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-            // Redirect when time runs out
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
-                window.location.href = redirectUrl;
-            }
-        }, 1000);
-    }
-
-    // Call the function to start the timer
-    startTimer();
 
     document.querySelectorAll('.room-btn').forEach(button => {
         const isOffered = button.dataset.offered === "1";
@@ -1172,7 +1146,7 @@ function addToSummary(roomId, roomName, price, minpax, maxpax, isOffered) {
         updateTotal(price);
     }
 
-    showAllRooms(); 
+    showAllRooms();
     showSuccessAlert(`"${roomName}" is added successfully.`);
 }
 

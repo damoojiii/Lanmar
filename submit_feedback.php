@@ -1,8 +1,7 @@
 <?php
-date_default_timezone_set('Asia/Manila');
-session_start();
-include("connection.php");
 include "role_access.php";
+date_default_timezone_set('Asia/Manila');
+include("connection.php");
 checkAccess('user');
 
 // Get the user ID from the session
@@ -37,13 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Insert feedback into the database
     try {
+        $currentDatetime = date('Y-m-d H:i:s');
         $sql = "INSERT INTO feedback_tbl (user_id, rating, comment, is_featured, created_at) 
-                VALUES (:user_id, :rating, :comment, 0, NOW())";
+                VALUES (:user_id, :rating, :comment, 0, :timestamp)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             ':user_id' => $userId,
             ':rating' => $rating,
             ':comment' => $comment,
+            ':timestamp' => $currentDatetime
         ]);
 
         echo json_encode(['status' => 'success', 'message' => 'Feedback submitted successfully.']);

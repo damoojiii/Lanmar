@@ -1,7 +1,6 @@
 <?php
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('user');
     $userId = $_SESSION['user_id'];
 
@@ -104,8 +103,11 @@
 
         
 
-    @media (max-width: 576px) {
-
+    @media (max-width: 768px) {
+        #main-content{
+            padding-inline: 10px;
+            margin-bottom: 5rem;
+        }
     }
 
 
@@ -130,7 +132,7 @@
     </ul>
     <hr>
     <div class="logout">
-        <a href="logout.php" class="nav-link text-white">Log out</a>
+        <a href="logout.php" class="nav-link text-white">Log out</a>     
     </div>
 </div>
 
@@ -146,7 +148,7 @@
     
     <div id="main-content" class="">
         <div class="">
-            <div class="main-container my-5">
+            <div class="main-container my-1">
                 <h2 class="text-center mb-4"><strong>Edit Reservation</strong></h2>
                 <form action="update_user_reservation.php" method="POST">
                     <?php 
@@ -154,9 +156,9 @@
                         if (isset($_GET['id']) && !empty($_GET['id'])) {
                             $bookingId = $_GET['id'];
                             // Fetch the booking details
-                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, booking_tbl.is_rebook, reservationType_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
+                            $sql = " SELECT booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours, booking_tbl.reservation_id, booking_tbl.status, booking_tbl.is_rebook, reservationtype_tbl.reservation_type, pax_tbl.adult, pax_tbl.child, pax_tbl.pwd, bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, bill_tbl.original_price, bill_tbl.additional_pax, bill_tbl.additional_time, bill_tbl.room_total, room_tbl.room_Id, room_tbl.room_name, users.firstname, users.lastname, users.contact_number 
                                     FROM booking_tbl 
-                                    LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id 
+                                    LEFT JOIN reservationtype_tbl ON booking_tbl.reservation_id = reservationtype_tbl.id 
                                     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id 
                                     LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id 
                                     LEFT JOIN room_tbl ON bill_tbl.bill_id = room_tbl.bill_id 
@@ -341,7 +343,10 @@
                                         </div>
                                         <input type="hidden" name="base_rate" value="">
                                         <input type="hidden" name="extra_adult_rate" value="">
-                                        <input type="hidden" name="additional_rate" value="">
+                                        <input type="hidden" name="original" value="<?= (int)$reservation['original_price']; ?>">
+                                        <input type="hidden" name="additional_rate" value="<?= (int)$reservation['additional_time']; ?>">
+                                        <input type="hidden" name="roomTotal" id="roomTotal" value="<?= (int)$reservation['room_total']; ?>">
+                                        <input type="hidden" name="paxcharges" id="paxcharges" value="<?= (int)$reservation['additional_pax']; ?>">
                                     </div>
                                 </div>
                                 <!-- Payment Information -->
@@ -374,7 +379,7 @@
                             exit(); 
                         } 
                     } ?>
-                    <div class="d-flex justify-content-end">
+                    <div class="d-flex justify-content-end" style="gap:5px;">
                         <button type="submit" class="btn btn-success">Save Changes</button>
                         <a href="my-reservation.php" class="btn btn-secondary">Cancel</a>
                     </div>
@@ -391,14 +396,14 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     document.getElementById('hamburger').addEventListener('click', function() {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('show');
-        
-        const navbar = document.getElementById('header');
-        navbar.classList.toggle('shifted');
-        
-        const mainContent = document.getElementById('main-content');
-        mainContent.classList.toggle('shifted');
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('show');
+    
+    const navbar = document.querySelector('.navbar');
+    navbar.classList.toggle('shifted');
+    
+    const mainContent = document.getElementById('main-content');
+    mainContent.classList.toggle('shifted');
     });
 
     document.querySelectorAll('.collapse').forEach(collapse => {
@@ -436,11 +441,12 @@
                         let result = JSON.parse(response);
                         let baseRate = result.baseRate;
                         let extraAdultRate = result.extraAdultRate;
-                        let additional = result.additional;
+                        let original = result.original;
 
                         $('input[name="base_rate"]').val(baseRate);
                         $('input[name="extra_adult_rate"]').val(extraAdultRate);
                         $('input[name="additional_rate"]').val(additional);
+                        $('input[name="original"]').val(original);
                         
                         recomputeTotalBill(); // Recompute total bill with new rates
                     }
@@ -486,6 +492,8 @@
 
             // Update the total bill input and balance
             $('#total-bill-input').val(totalBill);
+            $('#roomTotal').val(totalRoomPrice);
+            $('#paxcharges').val(additionalCharge);
             updateBalance();
         }
 
@@ -506,10 +514,18 @@
             let isOvernight = dateIn !== dateOut;
 
             // Count rooms with data-offered = 1
+            let totalRoomPrice = 0;
+            let freeRoomApplied = false;
             $('#selected-rooms .room-item').each(function() {
+                let roomPrice = parseInt($(this).data('price')) || 0;
                 const roomOffered = parseInt($(this).data('offered')) || 0;
                 if (roomOffered === 1) {
                     countOffered++;
+                }
+                if (isOvernight && roomOffered === 1 && !freeRoomApplied) {
+                    freeRoomApplied = true; // Apply free room discount only once
+                } else {
+                    totalRoomPrice += roomPrice;
                 }
             });
 
@@ -530,6 +546,7 @@
 
             // Update the total bill input and balance
             $('#total-bill-input').val(totalBill);
+            $('#roomTotal').val(totalRoomPrice);
             updateBalance();
         }
 
@@ -607,13 +624,13 @@
             }else{
                 $(this).closest('.room-item').remove();
                 $(`#hidden-rooms input[value="${roomId}"]`).remove();
+                updateTotalPrice(roomPrice, 'subtract', offered);
             }
 
             if ($('#selected-rooms .room-item').length === 0) {
                 $('#no-rooms-message').show();
             }
-
-            updateTotalPrice(roomPrice, 'subtract', offered); // Pass the offered value
+             // Pass the offered value
         });
 
 
@@ -735,12 +752,11 @@ fetch(`fetch-editbooking.php?id=${bookingId}`)
         }
     });
         
-        console.log(bookedTimeSlots);
         // Initialize flatpickr after booking data is fetched
         initializeFlatpickr();
         // Disable Dates
         updateDisabledDates();
-        // Populate the check-in times
+         // Populate the check-in times
         populateCheckInTimes(dateIn, dateOut, checkinTime);
         populateCheckOutTimes(checkinTime, dateIn, dateOut, checkoutTime);
     })
@@ -939,17 +955,22 @@ function isTimeAvailableForCheckIn(date, time) {
     return false;
   }
 
-  // Find the first booking slot after the selected check-in time
   if (bookedTimeSlots[date]) {
     const futureSlots = bookedTimeSlots[date].filter(slot => timeToMinutes(slot.start) > time * 60);
-    
-    if (futureSlots.length > 0) {
-      // Get the start time of the first booking slot after the check-in time
-      const firstFutureSlotStart = timeToMinutes(futureSlots[0].start);
 
-      // Check if the gap between the selected check-in time and the next booking is less than 12 hours
-      if (firstFutureSlotStart - (time * 60) < minimumStayMinutes) {
-        return false; // Gap is too small, doesnt allow a minimum stay of 12 hours
+    // If there are no future slots on the selected date, check the next day's start time
+    if (futureSlots.length === 0) {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const nextDayString = nextDay.toISOString().split('T')[0];
+
+      if (bookedTimeSlots[nextDayString]) {
+        const nextDayStartTime = timeToMinutes(bookedTimeSlots[nextDayString][0].start);
+        //console.log((time * 60) - nextDayStartTime < minimumStayMinutes, bookedTimeSlots[nextDayString][0].start, time);
+        // Check if the gap between the selected time and the next day's start time respects the minimum stay
+        if ((time * 60) - nextDayStartTime > minimumStayMinutes && nextDayStartTime - (time * 60) < minimumStayMinutes) {
+          return false; // Gap is too small, doesn't allow a minimum stay of 12 hours
+        }
       }
     }
   }

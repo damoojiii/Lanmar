@@ -1,7 +1,6 @@
 <?php 
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
 
@@ -188,7 +187,7 @@
 <!-- Sidebar -->
 <div id="sidebar" class="d-flex flex-column p-3 text-white position-fixed vh-100">
     <a href="#" class="mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <span class="fs-4">Lanmar Resort</span>
+        <span class="fs-4 logo">Lanmar Resort</span>
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
@@ -202,7 +201,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -300,9 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $currentStatus = $statusStmt->fetchColumn();
 
             // Update the status based on the current status
-            if ($currentStatus === 'Pending') {
-                $updateQuery = "UPDATE booking_tbl SET status = 'Cancellation1' WHERE booking_id = :booking_id";
-            } else if ($currentStatus === 'Approved') {
+            if ($currentStatus === 'Approved') {
                 $updateQuery = "UPDATE booking_tbl SET status = 'Cancellation2' WHERE booking_id = :booking_id";
             }
             

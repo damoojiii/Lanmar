@@ -1,9 +1,9 @@
 <?php
-    include "role_access.php";
+    session_start();
     include("connection.php");
-    
+    include "role_access.php";
     checkAccess('admin');
-
+    
     $id = $_SESSION['user_id'];
 
     try {
@@ -11,7 +11,7 @@
         $name_sql->execute();
         $name_data = $name_sql->fetch(PDO::FETCH_ASSOC);
         $name = $name_data['firstname'];
-
+        
         $pending_stmt = $pdo->prepare("SELECT COUNT(*) AS pending_reservations 
         FROM booking_tbl 
         WHERE status = 'Pending' 
@@ -118,7 +118,6 @@
         $stmt4->execute();
         $years1 = $stmt4->fetchAll(PDO::FETCH_ASSOC);
 
-
     
     } catch (PDOException $e) {
         echo "Connection failed: " . $e->getMessage();
@@ -152,7 +151,7 @@
         background-color: #f8f9fa;
         }
 
-        #sidebar span{
+        #sidebar .font-logo {
             font-family: 'nautigal';
             font-size: 50px !important;
         }
@@ -183,6 +182,9 @@
             transition: margin-left 0.3s ease;
             align-items: center;
             display: flex;  /* Smooth transition for header */
+        }
+        #header{
+            transition: margin-left 0.3s ease, width 0.3s ease;
         }
 
         #hamburger {
@@ -298,6 +300,26 @@
         .container-fluid{
             margin-inline: 10px ;
         }
+        #sidebar .badge-notif, .badge-chat{
+            border-radius: 20px;
+            width: auto;
+            
+            background-color: #fff !important;
+        }
+        #sidebar .badge-chat, #sidebar .badge-notif {
+            display: inline-block; 
+            width: 15px; 
+            height: 5px; 
+            border-radius: 5px; 
+            text-align: center;
+            align-content: center;
+            background-color: #fff !important;
+            margin-left: 5px;
+        }
+    
+        #sidebar .nav-link:hover .badge-notif, #sidebar .nav-link:hover .badge-chat{
+            background: linear-gradient(45deg,rgb(29, 69, 104),#19315D) !important;
+        }
         #paxChart{
             height: 100% !important;
             width: 100% !important;
@@ -322,6 +344,9 @@
             margin-inline: 10px; 
             padding: 0;
             max-width: 90%;
+        }
+        .welcome{
+            margin-top: 70px !important;
         }
 
         #hamburger {
@@ -362,6 +387,9 @@
         .chart-container {
             padding: 15px;
         }
+        .logout{
+            margin-bottom: 3rem;
+        }
 
 
     }
@@ -370,7 +398,7 @@
 <body>
     <!-- Header -->
     <header id="header" class="bg-light shadow-sm">
-        <button id="hamburger" class="btn btn-primary">
+        <button id="hamburger" class="btn btn-primary" onclick="toggleSidebar()">
             ☰
         </button>
         <span class="text-white ms-3 font-logo-mobile">Lanmar Resort</span>
@@ -399,10 +427,10 @@
                 </ul>
             </li>
             <li>
-                <a href="admin_notifications.php" class="nav-link text-white">Notifications</a>
+                <a href="admin_notifications.php" class="nav-link text-white target">Notifications</a>
             </li>
             <li>
-                <a href="admin_home_chat.php" class="nav-link text-white">Chat with Customer</a>
+                <a href="admin_home_chat.php" class="nav-link text-white chat">Chat with Customer</a>
             </li>
             <li>
                 <a href="reservation_history.php" class="nav-link text-white">Reservation History</a>
@@ -430,7 +458,7 @@
             </li>
         </ul>
         <hr>
-        <div class="logout">
+        <div class ="logout">
             <a href="logout.php" class="nav-link text-white">Log out</a>
         </div>
     </div>
@@ -438,10 +466,10 @@
     <div id="main-content" class="container mt-1">
         <div class="container-fluid">
         <!-- Header Section -->
-        <div class="row">
+        <div class="row welcome">
             <div class="col-12 header">
                 <h2>Welcome, <?php echo ucwords($name);?>!</h2>
-                <p>You have 24 new messages and 5 new notifications.</p>
+                <p>You have <span class = "chat-counter"></span> new messages and <span class = "notification-counter"></span> new notifications.</p>
             </div>
         </div>
 
@@ -451,14 +479,14 @@
                 <div class="stats-card">
                     <h5>Pending Reservations</h5>
                     <h2><?php echo number_format($pending_reservations); ?></h2>
-                    <p><?php echo ($pending_percentage_change >= 0 ? '+' : '') . number_format($pending_percentage_change, 2) . '% compared to last month';  ?></p>
+                    <p><?php echo ($pending_percentage_change >= 0 ? '+' : '-') . number_format(abs($pending_percentage_change), 2) . '% compared to last month'; ?></p>
                 </div>
             </div>
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
                 <div class="stats-card">
                     <h5>Incoming Confirmed Books this Week</h5>
                     <h3><?php echo number_format($incoming_books); ?></h3>
-                    <p><?php echo ($incoming_percentage_change >= 0 ? '+' : '-') . number_format(abs($incoming_percentage_change), 2) . '% compared to last month'; ?></p>
+                    <p><?php echo ($incoming_percentage_change >= 0 ? '+' : '-') . number_format(abs($incoming_percentage_change), 2) . '% compared to last week'; ?></p>
                 </div>
             </div>
             <div class="stats col-md-3 col-sm-12 col-12 mb-4 d-flex align-items-stretch">
@@ -572,12 +600,63 @@
     <script src="assets/vendor/bootstrap/js/all.min.js"></script>
     <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
     <script>
-        setInterval(function() {
-            fetch('keep_session.php')
-                .then(response => response.text())
-                .catch(error => console.error('Error keeping session alive:', error));
-        }, 300000);
+        $(document).ready(function() {
+            function updateNotificationCount(){
+                $.ajax({
+                    url: 'admin_notification_count.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var notificationCount = data;
+                        // Update the notification counter in the sidebar
+                        var notificationLink = $('.nav-link.text-white.target');
+                        var notificationDash = $('.notification-counter');
+                        if (notificationCount >= 1) {
+                            notificationLink.html('Notification <span class="badge badge-notif bg-secondary"></span>');
+                            notificationDash.html(notificationCount);
+                        } else {
+                            notificationLink.html('Notification');
+                            notificationDash.html('0');
+                        }
+                    },
+                    error: function() {
+                        console.log('Error retrieving notification count.');
+                    }
+                });
+            }
+        
+            function updateChatPopup() {
+                $.ajax({
+                    url: 'admin_chat_count.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var counter = data;
+                        // Update the chat counter in the sidebar
+                        var notificationLink = $('.nav-link.text-white.chat');
+                        var notificationDash = $('.chat-counter');
+                        
+                        if (counter >= 1) {
+                            notificationLink.html('Chat with Lanmar <span class="badge badge-chat bg-secondary"></span>');
+                            notificationDash.html(counter);
+                        } else {
+                            notificationLink.html('Chat with Lanmar');
+                            notificationDash.html('0');
+                        }
+                    },
+                    error: function() {
+                        console.log('Error retrieving chat count.');
+                    }
+                });
+            }
+        
+            updateNotificationCount();
+            updateChatPopup();
+            setInterval(updateNotificationCount, 5000);
+            setInterval(updateChatPopup, 5000);
+        });
 
+    
         document.addEventListener('DOMContentLoaded', function () {
             let chart;
 
@@ -671,6 +750,7 @@
             yearSelect.add(option);
         });
 
+        // Function to create or update the bar chart
         function createPaxChart(year) {
             const chartData = {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -690,6 +770,7 @@
                 chartData.datasets[0].data[month] += booking.totalPax;
             });
 
+            // Destroy the existing chart instance if it exists
             if (paxChart) {
                 paxChart.destroy();
             }
@@ -721,7 +802,7 @@
             const selectedYear = yearSelect.value;
             createPaxChart(selectedYear);
         });
-
+        
         document.getElementById('yearSelectorRoom').addEventListener('change', function() {
             var selectedYear = this.value;
             fetchRevenueData(selectedYear);  // Use the correct function name here
@@ -1043,8 +1124,6 @@
                 },
             }
         });
-
-
 
 
         document.getElementById('hamburger').addEventListener('click', function() {

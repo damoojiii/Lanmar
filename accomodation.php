@@ -481,6 +481,7 @@ include 'connection.php';
           <li><a href="index.php#gallery">Gallery</a></li>
           <li><a href="index.php#amenities">Amenities</a></li>
           <li><a href="index.php#contact">Contact</a></li>
+          <li><a href="index.php#faq">FAQs</a></li>
           <li><a href="login.php" class="btn btn-outline-light">Sign In</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

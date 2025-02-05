@@ -11,6 +11,7 @@ $baseRate = 0;
 $additionalRate = 0;
 $additionalRateCheckout = 0;
 $rateCategory = 0;
+$original = 0;
 
 $checkOutTime = new DateTime($checkOut);
 $isDayRate = $checkOutTime->format('H:i') >= '6:00';
@@ -29,6 +30,7 @@ if ($rateType == 2 && (!$isDayRate || $daysToLoop > 2 )) {
     $baseOvernightRate = $baseOvernightQuery->fetchColumn();
 
     $baseRate = $baseOvernightRate;
+    $original = $baseOvernightRate;
 
     $isOvernight = $checkOutTime->format('H:i') >= '18:00' && $checkOutTime->format('H:i') <= '23:30';
 
@@ -70,6 +72,7 @@ if ($rateType == 2 && (!$isDayRate || $daysToLoop > 2 )) {
     $rateQuery->bindValue(':rateType', $rateType, PDO::PARAM_INT);
     $rateQuery->execute();
     $baseRate = $rateQuery->fetchColumn();
+    $original = $baseRate;
 }
 
 $extraRateQuery = $pdo->prepare("SELECT price FROM prices_tbl WHERE id = 3");
@@ -78,7 +81,7 @@ $extraAdultRate = $extraRateQuery->fetchColumn();
 
 $additional = $additionalRate + $additionalRateCheckout;
 
-$response = ['baseRate' => $baseRate, 'extraAdultRate' => $extraAdultRate, 'additional' => $additional];
+$response = ['baseRate' => $baseRate, 'extraAdultRate' => $extraAdultRate, 'additional' => $additional, 'original' => $original];
 echo json_encode($response);
 
 ?>

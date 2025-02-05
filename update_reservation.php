@@ -11,12 +11,16 @@
         $checkin = $_POST['checkin'];
         $checkout = $_POST['checkout'];
         $numhours = $_POST['numhours'];
-        (!empty($rooms)) ? $rooms = $_POST['rooms'] : '';
+        $rooms = $_POST['rooms'] ?? [];
         $adult = $_POST['adult'] ?? 0;
         $child = $_POST['child'] ?? 0;
         $pwd = $_POST['pwd'];
         $reservationType = $_POST['reservationType'];
         $totalbill = $_POST['totalbill'];
+        $original = $_POST['original'];
+        $addPax = $_POST['paxcharges'];
+        $addTime = $_POST['additional_rate'];
+        $roomTotal = $_POST['roomTotal'];
         $balance = $_POST['balance'];
     
         // Error trapping and validation
@@ -72,7 +76,6 @@
             ]);
             
             if (!empty($rooms)) {
-                echo 'NAKAPASOK!';
                 // Update room assignments
                 $sql = "DELETE FROM room_tbl WHERE bill_id = (SELECT bill_id FROM booking_tbl WHERE booking_id = :bookingId)";
                 $stmt = $pdo->prepare($sql);
@@ -87,6 +90,11 @@
                     ]);
                 }
 
+            }else {
+                // If no rooms are selected, just delete existing room assignments
+                $sql = "DELETE FROM room_tbl WHERE bill_id = (SELECT bill_id FROM booking_tbl WHERE booking_id = :bookingId)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':bookingId' => $bookingId]);
             }
     
             // Update pax details
@@ -101,11 +109,15 @@
 
     
             // Update billing details
-            $sql = "UPDATE bill_tbl SET total_bill = :totalbill, balance = :balance WHERE bill_id = (SELECT bill_id FROM booking_tbl WHERE booking_id = :bookingId)";
+            $sql = "UPDATE bill_tbl SET total_bill = :totalbill, balance = :balance, original_price = :originalprice, additional_pax = :additionalpax, additional_time = :additionaltime, room_total = :roomtotal WHERE bill_id = (SELECT bill_id FROM booking_tbl WHERE booking_id = :bookingId)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':totalbill' => $totalbill,
                 ':balance' => $balance,
+                ':originalprice' => $original,
+                ':additionalpax' => $addPax,
+                ':additionaltime' => $addTime,
+                ':roomtotal' => $roomTotal,
                 ':bookingId' => $bookingId
             ]);
     

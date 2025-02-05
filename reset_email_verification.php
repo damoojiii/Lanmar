@@ -1,4 +1,8 @@
 <?php
+ini_set('session.gc_maxlifetime', 3600);
+session_set_cookie_params(3600); 
+session_start();
+
 include 'connection.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_email'])) {
@@ -15,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify_email'])) {
             echo "<script>alert('Verification successful!');</script>";
             echo "<script>window.location.href='new_password.php?email=" . urlencode($email) . "';</script>";
         } else {
-            echo "<script>alert('Invalid email or verification code.');</script>";
+            echo "<script>alert('Invalid verification code.');</script>";
         }
     } else {
         echo "<script>alert('Error executing query!');</script>";
@@ -63,9 +67,17 @@ $conn->close();
             <div class="mb-3">
                 <input type="text" class="form-control" name="verification_code" placeholder="Enter verification code" required />
             </div>
-            <input type="submit" class="btn btn-primary w-100" name="verify_email" value="Verify Email">
+            <input type="submit" class="btn btn-primary w-100" name="verify_email" value="Submit">
         </form>
     </div>
+    
+    <script>
+        setInterval(function() {
+            fetch('keep_session.php')
+                .then(response => response.text())
+                .catch(error => console.error('Error keeping session alive:', error));
+        }, 300000);
+    </script>
 </body>
 </html>
 

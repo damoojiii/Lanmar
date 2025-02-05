@@ -67,8 +67,10 @@ $descriptions = [];
   <meta name="keywords" content="">
 
   <!-- Favicons -->
-  <link href="favicon/favicon-16x16.png" rel="icon">
-  <link href="assets/img/" rel="apple-touch-icon">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -571,6 +573,9 @@ $descriptions = [];
           margin-top: 20px;
           min-height: 410px;
         }
+        .faq{
+            padding-inline: 10px;
+        }
     }
 
     @media (max-width: 576px) {
@@ -588,7 +593,7 @@ $descriptions = [];
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="index.php" class="logo d-flex align-items-center">
         <h1 class="sitename">Lanmar Resort</h1>
       </a>
 
@@ -599,6 +604,7 @@ $descriptions = [];
           <li><a href="#gallery">Gallery</a></li>
           <li><a href="#amenities">Amenities</a></li>
           <li><a href="#location">Locate Us</a></li>
+          <li><a href="#faq">FAQs</a></li>
           <li><a href="login.php" class="btn btn-outline-light">Sign In</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -643,7 +649,7 @@ $descriptions = [];
             </div>
             
             <div class="about-content">
-              <h2 class="text-center mb-4">About Our Resort</h2>
+              <h2 class="text-center mb-4 text-uppercase"><strong>About Our Resort</strong></h2>
               <h5 style="text-align: justify;">
                 <?php echo htmlspecialchars($descriptions['description']); ?>
               </h5>
@@ -660,7 +666,7 @@ $descriptions = [];
     <section id="gallery" class="gallery section py-2" data-aos="fade-right">
       <div class="container-fluid px-0">
         <div class="section-header text-center mb-4">
-          <h2>Our Gallery</h2>
+          <h2 class="text-uppercase"><strong>Gallery</strong></h2>
           <p>Explore our beautiful resort through these images</p>
         </div>
 
@@ -681,10 +687,10 @@ $descriptions = [];
     <!-- End Gallery Section -->
 
     <!-- Room Showcase Section -->
-    <section id="room-showcase" class="room-showcase section" data-aos="fade-left">
+    <section id="room-showcase" class="room-showcase section">
     <div class="container">
         <div class="section-header text-center">
-            <h2>Featured Rooms</h2>
+            <h2 class="text-uppercase"><strong>Featured Rooms</strong></h2>
             <p>Experience luxury and comfort in our signature accommodations</p>
         </div>
 
@@ -765,7 +771,7 @@ $descriptions = [];
     <section id="feedback" class="feedback">
       <div class="container">
             <div class="section-header text-center">
-            <h2>Guest Feedbacks</h2>
+            <h2 class="text-uppercase"><strong>Guest Feedbacks</strong></h2>
             <p>What Our Guests Say</p>
             </div>
 
@@ -792,7 +798,7 @@ $descriptions = [];
     <section id="amenities" class="amenities section">
       <div class="container">
         <div class="section-header text-center">
-          <h2 style="color: white;">Our Amenities</h2>
+          <h2 style="color: white;" class="text-uppercase"><strong>Our Amenities</strong></h2>
           <p style="color: white;">Comfort and Convenience at Your Fingertips</p>
         </div>
 
@@ -829,7 +835,7 @@ $descriptions = [];
             </div>
           </div>
 
-          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
             <div class="amenity-card text-center">
               <i class="bi bi-p-circle fs-1"></i>
               <h4>Free Parking</h4>
@@ -853,7 +859,7 @@ $descriptions = [];
             </div>
           </div>
           
-          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
             <div class="amenity-card text-center">
               <i class="bi bi-telephone fs-1"></i>
               <h4>24/7 Support</h4>
@@ -861,7 +867,7 @@ $descriptions = [];
             </div>
           </div>
 
-          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="800">
             <div class="amenity-card text-center">
               <i class="fa-solid fa-basketball fs-1" style="color: #19315D;"></i>
               <h4>Open Court</h4>
@@ -869,7 +875,7 @@ $descriptions = [];
             </div>
           </div>
 
-          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="900">
             <div class="amenity-card text-center">
             <i class="fa-solid fa-child-reaching fs-1" style="color: #19315D;"></i>
               <h4>Playground</h4>
@@ -877,7 +883,7 @@ $descriptions = [];
             </div>
           </div>
 
-          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="1000">
             <div class="amenity-card text-center">
             <i class="fa-solid fa-umbrella-beach fs-1" style="color: #19315D;"></i>
               <h4>Access To Beach</h4>
@@ -885,7 +891,7 @@ $descriptions = [];
             </div>
           </div>
           
-          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="700">
+          <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="1100">
             <div class="amenity-card text-center">
             <i class="fa-solid fa-fire-burner fs-1" style="color: #19315D;"></i>
               <h4>Access In Kitchen</h4>
@@ -902,7 +908,7 @@ $descriptions = [];
     <section id="location" class="location section" data-aos="fade-up">
       <div class="container">
         <div class="section-title text-center">
-          <h2>Our Location</h2>
+          <h2 class="text-uppercase"><strong>Our Location</strong></h2>
           <p>Find us at</p>
         </div>
 
@@ -910,11 +916,10 @@ $descriptions = [];
           <div class="col-lg-6 mb-4">
             <div class="location-info p-4 bg-white rounded shadow">
               <h3>Address</h3>
-              <p><i class="bi bi-geo-alt me-2"></i>Purok 6, Brgy. Poblacion, Madridejos, Cebu</p>
+              <p><i class="bi bi-geo-alt me-2"></i>Garden Coast Subdivision, Capipisa, Tanza, Cavite</p>
               
               <h3 class="">Contact Information</h3>
               <p><i class="bi bi-telephone me-2"></i>+63 912 345 6789</p>
-              <p><i class="bi bi-envelope me-2"></i>lanmarresort89xzy@gmail.com</p>
               
               <h3 class="">Operating Hours</h3>
               <p><i class="bi bi-clock me-2"></i>Open 24/7</p>
@@ -937,19 +942,18 @@ $descriptions = [];
         </div>
       </div>
     </section>
-
+    
     <section id="faq" class="faq bg-light" data-aos="fade-up">
       <div class="container faq-container">
           <div class="faq-header text-center mb-4">
-              <h2 class="fw-bold">Frequently Asked Questions</h2>
+              <h2 class="fw-bold text-uppercase"><strong>Frequently Asked Questions</strong></h2>
               <p class="text-muted">Find answers to the most common questions.</p>
           </div>
           <div class="accordion" id="faqAccordion">            
               
           </div>
       </div>
-  </section>
-
+    </section>
   </main>
 
   <footer id="footer" class="footer dark-background">
@@ -966,11 +970,10 @@ $descriptions = [];
         <div class="text-center">
           <div class="contact-info row">
             <div class="col-md-6">
-              <p><i class="bi bi-geo-alt me-2"></i>Purok 6, Brgy. Poblacion, Madridejos, Cebu</p>
+              <p><i class="bi bi-geo-alt me-2"></i>Garden Coast Subdivision, Capipisa, Tanza, Cavite</p>
               <p><i class="bi bi-telephone me-2"></i>+63 912 345 6789</p>
             </div>
             <div class="col-md-6">
-              <p><i class="bi bi-envelope me-2"></i>lanmarresort89xzy@gmail.com</p>
               <p><i class="bi bi-clock me-2"></i>Open 24/7</p>
             </div>
           </div>
@@ -1006,6 +1009,7 @@ $descriptions = [];
   <script src="assets/vendor/bootstrap/js/fontawesome.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
@@ -1114,7 +1118,6 @@ $descriptions = [];
 
         slides[slideIndex1].style.display = "block";  
     }
-
     $(document).ready(function () {
         function loadFAQs() {
             $.ajax({
@@ -1133,7 +1136,7 @@ $descriptions = [];
                                 </h2>
                                 <div id="collapse${faq.id}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                     <div class="accordion-body">
-                                        ${faq.answer}
+                                        <strong>•</strong> ${faq.answer}
                                     </div>
                                 </div>
                             </div>`;
@@ -1145,8 +1148,7 @@ $descriptions = [];
 
         // Load FAQs on page load
         loadFAQs();
-      });
-
+    });
 
   </script>
 <script>
@@ -1366,17 +1368,23 @@ function isTimeAvailableForCheckIn(date, time) {
     return false;
   }
 
-  // Find the first booking slot after the selected check-in time
   if (bookedTimeSlots[date]) {
+    console.log(bookedTimeSlots[date], time);
     const futureSlots = bookedTimeSlots[date].filter(slot => timeToMinutes(slot.start) > time * 60);
-    
-    if (futureSlots.length > 0) {
-      // Get the start time of the first booking slot after the check-in time
-      const firstFutureSlotStart = timeToMinutes(futureSlots[0].start);
 
-      // Check if the gap between the selected check-in time and the next booking is less than 12 hours
-      if (firstFutureSlotStart - (time * 60) < minimumStayMinutes) {
-        return false; // Gap is too small, doesnt allow a minimum stay of 12 hours
+    // If there are no future slots on the selected date, check the next day's start time
+    if (futureSlots.length === 0) {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const nextDayString = nextDay.toISOString().split('T')[0];
+
+      if (bookedTimeSlots[nextDayString]) {
+        const nextDayStartTime = timeToMinutes(bookedTimeSlots[nextDayString][0].start);
+        //console.log((time * 60) - nextDayStartTime < minimumStayMinutes, bookedTimeSlots[nextDayString][0].start, time);
+        // Check if the gap between the selected time and the next day's start time respects the minimum stay
+        if ((time * 60) - nextDayStartTime > minimumStayMinutes && nextDayStartTime - (time * 60) < minimumStayMinutes) {
+          return false; // Gap is too small, doesn't allow a minimum stay of 12 hours
+        }
       }
     }
   }

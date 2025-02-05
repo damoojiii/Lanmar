@@ -653,7 +653,7 @@
 
             <!-- Cancellation Form Section -->
             <h2><strong>Cancellation Form(s)</strong></h2>
-            <div class="notification-container">
+            <div class="notification-container cancel">
                 <!-- Cancellation Card -->
                 <?php 
                 $sql2 = "SELECT c.cancel_id,c.booking_id, c.is_read, c.timestamp, b.dateIn, b.dateOut, b.checkin, b.checkout,
@@ -696,7 +696,7 @@
                     </div>
                     <div class="notification-footer">
                         <div class="time-container">
-                            <p class="time">5h ago</p>
+                            <p class="time"><?php echo $timeAgo; ?></p>
                         </div>
                         <div class="buttons-container">
                         <button class="btn btn-primary btn-sm view-button" data-booking-id="<?php echo $notification['booking_id']; ?>">View</button>
@@ -751,6 +751,12 @@
             if (event.target && event.target.classList.contains('view-button')) {
                 const bookingId = event.target.dataset.bookingId;
                 window.location.href = `pending_reservation.php?booking_id=${bookingId}`;
+            }
+        });
+        document.querySelector('.notification-container.cancel').addEventListener('click', function (event) {
+            if (event.target && event.target.classList.contains('view-button')) {
+                const bookingId = event.target.dataset.bookingId;
+                window.location.href = `cancellationformtbl.php`;
             }
         });
 

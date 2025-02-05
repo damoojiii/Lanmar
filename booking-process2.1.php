@@ -132,10 +132,13 @@
         }
     </style>
     <style>
+        #main-content{
+            height: 100vh;
+        }
         .bill-message{
             display: flex;
+            justify-content: center;
             gap: 80px;
-            margin-left: 100px;
         }
         .qrcode {
             /*padding: 5px 10px;*/
@@ -155,10 +158,13 @@
             margin-bottom: -5px;
         }
         .summary {
-            padding: 5px 10px;
-            width: 50%;
-            margin-right: 10%;
+            padding: 20px 40px;
+            align-items: center;
+            justify-content: center;
             border: 1px solid black;
+        }
+        .summary-content{
+        
         }
         .summary p{
             text-align: justify;
@@ -189,7 +195,7 @@
             background-color: rgba(0, 0, 0, 0.7);
             z-index: 9999;
         }
-
+        
         .modal-content {
             background: white;
             margin: 5% auto;
@@ -207,7 +213,8 @@
             gap: 5px;
         }
         .timer-container{
-            margin-left: 100px;
+            display: flex;
+            justify-content: center;
         }
     </style>
 <style>
@@ -327,6 +334,8 @@
             width: 90%;
             margin-right: 0;
             margin-top: 15px;
+            margin-bottom: 20px;
+            padding: 10px;
         }
 
         input[type="file"], input[type="text"], button {
@@ -351,13 +360,13 @@
         }
 
         .modal-content ul li {
-            font-size: 13px;
+            font-size: 15px;
         }
 
 
         #proceed-button {
             margin-top: 15px;
-            font-size: 14px;
+            font-size: 17px;
         }
         .timer-container{
             margin-inline: auto;
@@ -406,12 +415,12 @@
             font-size: 18px;
         }
 
-        .modal-content ul li {
-            font-size: 12px;
+        .modal-content ul {
+            font-size: 10px;
         }
 
         #proceed-button {
-            font-size: 12px;
+            font-size: 15px;
             padding: 8px 15px;
         }   
     }
@@ -469,9 +478,11 @@
     $pwd = $_SESSION['pwd'] ?? '';
     $totalPax = $_SESSION['totalpax'] ?? '';
     $reservationType = $_SESSION['reservationType'] ?? '' ;
-    $origPrice = $_SESSION['rate'] ?? '';
-    $grandTotal = $_SESSION['grandTotal']  ?? '';
+    $origPrice = $_SESSION['original'] ?? '';
+    $paxCharges = $_SESSION['paxcharges'] ?? '';
     $roomTotal = $_SESSION['roomTotal'] ?? '';
+    $additionalCharges = $_SESSION['additional_rate'] ?? '';
+    $grandTotal = $_SESSION['grandTotal']  ?? '';
     $roomIds = $_SESSION['roomIds'] ?? [];
     $paymode = $_SESSION['payment_method'] ?? '';
     $status = 'Pending';
@@ -520,12 +531,16 @@
 
     try {
         // Insert into bill_tbl first
-        $bill_sql = "INSERT INTO bill_tbl (image, ref_num, balance, total_bill, pay_mode) 
-                    VALUES (:uploadFile, :ref_id, :balance, :grandTotal, :paymode)";
+        $bill_sql = "INSERT INTO bill_tbl (image, ref_num, original_price, additional_pax, additional_time, room_total, balance, total_bill, pay_mode) 
+                    VALUES (:uploadFile, :ref_id, :originalprice, :addpax, :addtime, :roomtotal, :balance, :grandTotal, :paymode)";
         $stmt = $pdo->prepare($bill_sql);
         $stmt->execute([
             ':uploadFile' => $uploadFile, 
             ':ref_id' => $formamattedref_id,
+            ':originalprice' => $origPrice,
+            ':addpax' => $paxCharges,
+            ':addtime' => $additionalCharges,
+            ':roomtotal' => $roomTotal,
             ':balance' => $balance,
             ':grandTotal' => $grandTotal,
             ':paymode' => $paymode
@@ -598,9 +613,6 @@
             ':status' => $status
         ]);
 
-        $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
-        $deletetemp->execute([$userId]);
-
         $bookingId = $pdo->lastInsertId();
 
         // Insert into notification_tbl
@@ -610,7 +622,10 @@
         $stmt_notification->execute([
             ':booking_id' => $bookingId
         ]);
-
+        
+        $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
+        $deletetemp->execute([$userId]);
+        
         unset($_SESSION['dateIn']);
         unset($_SESSION['dateOut']);
         unset($_SESSION['checkin']);
@@ -659,8 +674,9 @@
         <h3><strong>Cancellation/Rebook/Refund Policy</strong></h3>
         <ul>
             <li>1. Payments for the chosen date are non-refundable. Choose your dates wisely.</li>
-            <li>2. Rebookings are one-time only</li>
-            <li>3. Rebookings are allowed only if requested before the day of the booking.</li>
+            <li>2. Cancellation requests are available for confirmed bookings only.</li>
+            <li>3. Rebookings are one-time only</li>
+            <li>4. Rebookings are allowed only if requested before the day of the booking.</li>
         </ul>
         <div style="margin-top: 20px;">
             <div class="d-flex justify-content-start">
@@ -675,16 +691,16 @@
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
-    <div class="timer-container d-flex justify-content-start p-1">
-        <div class="d-flex timer">
-            <div class="">Timer: </div>
-            <div id="timer-display">10:00</div>
-        </div>
-    </div>
     <div class="container1">
         <div class="row" style="justify-content:space-between;">
         <div class="bill-message" >
             <div class="qr">
+                <div class="timer-container d-flex justify-content-start p-1">
+                    <div class="d-flex timer">
+                        <div class="">Timer: </div>
+                        <div id="timer-display">5:00</div>
+                    </div>
+                </div>
                 <h2 class="section-header"><strong>Scan Here</strong></h2>
                 <div class="qrcode">
                     <img src="<?php
@@ -702,30 +718,29 @@
                 ?>" alt="QRCode"/>
                 </div>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" >
-                    <input type="file" name="image" accept="image/*" required>
+                    <input type="file" name="image" accept="image/*">
                     <p>Reference ID</p>
                     <input type="text" 
-                        name="ref_id" 
-                        id="reference" 
-                        placeholder="<?php 
-                        if ($paymentMethod === 'gcash') {
-                            echo "xxxx xxx xxxxxx";
-                        } else {
-                            echo "xxxxxxxxxx";
-                        }?> " 
-                        maxlength="13"  
-                        required oninput="validateInput(this,  '<?php echo $paymentMethod; ?>')">
+                       name="ref_id" 
+                       id="reference" 
+                       placeholder="<?php echo ($paymentMethod === 'gcash') ? 'xxxxxxxxxxxxx' : 'xxxxxxxxxxxx'; ?>" 
+                       maxlength="13"  
+                       required 
+                       oninput="validateInput(this, '<?php echo $paymentMethod; ?>')">
+                    <div id="error-message" style="color: red; display: none; font-size: 13px;">Invalid reference number length for the selected payment method.</div>
                     <div class="submit-btn">
-                        <button type="submit" class="btn btn-primary mt-1 submit">Submit</button>
+                        <button type="submit" class="btn btn-primary mt-1 submit" onclick="validateBeforeSubmit(event, '<?php echo $paymentMethod; ?>')">Submit</button>
                     </div>
                 </form>
             </div>
             <div class="summary">
-                <h2><strong>Instructions</strong></h2>
+                <div class="summary-content">
+                    <h2><strong>Instructions</strong></h2>
                 <li>1. Ensure the uploaded image is clear and legible.</li>
                 <li>2. The reference ID must match the payment details.</li>
                 <li>3. Only valid payment methods are accepted.</li>
                 <li>4. Any discrepancies may lead to delays.</li>
+                </div>
             </div>
         </div>
     </div>
@@ -739,6 +754,48 @@
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+    setInterval(function() {
+        fetch('keep_session.php')
+            .then(response => response.text())
+            .catch(error => console.error('Error keeping session alive:', error));
+    }, 300000);
+    document.addEventListener("DOMContentLoaded", function() {
+    // Timer duration in seconds (10 minutes)
+    const timerDuration = 5 * 60;
+    const redirectUrl = 'index1.php'; // Replace with your main page URL
+
+    // Function to start or resume the timer
+    function startTimer() {
+        let endTime = sessionStorage.getItem('bookingTimerEndTime');
+
+        if (!endTime) {
+            const currentTime = Date.now();
+            endTime = currentTime + timerDuration * 1000; // Set end time
+            sessionStorage.setItem('bookingTimerEndTime', endTime);
+        }
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            const timeLeft = Math.max(0, endTime - now);
+            const minutes = Math.floor(timeLeft / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            // Display the timer on the page (replace 'timer-display' with your element ID)
+            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            // Redirect when time runs out
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
+                alert('You ran out of time. Please book again.');
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+    }
+
+    // Call the function to start the timer
+    startTimer();
+    });
      // Display the modal on page load
      window.onload = function() {
         document.getElementById('policy-modal').style.display = 'block';
@@ -755,40 +812,35 @@
         document.getElementById('policy-modal').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
     });
-    document.getElementById('hamburger').addEventListener('click', function() {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('show');
-        
-        const navbar = document.querySelector('.navbar');
-        navbar.classList.toggle('shifted');
-        
-        const mainContent = document.getElementById('main-content');
-        mainContent.classList.toggle('shifted');
-    });
+
 function validateInput(input, paymentMethod) {
     // Remove non-numeric characters
     input.value = input.value.replace(/\D/g, '');
-    
-    let maxLength = 13; // Default maxLength for GCash
-    if (paymentMethod === 'paymaya') {
-        maxLength = 12; // Set maxLength to 12 for PayMaya
-    }
 
-    // Limit the length to 13 for GCash or 12 for PayMaya
+    let maxLength = (paymentMethod === 'paymaya') ? 12 : 13;
+
+    // Limit the length to the appropriate maxLength
     if (input.value.length > maxLength) {
         input.value = input.value.slice(0, maxLength);
     }
-    let value = input.value.replace(/\D/g, '');  // Remove non-digit characters
-    if (value.length > 4 && value.length <= 7) {
-        // Insert a space between the 4th and 5th characters
-        value = value.slice(0, 4) + ' ' + value.slice(4);
-    }
-    if (value.length > 7 && value.length > 13) {
-        // Insert a space between the 4th and 5th characters
-        value = value.slice(0, 8) + ' ' + value.slice(8);
-    }
+
     input.value = value;
 }
+
+function validateBeforeSubmit(event, paymentMethod) {
+    const input = document.getElementById('reference');
+    const errorMessage = document.getElementById('error-message');
+    const requiredLength = (paymentMethod === 'paymaya') ? 12 : 13;
+    const inputValue = input.value.replace(/\D/g, '');
+
+    if (inputValue.length !== requiredLength) {
+        errorMessage.style.display = 'block';
+        event.preventDefault(); // Prevent form submission
+    } else {
+        errorMessage.style.display = 'none';
+    }
+}
+
 </script>
 </body>
 </html>

@@ -89,7 +89,7 @@ if (isset($_POST["verify_email"])) {
                         <h6>If not found, check your <strong>All mail</strong> or <strong>Spam</strong></h6>
                         <div class="mb-3">
                             <label for="verification_code" class="form-label"><strong>Verification Code</strong></label>
-                            <input type="text" class="form-control" id="verification_code" name="verification_code" placeholder="Enter verification code" required />
+                            <input type="number" class="form-control" id="verification_code" name="verification_code" placeholder="Enter verification code" required />
                         </div>
                         <input type="submit" class="btn btn-primary w-100" name="verify_email" value="Verify Email">
                     </form>
@@ -99,12 +99,22 @@ if (isset($_POST["verify_email"])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         setInterval(function() {
             fetch('keep_session.php')
                 .then(response => response.text())
                 .catch(error => console.error('Error keeping session alive:', error));
         }, 300000);
+        $(document).ready(function() {
+        $('input[name="verification_code"]').on('input', function() {
+            let value = $(this).val();
+            if (value.length > 2) {
+                $(this).val(value.slice(0, 6)); // Limit to 2 digits
+            }
+        });
+
+    });
     </script>
 </body>
 </html>

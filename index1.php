@@ -1,10 +1,11 @@
 <?php  
-    session_start();
+    include "role_access.php";
     include("connection.php");
+    checkAccess('user');
     $userId = $_SESSION['user_id'];
     $preDateIn = $_SESSION['preDateIn'] ?? ''; 
     $preDateOut = $_SESSION['preDateOut'] ?? ''; 
-
+    
     $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
     $deletetemp->execute([$userId]); 
     $deletetemptime = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE TIMESTAMPDIFF(MINUTE, created_at, NOW()) > 30;");
@@ -25,12 +26,18 @@
     unset($_SESSION['roomTotal']);
     unset($_SESSION['roomIds']);
 
-    $query = "SELECT COUNT(*) as completed_count FROM booking_tbl WHERE user_id = :user_id AND status = 'Completed'";
+    $query = "
+        SELECT COUNT(*) as completed_count 
+        FROM booking_tbl b
+        LEFT JOIN feedback_tbl f ON b.user_id = f.user_id
+        WHERE b.user_id = :user_id AND b.status = 'Completed' AND f.feedback_id IS NULL
+    ";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
     $stmt->execute();
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     $completedCount = $row['completed_count'];
+
 
     if ($completedCount === 1) {
         echo "<script>var showModal = true;</script>";
@@ -360,7 +367,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -590,6 +599,7 @@ const disabledDates = {
   checkIn: [],
   checkOut: []
 };
+
 let earliestTime;
 let latestTime;
 let cleanupTime;
@@ -795,6 +805,8 @@ function isTimeAvailableForCheckIn(date, time) {
   }
 
   // Check if the time is available
+  //console.log(date, time);
+  //console.log(isTimeAvailableCheckIn(date, time));
   if (!isTimeAvailableCheckIn(date, time)) {
     return false;
   }
@@ -1033,14 +1045,12 @@ function populateCheckInTimes(checkInDate, checkOutDate) {
 
   // Populate check-in times up to maxCheckInTime
   for (let time = earliestTime; time <= maxCheckInTime; time += 0.5) {
-    console.log(!isTimeBlocked(checkInDate, time), time);
     if (!isTimeBlocked(checkInDate, time)) { // Only add options if time is not blocked and respects 12-hour stay
       const optionDate = new Date();
       optionDate.setHours(Math.floor(time), (time % 1) * 60, 0, 0);
       const optionText = optionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const optionValue = optionDate.getHours().toString().padStart(2, '0') + ':' + optionDate.getMinutes().toString().padStart(2, '0');
       checkInTimeSelect.add(new Option(optionText, optionValue));
-      
     }
   }
 

@@ -1,8 +1,7 @@
 <?php
-date_default_timezone_set('Asia/Manila');
-session_start();
-include("connection.php");
 include "role_access.php";
+date_default_timezone_set('Asia/Manila');
+include("connection.php");
 checkAccess('user');
 
 $userId = $_SESSION['user_id'];
@@ -17,15 +16,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "Invalid input.";
         exit;
     }
+    $currentDatetime = date('Y-m-d H:i:s');
 
     // Update feedback
-    $query = "UPDATE feedback_tbl SET rating = :rating, comment = :comment, updated_at = NOW() WHERE feedback_id = :feedback_id AND user_id = :user_id";
+    $query = "UPDATE feedback_tbl SET rating = :rating, comment = :comment, updated_at = :timestamp WHERE feedback_id = :feedback_id AND user_id = :user_id";
     $stmt = $pdo->prepare($query);
     $stmt->execute([
         ':rating' => $rating,
         ':comment' => $comment,
         ':feedback_id' => $feedbackId,
-        ':user_id' => $userId
+        ':user_id' => $userId,
+        ':timestamp' => $currentDatetime
     ]);
 
     header("Location: my-feedback.php");

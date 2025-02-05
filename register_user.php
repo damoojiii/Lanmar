@@ -44,66 +44,64 @@ if (isset($_POST["register"])) {
         exit; // Stop further execution
     }
 
-    try {
-        $mail->SMTPDebug = 0;
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['MAIL_USERNAME'];
-        $mail->Password = $_ENV['MAIL_PASSWORD'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-        $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
-        $mail->addAddress($email, $firstname);
+        
 
-        $mail->isHTML(true);
-        $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
-        $mail->Subject = 'Email verification';
-        $mail->Body = '<p>Your verification code is: <b style="font-size:30px;">' . $verification_code . '</b></p>';
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-        // Send the email
-        $mail->send();
-
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-        if (!$conn) {
-            die("Connection failed: " . mysqli_connect_error());
-        }
-
-        // Check if email already exists
-        $email_exist = "SELECT * FROM users WHERE email ='$email'";
-        $email_result = $conn->query($email_exist);
-        if ($email_result->num_rows > 0) {
-            $error = "Email already exists";
+    // Check if email already exists
+    $email_exist = "SELECT * FROM users WHERE email ='$email'";
+    $email_result = $conn->query($email_exist);
+    if ($email_result->num_rows > 0) {
+        $error = "Email already exists";
+    } else {
+        if ($_FILES['photo']['name']) {
+            $photo = $_FILES['photo']['name'];
+            $photoPath = 'profile/' . basename($photo);
+            move_uploaded_file($_FILES['photo']['tmp_name'], $photoPath);
         } else {
-            if ($_FILES['photo']['name']) {
-                $photo = $_FILES['photo']['name'];
-                $photoPath = 'profile/' . basename($photo);
-                move_uploaded_file($_FILES['photo']['tmp_name'], $photoPath);
-            } else {
-                // Default photo
-                $photoPath = 'profile/default_photo.jpg';
-            }
-
-            $insert_query = "INSERT INTO users (firstname, lastname, contact_number, email, gender, password, role, verification_code, email_verify, status, profile) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-            $insert_stmt = $conn->prepare($insert_query);
-            $email_verify = NULL; // Assuming email is not verified initially
-
-            $insert_stmt->bind_param("ssissssssis", $firstname, $lastname, $contact_number, $email, $gender, $hashed_password, $role, $verification_code, $email_verify, $status, $photoPath);
-
-            // Execute the insert statement
-            if ($insert_stmt->execute()) {
-                header("Location: email_verification.php?email=" . urlencode($email));
-                exit();
-            } else {
-                echo "Error inserting data: " . $insert_stmt->error; // Output error if insert fails
-            }
+            // Default photo
+            $photoPath = 'profile/default_photo.jpg';
         }
-    } catch (Exception $e) {
-        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        
+        try{
+            $mail->SMTPDebug = 0;
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = $_ENV['MAIL_USERNAME'];
+            $mail->Password = $_ENV['MAIL_PASSWORD'];
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+            $mail->setFrom('your_email@gmail.com', 'Lanmar Resort');
+            $mail->addAddress($email, $firstname);
+    
+            $mail->isHTML(true);
+            $verification_code = substr(number_format(time() * rand(), 0, '', ''), 0, 6);
+            $mail->Subject = 'Email verification';
+            $mail->Body = '<p>Your verification code is: <b style="font-size:30px;">' . $verification_code . '</b></p>';
+    
+            // Send the email
+            $mail->send();
+        }catch (Exception $e) {
+            echo '<script> alert("Message could not be sent. Mailer Error:{'.$mail->ErrorInfo.'}")</script>';
+        }
 
+        $insert_query = "INSERT INTO users (firstname, lastname, contact_number, email, gender, password, role, verification_code, email_verify, status, profile) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        $insert_stmt = $conn->prepare($insert_query);
+        $email_verify = NULL; // Assuming email is not verified initially
+
+        $insert_stmt->bind_param("ssissssssis", $firstname, $lastname, $contact_number, $email, $gender, $hashed_password, $role, $verification_code, $email_verify, $status, $photoPath);
+
+        // Execute the insert statement
+        if ($insert_stmt->execute()) {
+            header("Location: email_verification.php?email=" . urlencode($email));
+            exit();
+        } else {
+            echo "Error inserting data: " . $insert_stmt->error; // Output error if insert fails
+        }
     }
+
 
 
 }
@@ -204,10 +202,11 @@ if (isset($_POST["register"])) {
             <p class="success"><?php echo $success; ?></p>
         <?php endif; ?>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-            <input type="text" name="firstname" placeholder="First Name" required>
-            <input type="text" name="lastname" placeholder="Last Name" required>
-            <input type="tel" id="contact" name="contact_number" placeholder="Contact Number" required>
-            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" id="firstname" name="firstname" placeholder="First Name" required>
+            <input type="text" id="lastname" name="lastname" placeholder="Last Name" required>
+            <input type="tel" id="contact" name="contact_number" placeholder="Contact Number" maxlength="11" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <div id="email-error-message"></div>
             <select name="gender" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;" required>
                 <option value="" disabled hidden selected>Select Gender</option>
                 <option value="Male">Male</option>
@@ -232,7 +231,14 @@ if (isset($_POST["register"])) {
         var msg = document.getElementById("message");
         var strength = document.getElementById("strength");
         var submitButton = document.querySelector('button[type="submit"]');
-
+        var contactNumber = document.getElementById("contact");
+        var firstName = document.getElementById("firstname");
+        var lastName = document.getElementById("lastname");
+        var emailInput = document.getElementById("email");
+        var emailErrorMessage = document.getElementById("email-error-message");
+        const namePattern = /^[A-Za-z\s]+$/;
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        
         // Add new element for confirm password message
         var confirmMsg = document.createElement("p");
         confirmMsg.id = "confirmMessage";
@@ -241,6 +247,19 @@ if (isset($_POST["register"])) {
         confirmMsg.style.marginTop = "-5px";
         confirmMsg.style.textAlign = "left";
         confirmPass.parentNode.insertBefore(confirmMsg, confirmPass.nextSibling);
+        
+        function validateName(inputField) {
+            const value = inputField.value;
+            if (!namePattern.test(value)) {
+                inputField.style.borderColor = "#ff5925";
+                inputField.style.borderWidth = "2px";
+                submitButton.disabled = true;
+            } else {
+                inputField.style.borderColor = "#26d730";
+                inputField.style.borderWidth = "2px";
+                submitButton.disabled = false;
+            }
+        }
 
         // Add event listener for confirm password
         confirmPass.addEventListener("input", () => {
@@ -297,17 +316,47 @@ if (isset($_POST["register"])) {
         }
 
         // Add event listener for password
+        firstName.addEventListener("input", function() {
+            validateName(firstName);
+        });
+        
+        lastName.addEventListener("input", function() {
+            validateName(lastName);
+        });
         pass.addEventListener("input", checkPasswordStrength);
-    });
-
-    $(document).ready(function() {
-        $('input[name="contact_number"]').on('input', function() {
-            let value = $(this).val();
-            if (value.length > 2) {
-                $(this).val(value.slice(0, 11)); // Limit to 2 digits
+        
+        
+        
+        contactNumber.addEventListener("input", function() {
+            const value = contactNumber.value.trim();
+            const phonePattern = /^09\d{9}$/;  // Starts with "09" and followed by 9 digits (total 11 digits)
+            
+            if (!phonePattern.test(value)) {
+                contactNumber.style.borderColor = "#ff5925";
+                contactNumber.style.borderWidth = "2px";
+                submitButton.disabled = true;
+            } else {
+                contactNumber.style.borderColor = "#26d730";
+                contactNumber.style.borderWidth = "2px";
+                submitButton.disabled = false;
+            }
+            
+        });
+        emailInput.addEventListener("input", function() {
+            const value = emailInput.value;
+        
+            if (!emailPattern.test(value)) {
+                emailInput.style.borderColor = "#ff5925"; 
+                emailErrorMessage.textContent = "Invalid email format.";
+                emailErrorMessage.style.color = "#ff5925";
+                emailErrorMessage.style.fontSize = "10px";
+                emailErrorMessage.style.textAlign = "left";
+            } else {
+                emailInput.style.borderColor = "#26d730"; 
+                emailErrorMessage.textContent = "";
             }
         });
-
+        
     });
 </script>
 

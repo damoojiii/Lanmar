@@ -1,9 +1,11 @@
 <?php 
-    session_start();
-    include("connection.php");
     include "role_access.php";
+    include("connection.php");
     checkAccess('user');
     $userId = $_SESSION['user_id']; 
+    
+    $deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
+    $deletetemp->execute([$userId]);
 
     $updateQuery = "
     UPDATE message_tbl m
@@ -148,7 +150,7 @@
         border-radius: 8px;
         border: 1px solid #ced4da;
         min-height: 40px;
-        max-height: 120px;
+        max-height: 40px;
     }
 
     .chat-footer button {
@@ -210,7 +212,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -247,7 +251,6 @@
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/all.min.js"></script>
@@ -312,10 +315,9 @@
 
     $(document).ready(function () {
     const userId = '<?php echo $userId; ?>';
-    let isAutoScrollEnabled = true;
+    let isAutoScrollEnabled = true; // Flag to control auto-scroll
     let offset = 0;
     const limit = 20; 
-    const chatArea = $('#chat-area');
 
     function fetchMessages(initialLoad = true) {
         $.ajax({
@@ -329,6 +331,7 @@
                 const today = new Date().toISOString().split('T')[0];
                 let hasMoreMessages = false; 
 
+                // Check if we have any messages
                 if (messages.length > limit) {
                     hasMoreMessages = true;
                 }
@@ -336,6 +339,7 @@
                 messages.forEach((msg) => {
                     const [messageDate, messageTime] = msg.timestamp.split(' ');
 
+                    // Convert time to 12-hour format
                     const timeParts = messageTime.split(':');
                     let hours = parseInt(timeParts[0]);
                     const minutes = timeParts[1];
@@ -344,11 +348,16 @@
                     const formattedTime = `${hours}:${minutes} ${ampm}`;
 
                     if (messageDate !== lastDate) {
-                        lastDate = messageDate;
-                        const dateLabel = messageDate === today ? 'Today' : lastDate;
-                        chatHTML += `<div class="date-stamp"><span>${dateLabel}</span></div>`;
+                    lastDate = messageDate;
+
+                    const dateLabel = messageDate === today ? 'Today' : lastDate;
+                    chatHTML += `
+                        <div class="date-stamp">
+                            <span>${dateLabel}</span>
+                        </div>`;
                     }
 
+                    // Add message content
                     if (msg.role === 'admin') {
                         chatHTML += `
                             <div class="message received">
@@ -369,69 +378,77 @@
                     }
                 });
 
-                if (!chatArea[0].classList.contains("active")) {
-                    scrollToBottom();
-                }
-
+                const chatArea = $('#chat-area');
                 const wasAtBottom = chatArea[0].scrollHeight - chatArea.scrollTop() === chatArea.outerHeight();
 
                 if (initialLoad) {
-                    chatArea.html(chatHTML);
+                    chatArea.html(chatHTML); 
                 } else {
-                    chatArea.prepend(chatHTML);
+                    chatArea.prepend(chatHTML); 
                 }
 
+                // Check if there are more messages to load
                 if (hasMoreMessages) {
-                    $('#load-more').show();
+                    $('#load-more').show(); 
                 } else {
-                    $('#load-more').hide();
+                    $('#load-more').hide(); 
+                }
+                // Auto-scroll logic
+                if (isAutoScrollEnabled || wasAtBottom) {
+                    chatArea.scrollTop(chatArea[0].scrollHeight); // Scroll to bottom
                 }
             }
         });
     }
 
-
-    setInterval(fetchMessages, 2000);
-
+    setInterval(fetchMessages, 1000);
     $('#send-message').click(function () {
-        const message = $('#message-input').val().trim();
+    const message = $('#message-input').val().trim();
 
-        if (message.length > 0) {
-            $.ajax({
-                url: 'send_message1.php',
-                method: 'POST',
-                data: { user_id: userId, message: message },
-                success: function (response) {
-                    const result = JSON.parse(response);
-                    if (result.success) {
-                        $('#message-input').val('');
-                        scrollToBottom();
-                    } else {
-                        alert('Error sending message: ' + (result.error || 'Unknown error'));
-                    }
-                },
-                error: function (xhr, status, error) {
-                    alert('AJAX error: ' + error);
+    if (message.length > 0) {
+        $.ajax({
+            url: 'send_message1.php',
+            method: 'POST',
+            data: { user_id: userId, message: message },
+            success: function (response) {
+                const result = JSON.parse(response);
+                if (result.success) {
+                    $('#message-input').val(''); // Clear input
+                    scrollToBottom();
+                    // Refresh chat
+                } else {
+                    alert('Error sending message: ' + (result.error || 'Unknown error'));
                 }
-            });
-        }
-    });
+            },
+            error: function (xhr, status, error) {
+                alert('AJAX error: ' + error);
+            }
+        });
+    }
+});
 
+    // Load more messages when the button is clicked
     $('#load-more').on('click', function () {
         offset += limit; 
         fetchMessages();
     });
 
+    // Monitor scroll position to detect manual backreading
     $('#chat-area').on('scroll', function () {
+        const chatArea = $(this);
         const isAtBottom = (chatArea[0].scrollHeight - chatArea.scrollTop()) === chatArea.outerHeight();
-        isAutoScrollEnabled = isAtBottom;
-    });
 
+        if (isAtBottom) {
+            isAutoScrollEnabled = true;
+        } else {
+            isAutoScrollEnabled = false;
+        }
+    });
     function scrollToBottom() {
-        chatArea.scrollTop(chatArea[0].scrollHeight);
+    const chatContainer = $('#chat-area'); // Replace with your chat container's ID
+    chatContainer.scrollTop(chatContainer[0].scrollHeight);
     }
 });
-
 
 
 

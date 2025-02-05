@@ -8,14 +8,14 @@ function getBookingDetailsById($bookingId) {
     // Query to fetch booking details
     $bookingQuery = "SELECT 
         booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout,
-        booking_tbl.hours, booking_tbl.additionals,booking_tbl.status,
+        booking_tbl.hours, booking_tbl.additionals, booking_tbl.status,
         users.firstname, users.lastname, users.contact_number, users.gender,
-        reservationType_tbl.reservation_type,
+        reservationtype_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
-        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, bill_tbl.ref_num, image
+        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.pay_mode, bill_tbl.original_price, bill_tbl.additional_pax, bill_tbl.additional_time, bill_tbl.room_total, bill_tbl.ref_num, image
     FROM booking_tbl
     LEFT JOIN users ON booking_tbl.user_id = users.user_id
-    LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+    LEFT JOIN reservationtype_tbl ON booking_tbl.reservation_id = reservationtype_tbl.id
     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
     LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
     WHERE booking_tbl.booking_id = :booking_id";
@@ -63,7 +63,6 @@ function getBookingDetailsById($bookingId) {
 }
 
         // Add rooms to the booking details
-        //$bookingResult['dateIn'] = $bookingResult['dateIn'];
         $bookingResult['dateRange'] = $dateRange;
         $bookingResult['timeRange'] = $timeRange;
         $bookingResult['rooms'] = $rooms;
@@ -103,6 +102,10 @@ if (isset($_GET['booking_id'])) {
             'additional' => $bookingDetails['additionals'],
             'paymode' => $bookingDetails['pay_mode'] ?? null,
             'totalBill' => number_format($bookingDetails['total_bill']),
+            'originalprice' => number_format($bookingDetails['original_price']),
+            'addpax' => number_format($bookingDetails['additional_pax']),
+            'addtime' => number_format($bookingDetails['additional_time']),
+            'roomtotal' => number_format($bookingDetails['room_total']),
             'balance' => number_format($bookingDetails['balance']),
             'roomName' => $bookingDetails['rooms'], // Include the rooms in the response
             'imageProof' => $bookingDetails['image'],

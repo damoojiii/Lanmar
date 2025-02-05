@@ -11,9 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lanmar Resort</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/all.min.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/fontawesome.min.css">
@@ -111,22 +109,29 @@
         }
     </style>
     <style>
+        .container{
+            max-width: 80%;
+        }
         .container1{
-            width: 80%;
+            width: 100%;
         }
         .bill-message{
             display: flex;
             justify-content: space-between;
             width: 100%;
             gap: 10px;
+            margin-bottom: 5rem;
         }
         .receipt-section {
             padding: 5px 10px;
             border: 1px solid black;
             width: 100%;
+            padding: 15px;
+            border-radius: 10px;
         }
         .summary {
-            padding: 5px 10px;
+            text-align: center;
+            margin-top: 20px;
         }
         .summary h2{
             text-align: center;
@@ -134,8 +139,15 @@
         .summary p{
             text-align: justify;
         }
-        .room-list{
-            margin-left: 50px;
+        .receipt-details p {
+            margin-bottom: 5px;
+        }
+        .room-list {
+            margin-left: 20px;
+        }
+        .logo-title{
+            font-family:'nautigal' !important;
+            font-size: 50px;
         }
 
     </style>
@@ -164,11 +176,11 @@
             .progress-bar span {
                 font-size: 14px; /* Reduce font size slightly for tablets */
             }
-            .container{
-                max-width: fit-content;
-            }
         }
         @media (max-width: 768px) {
+            .container{
+                max-width: 100%;
+            }
             .container1{
                 width: 100%;
             }
@@ -257,22 +269,39 @@
         }
         }
         @media print {
-  /* Hide the main-content during printing */
-  #navbar {
-    display: none;
-  }
-  #sidebar{
-    display: none;
-  }
-  .progress-container{
-    display: none;
-  }
-  #makePDF{
-    display: none;
-  }
-  #myreserve{
-    display: none;
-  }
+          /* Hide the main-content during printing */
+          @page{
+            size: 80mm auto; /* Width 80mm (typical receipt width), height adjusts dynamically */
+            margin: 0;
+          }
+          #navbar {
+            display: none;
+          }
+          #sidebar{
+            display: none;
+          }
+          .progress-container{
+            display: none;
+          }
+          #makePDF{
+            display: none;
+          }
+          #myreserve{
+            display: none;
+          }
+          .logo-title{
+              display: block;
+          }
+          .summary{
+              display: none;
+          }
+          .bill-message{
+              width: 100%;
+          }
+          .receipt-section{
+              width: 60%;
+              margin-bottom: 20px;
+          }
 
   /* Ensure the content to print is visible */
   .print-content {
@@ -300,7 +329,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -381,11 +412,11 @@
     $sql_solo = "
     SELECT 
         booking_tbl.booking_id, booking_tbl.dateIn, booking_tbl.dateOut, booking_tbl.checkin, booking_tbl.checkout, booking_tbl.hours,
-        reservationType_tbl.reservation_type,
+        reservationtype_tbl.reservation_type,
         pax_tbl.adult, pax_tbl.child, pax_tbl.pwd,
-        bill_tbl.total_bill, bill_tbl.balance
+        bill_tbl.total_bill, bill_tbl.balance, bill_tbl.original_price, bill_tbl.additional_pax, bill_tbl.additional_time, bill_tbl.room_total, bill_tbl.pay_mode, bill_tbl.ref_num
     FROM booking_tbl
-    LEFT JOIN reservationType_tbl ON booking_tbl.reservation_id = reservationType_tbl.id
+    LEFT JOIN reservationtype_tbl ON booking_tbl.reservation_id = reservationtype_tbl.id
     LEFT JOIN pax_tbl ON booking_tbl.pax_id = pax_tbl.pax_id
     LEFT JOIN bill_tbl ON booking_tbl.bill_id = bill_tbl.bill_id
     WHERE booking_tbl.booking_id = :id
@@ -402,61 +433,43 @@
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
     <div class="container1">
-        <div class="row" style="justify-content:space-between;">
+        <div class="row">
         <div class="bill-message" >
             <div class="receipt-section">
-                <h2 class="section-header">Reservation Receipt</h2>
-                <p><strong>Reservation ID: </strong><span id="ID"><?php if ($row) {
-                    echo $row["booking_id"];
-                    } else {
-                    echo "No record found with user ID: $id.";
-                    }
-                ?></span></p><br>
-                <p><strong>Name: </strong> <span id="name-input"><?php echo $fullname?>
-                </span></p>
-                <p><strong>Date: </strong> <span id="date-input"><?php if ($row) {
-                    echo date("F j, Y", strtotime($row["dateIn"])) . " to " . date("F j, Y", strtotime($row["dateOut"]));
-                    } else {
-                    echo "No record found with user ID: $id.";
-                    }
-                ?></span></p>
-                <p><strong>Time: </strong> <span id="time-input"><?php if ($row) {
-                    $checkinDisplay = (new DateTime($row['checkin']))->format('g:i A');
-                    $checkoutDisplay = (new DateTime($row['checkout']))->format('g:i A');
-                    echo $checkinDisplay . " to " . $checkoutDisplay;
-                    } else {
-                    echo "No record found with user ID: $id.";
-                    }
-                ?></span></p>
-                <p><strong>Total No. of Pax: </strong> <span id="total-pax"><?php if ($row) {
-                    $totalPax = $row['adult'] + $row['child'] + $row['pwd'];
-                    echo $totalPax;
-                    } else {
-                    echo "No record found with user ID: $id.";
-                    }
-                ?></span></p>
-                <p><strong>Reservation Type: </strong> <span id="reservation-type"><?php if ($row) {
-                    echo $row["reservation_type"];
-                    } else {
-                    echo "No record found with user ID: $id.";
-                    }
-                ?></span></p>
-                <p><strong>Rooms: </strong> <span id="rooms"><?php
-                    if (!empty($room_data)) {
-                        echo '<div class="room-list">'; // Start the div container
-                        foreach ($room_data as $room) {
-                            echo '<div class="room-item">' . $room['room_name'] . '</div>'; // Room name inside a div
+                <h2 class="section-header logo-title">Lanmar Resort</h2>
+                <h4 class="section-header">Reservation Receipt</h4>
+                <div class="receipt-details">
+                    <p><strong>Reservation ID:</strong> <?php echo $row ? $row["booking_id"] : "No record found"; ?></p>
+                    <hr>
+                    <p><strong>Name:</strong> <?php echo $fullname; ?></p>
+                    <p><strong>Date:</strong> <?php echo $row ? date("F j, Y", strtotime($row["dateIn"])) . " to " . date("F j, Y", strtotime($row["dateOut"])) : "No record found"; ?></p>
+                    <p><strong>Time:</strong> <?php echo $row ? (new DateTime($row['checkin']))->format('g:i A') . " to " . (new DateTime($row['checkout']))->format('g:i A') : "No record found"; ?></p>
+                    <p><strong>Adults:</strong> <?php echo $row ? $row['adult'] : "No record found"; ?></p>
+                    <p><strong>Child(ren):</strong> <?php echo $row ? $row['child']: "No record found"; ?></p>
+                    <p><strong>PWD:</strong> <?php echo $row ? $row['pwd'] : "No record found"; ?></p>
+                    <p><strong>Total No. of Pax:</strong> <?php echo $row ? $row['adult'] + $row['child'] + $row['pwd'] : "No record found"; ?></p>
+                    <p><strong>Reservation Type:</strong> <?php echo $row ? $row["reservation_type"] : "No record found"; ?></p>
+                    <p><strong>Rooms:</strong></p>
+                    <div class="room-list">
+                        <?php 
+                        if (!empty($room_data)) {
+                            foreach ($room_data as $room) {
+                                echo '<p>' . $room['room_name'] . '</p>';
+                            }
                         }
-                        echo '</div>';
-                    }
-                ?></span></p><br>
-                <p><Strong>Total Amount: </Strong><span><?php if ($row) {
-                    echo 'PHP '. number_format($row["total_bill"] ?? 0);
-                    } else {
-                    echo "No record found with user ID: $id.";
-                    }
-                    ?></span></p>
-                <p><strong>Balance Remaining: </strong><?php echo 'PHP '. number_format($row["balance"]) ?><span></span></p>
+                        ?>
+                    </div>
+                    <p><strong>Payment Mode:</strong> <?php echo $row["pay_mode"]; ?></p>
+                    <p><strong>Reference Number:</strong> <?php echo $row["ref_num"]; ?></p>
+                    <hr>
+                    <p><strong>Original Rate:</strong> PHP <?php echo number_format($row["original_price"] ?? 0); ?></p>
+                    <p><strong>Additional Pax Rate:</strong> PHP <?php echo number_format($row["additional_pax"] ?? 0); ?></p>
+                    <p><strong>Additional Time Rate:</strong> PHP <?php echo number_format($row["additional_time"] ?? 0); ?></p>
+                    <p><strong>Total of Room(s):</strong> PHP <?php echo number_format($row["room_total"] ?? 0); ?></p>
+                    <hr>
+                    <p><strong>Total Amount:</strong> PHP <?php echo number_format($row["total_bill"] ?? 0); ?></p>
+                    <p><strong>Balance Remaining:</strong> PHP <?php echo number_format($row["balance"] ?? 0); ?></p>
+                </div>
             </div>
             <div class="summary">
                 <h2>Thank You For Choosing <br> Lanmar Resort</h2>
@@ -471,10 +484,7 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="assets/vendor/bootstrap/js/jquery.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

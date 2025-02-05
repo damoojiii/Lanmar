@@ -4,6 +4,9 @@ include("connection.php");
 include "role_access.php";
 checkAccess('user'); 
 
+$deletetemp = $pdo->prepare("DELETE FROM temp_booking_tbl WHERE user_id = ?");
+$deletetemp->execute([$userId]);
+
 $success_message = "";
 $error_message = "";
 
@@ -44,7 +47,7 @@ if (isset($_POST['update_password'])) {
 
                 $success_message = "Password changed successfully";
             }else{
-                $error_message = "New password and Confirm password doesnt match.";
+                $error_message = "Current password and Confirm password doesnt match.";
             }    
         }else{
             header("Location: settings_user.php");
@@ -212,7 +215,9 @@ if (isset($_POST['update_password'])) {
         <li><a href="settings_user.php" class="nav-link text-white active">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->

@@ -343,11 +343,15 @@
                 width: 100% !important;
             }
         }
-        @media(max-height: 840px){
-            .scrollable-table{
-                max-height: 300px; /* Adjust as needed */
+        @media(max-height: 850px){
+            
+            #main-content{
+                margin-top: 5px !important;
+                margin-bottom: 100px;
+            }
+            table{
+                max-height: 100px; /* Adjust height as needed */
                 overflow-y: auto;
-                overflow-x: hidden; /* Prevent horizontal scrolling if not needed */
             }
         }
     </style>
@@ -371,7 +375,9 @@
         <li><a href="settings_user.php" class="nav-link text-white">Settings</a></li>
     </ul>
     <hr>
-    <a href="logout.php" class="nav-link text-white">Log out</a>
+    <div class="logout">
+        <a href="logout.php" class="nav-link text-white">Log out</a>
+    </div>
 </div>
 
 <!-- Navbar -->
@@ -471,12 +477,6 @@
 
 <!-- Main content -->
 <div id="main-content" class="container mt-4 pt-3">
-    <div class="d-flex justify-content-start p-1">
-        <div class="d-flex timer">
-            <div class="">Timer: </div>
-            <div id="timer-display">10:00</div>
-        </div>
-    </div>
     <div class="container1">
         <div class="row " style="justify-content:space-between;">
         <div class="guest col-md-6" style="width: 70%;">
@@ -556,8 +556,7 @@
                 </div>
 
                 <!-- Total Calculation Section -->
-            <div class="scrollable-table">
-                <table class="w-100 text-light">
+                <table class="charges w-100 text-light">
                     <tr>
                         <td>Original Rate:</td>
                         <td class="text-end"><?php echo number_format($origPrice ?? 0); ?></td>
@@ -625,7 +624,7 @@
                         <td class="text-end"><p id="PaymentChoice">none</p></td>
                     </tr>
                 </table>
-            </div>
+
                 <button type="submit" class="btn btn-primary w-100 mt-3" onclick="submitFormAndRedirect()" >Continue</button>
             </div>
         </div>
@@ -652,42 +651,6 @@ document.getElementById('hamburger').addEventListener('click', function() {
     
     const mainContent = document.getElementById('main-content');
     mainContent.classList.toggle('shifted');
-});
-document.addEventListener("DOMContentLoaded", function() {
-    // Timer duration in seconds (10 minutes)
-    const timerDuration = 10 * 60;
-    const redirectUrl = 'index1.php'; // Replace with your main page URL
-
-    // Function to start or resume the timer
-    function startTimer() {
-        let endTime = sessionStorage.getItem('bookingTimerEndTime');
-
-        if (!endTime) {
-            const currentTime = Date.now();
-            endTime = currentTime + timerDuration * 1000; // Set end time
-            sessionStorage.setItem('bookingTimerEndTime', endTime);
-        }
-
-        const interval = setInterval(() => {
-            const now = Date.now();
-            const timeLeft = Math.max(0, endTime - now);
-            const minutes = Math.floor(timeLeft / (1000 * 60));
-            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-            // Display the timer on the page (replace 'timer-display' with your element ID)
-            document.getElementById('timer-display').innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-            // Redirect when time runs out
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                sessionStorage.removeItem('bookingTimerEndTime'); // Clear the timer
-                window.location.href = redirectUrl;
-            }
-        }, 1000);
-    }
-
-    // Call the function to start the timer
-    startTimer();
 });
 
 $(document).ready(function() {
@@ -740,7 +703,7 @@ function toggleSummary() {
 
     if (summarySection.classList.contains('collapse')) {
         summarySection.classList.remove('collapse');
-        summarySection.style.height = '100vh'; // Full screen height
+        summarySection.style.height = '90vh'; // Full screen height
         expandButton.textContent = 'Close';
     } else {
         summarySection.classList.add('collapse');

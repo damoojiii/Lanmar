@@ -500,7 +500,7 @@ if (isset($_POST['submit_desc'])) {
                 
                 <div class="tab-container">
                     <a href="homepage_settings.php">
-                        <div class="tab active" id="roomInfoTab">
+                        <div class="tab" id="roomInfoTab">
                             Homepage
                         </div>
                     </a>
@@ -520,7 +520,7 @@ if (isset($_POST['submit_desc'])) {
                         </div>
                     </a>
                     <a href="homepage_section3.php">
-                        <div class="tab " id="facilityInfoTab">
+                        <div class="tab active " id="facilityInfoTab">
                             FAQ
                         </div>
                     </a>

@@ -787,7 +787,7 @@
             </button>
 
             <!-- Check Button -->
-            <button type="button" class="btn btnCompleted" style="width:auto; background-color: #1daa2d; border-color: #1daa2d; color: #ffffff;">
+            <button type="button" class="btn btnCompleted" id="completeBtn" style="width:auto; background-color: #1daa2d; border-color: #1daa2d; color: #ffffff;">
                 <i class="fa-solid fa-check" style="color: #ffffff;"></i> Complete
             </button>
 
@@ -992,6 +992,7 @@
                     }
 
                     // Populate the modal with the fetched data
+                    const bookStartDate = data.dateIn;
                     document.getElementById('modalBookingId').textContent = data.bookingId;
                     document.getElementById('modalName').textContent = data.name;
                     document.getElementById('modalContact').textContent = data.contact;
@@ -1024,6 +1025,18 @@
                     document.getElementById('modalrefNum').textContent = data.refNumber;
                     const modalBody = document.getElementById('modal-IMAGE');
                         modalBody.innerHTML = `<img src="${data.imageProof}" alt="GCash Receipt" class="img-fluid">`;
+                    
+                    const completeBtn = document.querySelector('#completeBtn');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0); // Reset time to midnight
+                    const dateIn = new Date(bookStartDate);
+                    dateIn.setHours(0, 0, 0, 0); // Reset time to midnight
+            
+                    if (dateIn <= today) {
+                        completeBtn.disabled = false; // Disable the button
+                    } else {
+                        completeBtn.disabled = true; // Enable the button
+                    }
 
                     // Show the modal
                     $('#reservationModal').modal('show');
